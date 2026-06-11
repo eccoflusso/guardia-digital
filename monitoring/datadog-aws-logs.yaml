@@ -1,0 +1,37 @@
+# Datadog — Ingesta de logs AWS (CloudWatch -> Datadog Forwarder)
+# Despliegue del Forwarder oficial (CloudFormation) + suscripción al log group de la Lambda.
+forwarder:
+  stack_name: datadog-forwarder
+  template_url: https://datadog-cloudformation-template.s3.amazonaws.com/aws/forwarder/latest.yaml
+  parameters:
+    DdApiKey: ${DD_API_KEY}
+    DdSite: datadoghq.com
+    DdTags: "env:prod,producto:guardia-digital,pais:cl"
+
+log_subscriptions:
+  - log_group: /aws/lambda/guardia-auth0-webhook
+    filter_pattern: ""            # enviar todo: trazabilidad completa para auditoría
+    destination: datadog-forwarder
+
+pipelines:
+  - name: guardia-iam-auth0
+    filter: "source:auth0 service:guardia-iam"
+    processors:
+      - type: geo-ip
+        sources: [ip]
+      - type: category
+        name: clasificacion_evento
+        categories:
+          - { filter: "@type:s",  name: "login_exitoso" }
+          - { filter: "@type:f",  name: "login_fallido" }
+          - { filter: "@type:limit_mu", name: "cuenta_bloqueada" }
+
+monitors:
+  - name: "[Guardia] Ráfaga de logins fallidos"
+    type: log alert
+    query: "logs(\"@type:f service:guardia-iam\").index(\"*\").rollup(\"count\").last(\"5m\") > 20"
+    message: "Posible ataque de fuerza bruta. @slack-seguridad"
+  - name: "[Guardia] Anomalía IA detectada"
+    type: log alert
+    query: "logs(\"service:guardia-ia @anomalies.anomaly_score:>=0.8\").index(\"*\").rollup(\"count\").last(\"15m\") > 0"
+    message: "Vertex AI detectó acceso anómalo (viaje imposible / fuera de turno). @pagerduty"

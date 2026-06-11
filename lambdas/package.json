@@ -1,0 +1,15 @@
+{
+  "name": "guardia-auth0-webhook",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Receptor de Log Streams de Auth0 vía API Gateway (runtime nativo, sin deps externas)",
+  "main": "handler.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "lint": "node --check handler.js"
+  },
+  "license": "UNLICENSED"
+}

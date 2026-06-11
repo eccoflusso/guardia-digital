@@ -1,0 +1,36 @@
+{
+  "title": "Guardia Digital — Auditoría y Compliance (Ley 20.393)",
+  "layout_type": "ordered",
+  "tags": ["producto:guardia-digital", "pais:cl"],
+  "widgets": [
+    {
+      "definition": {
+        "title": "Logins por resultado (24h)",
+        "type": "timeseries",
+        "requests": [{ "queries": [{ "data_source": "logs", "name": "q1",
+          "search": { "query": "service:guardia-iam" },
+          "compute": { "aggregation": "count" },
+          "group_by": [{ "facet": "@clasificacion_evento", "limit": 5 }] }] }]
+      }
+    },
+    {
+      "definition": {
+        "title": "Anomalías IA (score >= 0.8)",
+        "type": "query_value",
+        "requests": [{ "queries": [{ "data_source": "logs", "name": "q1",
+          "search": { "query": "service:guardia-ia" },
+          "compute": { "aggregation": "count" } }] }]
+      }
+    },
+    {
+      "definition": {
+        "title": "Top conexiones (AD sucursales / contratistas)",
+        "type": "toplist",
+        "requests": [{ "queries": [{ "data_source": "logs", "name": "q1",
+          "search": { "query": "service:guardia-iam" },
+          "compute": { "aggregation": "count" },
+          "group_by": [{ "facet": "@connection", "limit": 10 }] }] }]
+      }
+    }
+  ]
+}
