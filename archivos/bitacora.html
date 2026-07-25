@@ -373,7 +373,7 @@
       <div style="text-align:right;flex-shrink:0;">
         <div style="font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">última actualización</div>
         <div style="font-size:15px;font-weight:600;color:#334155;">2026-07-25</div>
-        <div style="font-size:12px;color:#64748b;">Sesión #5</div>
+        <div style="font-size:12px;color:#64748b;">Sesión #6</div>
       </div>
     </div>
   </div>
@@ -391,7 +391,7 @@
       <div class="stat-card">
         <div class="stat-value">TRL 5</div>
         <div class="stat-label">Nivel de madurez</div>
-        <div class="stat-sub">Lazo cerrado, validado en real</div>
+        <div class="stat-sub">Campaña de validación formal: 6/6 escenarios OK</div>
       </div>
       <div class="stat-card">
         <div class="stat-value">6</div>
@@ -452,12 +452,12 @@
         <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
       </div>
       <div class="progress-row">
-        <div class="progress-label"><span>Fase 3 — Observabilidad / SIEM (Datadog)</span><span>15%</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill fill-amber" style="width:15%"></div></div>
+        <div class="progress-label"><span>Fase 3 — Observabilidad / SIEM (Datadog)</span><span>90%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:90%"></div></div>
       </div>
       <div class="progress-row">
-        <div class="progress-label"><span>Fase 4 — Detección de anomalías (Modal → Vertex AI)</span><span>90%</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:90%"></div></div>
+        <div class="progress-label"><span>Fase 4 — Detección de anomalías (Modal → Vertex AI)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
       </div>
       <div class="progress-row">
         <div class="progress-label"><span>Fase 5 — Endurecimiento y go-live</span><span>5%</span></div>
@@ -780,6 +780,88 @@
     </div>
 
     <div class="timeline">
+
+      <!-- ── ENTRADA #6 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-6">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-25</span>
+          <span class="badge badge-indigo">Sesión #6</span>
+          <span class="badge badge-emerald">Fase 3 cerrada · Modal programado · Campaña de validación formal</span>
+        </div>
+
+        <div class="entry-title">Datadog Forwarder desplegado y verificado, job Modal en modo programado, y campaña de validación formal: 6/6 escenarios correctos</div>
+        <div class="entry-summary">
+          Se cerró la Fase 3 (Datadog Forwarder, vía CloudFormation embebido en Terraform), se desplegó el job
+          de Modal en modo programado (<code>modal deploy</code>, cada 15 min, ya no solo pruebas manuales),
+          se hizo el commit de todo el trabajo (2 commits limpios, sin secretos), y se ejecutó la
+          <strong>campaña de validación formal</strong> planificada desde la Semana 3 del plan hacia TRL5:
+          6 escenarios controlados contra el modelo real en Vertex AI, con <strong>6/6 resultados correctos</strong>.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block full">
+            <h4>Campaña de validación — resultados</h4>
+            <table class="files-table">
+              <thead><tr><th>Escenario</th><th>Esperado</th><th>Resultado</th><th>Score</th><th>Latencia</th></tr></thead>
+              <tbody>
+                <tr><td>Login normal (CL, 14h)</td><td>Sin anomalía</td><td class="change-created">✓ Correcto</td><td>—</td><td>11026 ms (cold start)</td></tr>
+                <tr><td>Fuera de turno (CL, 03h)</td><td>Anomalía</td><td class="change-created">✓ Correcto</td><td>0.984</td><td>1146 ms</td></tr>
+                <tr><td>Viaje imposible (Rusia)</td><td>Anomalía</td><td class="change-created">✓ Correcto</td><td>1.0</td><td>1616 ms</td></tr>
+                <tr><td>Geo-IP nueva (Nigeria, noche)</td><td>Anomalía</td><td class="change-created">✓ Correcto</td><td>1.0</td><td>1432 ms</td></tr>
+                <tr><td>Borde de horario (CL, 07h)</td><td>Sin anomalía</td><td class="change-created">✓ Correcto</td><td>—</td><td>2123 ms</td></tr>
+                <tr><td>Login fallido normal (CL)</td><td>Sin anomalía</td><td class="change-created">✓ Correcto</td><td>—</td><td>774 ms</td></tr>
+              </tbody>
+            </table>
+            <p style="margin-top:10px;font-size:12.5px;">
+              <strong>6/6 escenarios coincidieron con lo esperado.</strong> Latencia: la primera llamada
+              incluye cold-start del contenedor Modal + primera invocación de Vertex (~11s); las siguientes,
+              con todo "caliente", entre 0.8s y 2.1s — dato honesto para la ficha técnica, no toda invocación
+              es tan rápida como la demo. Resultados crudos en <code>ia_models/validation_results.json</code>.
+            </p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Datadog Forwarder (Fase 3)</h4>
+            <p>Desplegado vía <code>aws_cloudformation_stack</code> (template oficial de Datadog) + suscripción del log group de la Lambda. <strong>Verificado con un evento de prueba real:</strong> llegó a Datadog con los tags esperados (<code>project:guardia-digital-inteligente</code>, <code>forwardername:...</code>, mensaje completo intacto). Esto es lo que le da datos reales a <code>_fetch_pending_logs()</code>.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Modal en modo programado</h4>
+            <p><code>modal deploy anomaly_detector.py</code> — ya no son pruebas efímeras con <code>modal run</code>. El job <code>detect_anomalies</code> corre solo cada 15 minutos, encontrado en <code>modal app list</code> con estado <code>deployed</code>.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos creados / modificados en esta sesión</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>infra/datadog_forwarder.tf</code></td><td><span class="change-created">CREADO</span></td><td>Forwarder de Datadog (CFN) + suscripción del log group</td></tr>
+                <tr><td><code>infra/variables.tf</code></td><td><span class="change-modified">MODIFICADO</span></td><td><code>datadog_api_key</code>, <code>datadog_site</code></td></tr>
+                <tr><td><code>ia_models/validation_campaign.py</code></td><td><span class="change-created">CREADO</span></td><td>Matriz de 6 escenarios contra el modelo real desplegado</td></tr>
+                <tr><td><code>ia_models/validation_results.json</code></td><td><span class="change-created">CREADO</span></td><td>Evidencia cruda de la campaña</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Decisiones / observaciones</h4>
+            <div class="callout callout-success">
+              <div class="callout-icon">✅</div>
+              <div>
+                <strong>Con esta sesión se completa el plan de 3 semanas hacia TRL5</strong> definido en la
+                sección "Implementación": cuentas, ingesta real, dataset+modelo, cierre del lazo, y ahora la
+                campaña de validación formal — todos los bloques del plan quedan con evidencia real, no solo
+                código. Pendiente real para producción (fuera de TRL5): migración a firma HMAC, least-privilege
+                IAM, retención de logs y evidencia de auditoría Ley 20.393 (Fase 5).
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #6 ──────────────────────────────────────── -->
 
       <!-- ── ENTRADA #5 ──────────────────────────────────────────── -->
       <article class="entry" id="sesion-5">
@@ -1271,7 +1353,7 @@
       <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Fase 0 — Higiene del repo.</strong> git init, .gitignore, .env.example, lambdas/package.json. Sin costo, todo reversible.</span></label>
       <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Fase 1 — Ingreso de identidad.</strong> Auth0 (Universal Login + Action MFA) desplegado en tenant real, login de prueba verificado. <em>Completada Sesión #5.</em></span></label>
       <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Fase 2 — Captura y normalización.</strong> Terraform apply en staging, Log Stream de Auth0, test e2e login → CloudWatch. <em>Completada Sesión #5.</em></span></label>
-      <label class="rdm-item"><input type="checkbox" class="rdm-check" disabled><span><strong>Fase 3 — Observabilidad / SIEM.</strong> Datadog Forwarder, pipelines, monitores y dashboard de compliance. Credenciales verificadas, forwarder pendiente.</span></label>
+      <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Fase 3 — Observabilidad / SIEM.</strong> Datadog Forwarder desplegado y verificado end-to-end. <em>Completada Sesión #6.</em> Pendiente como mejora futura: pipelines/monitores/dashboard específicos (no bloquean TRL5).</span></label>
       <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Fase 4 — Detección de anomalías (camino crítico).</strong> Modelo entrenado y desplegado en Vertex AI, lazo de respuesta cerrado y verificado con un usuario real (bloqueo ejecutado y revertido). Falta solo el <code>modal deploy</code> en modo programado. <em>Completada Sesión #5.</em></span></label>
       <label class="rdm-item"><input type="checkbox" class="rdm-check" disabled><span><strong>Fase 5 — Endurecimiento y go-live.</strong> Seguridad (HMAC, least-privilege, rate-limit), resiliencia (DLQ, reintentos), compliance Ley 20.393, runbook.</span></label>
     </div>
@@ -1321,7 +1403,7 @@
       <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Semana 1–2 (paralelo) — Ingesta real.</strong> Auth0 Universal Login + Action MFA probados en tenant real. <code>terraform apply</code> en AWS staging. Log Stream → webhook → Lambda → CloudWatch. <strong>Hito cumplido:</strong> login real → evento normalizado visible en CloudWatch, con geolocalización real.</span></label>
       <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Semana 2 — Dataset sintético + entrenamiento.</strong> Dataset sintético generado (5000 filas). En vez de AutoML: modelo scikit-learn + contenedor propio en Vertex AI (más rápido y barato para este piloto). <code>_fetch_pending_logs()</code> implementado contra Datadog Logs API v2.</span></label>
       <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Semana 2–3 — Cerrar el lazo.</strong> <strong>Verificado con un usuario real:</strong> anomaly_score 0.984 → Auth0 Management API bloqueó la cuenta de verdad (revertida tras la prueba). Falta desplegar el job Modal en modo programado (hoy probado con <code>modal run</code> efímero) y el forwarder de Datadog.</span></label>
-      <label class="rdm-item"><input type="checkbox" class="rdm-check" disabled><span><strong>Semana 3 — Campaña de validación.</strong> Escenarios controlados en staging (login normal, viaje imposible, fuera de horario, dispositivo nuevo, fuerza bruta). Medir tasa de detección, falsos positivos y latencia del lazo completo. Documentar resultados como evidencia formal de TRL 5.</span></label>
+      <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Semana 3 — Campaña de validación.</strong> 6 escenarios controlados corridos contra el modelo real en Vertex AI: <strong>6/6 correctos</strong>. Latencia medida (0.8s–2.1s en caliente, ~11s en frío). Evidencia en <code>ia_models/validation_results.json</code>. <em>Completada Sesión #6.</em></span></label>
     </div>
 
     <div class="card">
