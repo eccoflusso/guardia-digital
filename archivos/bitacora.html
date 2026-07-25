@@ -373,7 +373,7 @@
       <div style="text-align:right;flex-shrink:0;">
         <div style="font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">última actualización</div>
         <div style="font-size:15px;font-weight:600;color:#334155;">2026-07-25</div>
-        <div style="font-size:12px;color:#64748b;">Sesión #7</div>
+        <div style="font-size:12px;color:#64748b;">Sesión #8</div>
       </div>
     </div>
   </div>
@@ -780,6 +780,70 @@
     </div>
 
     <div class="timeline">
+
+      <!-- ── ENTRADA #8 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-8">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-25</span>
+          <span class="badge badge-indigo">Sesión #8</span>
+          <span class="badge badge-emerald">Dashboard de operación y compliance · 3 monitores reales</span>
+        </div>
+
+        <div class="entry-title">Dashboard de Datadog "Operación y Compliance" (6 grupos, 18 widgets) + 3 monitores, con telemetría real del pipeline de IA</div>
+        <div class="entry-summary">
+          Antes de armar el dashboard se cerró un hueco real: el job de IA (Modal) nunca enviaba su propia
+          telemetría a Datadog — solo vivía en <code>modal app logs</code>, invisible para cualquier panel o
+          alerta (exactamente el punto ciego que dejó pasar el bug de la Sesión #7 tanto tiempo sin
+          detectarse). Se agregó envío directo a la Logs Intake API de Datadog (<code>service:guardia-ia-pipeline</code>)
+          para ingesta, anomalías, enforcement y errores. Con eso, se construyó el dashboard completo vía
+          API (no clickeado a mano) y 3 monitores reales.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>Los 6 grupos del dashboard</h4>
+            <table class="files-table">
+              <thead><tr><th>Grupo</th><th>Contenido</th></tr></thead>
+              <tbody>
+                <tr><td>1. Resumen ejecutivo</td><td>Total logins, éxito/fallido, anomalías detectadas, enforcement (bloqueo vs re-MFA)</td></tr>
+                <tr><td>2. Mapa de accesos</td><td>Geomap + top países de origen de login (Zero-Trust visual)</td></tr>
+                <tr><td>3. Detección de anomalías</td><td>Timeseries de anomaly_score, score promedio por país, tabla de anomalías recientes</td></tr>
+                <tr><td>4. Salud operacional</td><td>Logs ingeridos por ciclo, errores del pipeline, tipos de error — el panel que habría detectado el bug de la Sesión #7 en minutos, no días</td></tr>
+                <tr><td>5. Auditoría / Compliance</td><td>Trazabilidad completa de accesos (Ley 20.393) + nota de retención</td></tr>
+                <tr><td>6. Actividad por conexión/tenant</td><td>Login por conexión (AD sucursal/contratistas) y por tenant</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block">
+            <h4>3 monitores reales creados</h4>
+            <ul style="font-size:13px;color:#475569;padding-left:18px;">
+              <li>Ráfaga de logins fallidos (&gt;20 en 5 min) — fuerza bruta</li>
+              <li>Anomalía de acceso detectada por IA</li>
+              <li>Error en el pipeline de detección (ingesta, Vertex, o Auth0 Management API)</li>
+            </ul>
+            <p style="font-size:12px;color:#64748b;">Reemplazó el <code>dashboard-compliance.json</code> placeholder original del bootstrap — que tenía exactamente el mismo bug de facet <code>service:guardia-iam</code> que <code>_fetch_pending_logs()</code>, nunca antes ejecutado contra datos reales.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos creados / modificados</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>ia_models/anomaly_detector.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td><code>_ship_to_datadog()</code>: envía ingesta/anomalías/enforcement/errores a Datadog en tiempo real</td></tr>
+                <tr><td><code>monitoring/build_dashboard.py</code></td><td><span class="change-created">CREADO</span></td><td>Construye el dashboard completo vía API (infraestructura como código)</td></tr>
+                <tr><td><code>monitoring/build_monitors.py</code></td><td><span class="change-created">CREADO</span></td><td>Crea los 3 monitores vía API</td></tr>
+                <tr><td><code>monitoring/dashboard-compliance.json</code></td><td><span class="change-modified">REEMPLAZADO</span></td><td>Definición real exportada, ya no el placeholder roto original</td></tr>
+                <tr><td><code>monitoring/datadog-aws-logs.yaml</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Queries corregidas, documentado el bug de facet como referencia</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #8 ──────────────────────────────────────── -->
 
       <!-- ── ENTRADA #7 ──────────────────────────────────────────── -->
       <article class="entry" id="sesion-7">
