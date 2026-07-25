@@ -22,6 +22,18 @@ variable "log_retention_days" {
   default     = 30
 }
 
+variable "datadog_api_key" {
+  description = "API Key de Datadog para el Forwarder oficial (CloudWatch Logs -> Datadog)."
+  type        = string
+  sensitive   = true
+}
+
+variable "datadog_site" {
+  description = "Sitio de Datadog donde se envían los logs (ej. datadoghq.com, us5.datadoghq.com)."
+  type        = string
+  default     = "datadoghq.com"
+}
+
 locals {
   common_tags = {
     Project     = "guardia-digital-inteligente"
