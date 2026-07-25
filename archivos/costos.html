@@ -427,7 +427,8 @@
     <div class="nav-section">
       <div class="nav-label">Resumen</div>
       <a href="#overview"    class="nav-link active"><span class="nav-icon">📊</span>KPIs de costo</a>
-      <a href="#fases"       class="nav-link"><span class="nav-icon">📅</span>Costos por escenario</a>
+      <a href="#costo-real"  class="nav-link"><span class="nav-icon">🔴</span>Costo real actual (pre-lanzamiento)</a>
+      <a href="#fases"       class="nav-link"><span class="nav-icon">📅</span>Costos por escenario (proyección)</a>
     </div>
     <div class="nav-section">
       <div class="nav-label">Plataformas</div>
@@ -592,11 +593,130 @@
   </section>
 
   <!-- ══════════════════════════════════════════════════════
+       COSTO REAL ACTUAL (PRE-LANZAMIENTO)
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="costo-real">
+    <div class="section-header">
+      <h2>Costo real actual — mientras el proyecto no tiene usuarios</h2>
+      <p>No es una proyección: esto es lo que la infraestructura ya desplegada (Sesiones #5–#6) factura hoy, con cero clientes.</p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">🔴</div>
+      <div>
+        <strong>Hallazgo principal:</strong> el endpoint de Vertex AI se desplegó con <code>min_replica_count=1</code>,
+        es decir, mantiene una máquina <code>n1-standard-2</code> corriendo <strong>24/7</strong> aunque nadie haga
+        una sola predicción. Es, por lejos, el costo dominante de "tener esto prendido" sin lanzarlo — más que
+        todo el resto de la infraestructura junta.
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" style="color:#dc2626;">~$70</div>
+        <div class="stat-label">USD / mes reales</div>
+        <div class="stat-sub">con cero usuarios, cero clientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">~$69</div>
+        <div class="stat-label">USD / mes solo el endpoint Vertex</div>
+        <div class="stat-sub">n1-standard-2 · 730h/mes · 24/7</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">&lt;$2</div>
+        <div class="stat-label">USD / mes el resto de todo</div>
+        <div class="stat-sub">AWS + Artifact Registry + Modal + Datadog</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Desglose por componente (infraestructura real desplegada)</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Componente</th><th>Detalle real</th><th class="cost-value">USD / mes</th></tr>
+        </thead>
+        <tbody>
+          <tr class="total-row">
+            <td><strong>Vertex AI Endpoint</strong></td>
+            <td><code>n1-standard-2</code> (2 vCPU, 7.5GB), 1 réplica mínima, 24/7 — tarifa pública ~$0.095 USD/hora × 730h</td>
+            <td class="cost-value">~$69.00</td>
+          </tr>
+          <tr>
+            <td><strong>Artifact Registry</strong></td>
+            <td>Imagen del contenedor de predicción (~700MB, comprimida menos)</td>
+            <td class="cost-value">&lt;$0.10</td>
+          </tr>
+          <tr class="free-row">
+            <td><strong>AWS (Lambda + API GW + CloudWatch + DynamoDB + S3)</strong></td>
+            <td>Volumen de pruebas (decenas de invocaciones) — dentro de Free Tier</td>
+            <td class="cost-value">~$0.50</td>
+          </tr>
+          <tr class="free-row">
+            <td><strong>Datadog Forwarder (Lambda)</strong></td>
+            <td>Solo se ejecuta cuando llega un log — volumen mínimo</td>
+            <td class="cost-value">~$0.10</td>
+          </tr>
+          <tr>
+            <td><strong>Modal</strong></td>
+            <td>Job cada 15 min (2.880 corridas/mes), cómputo liviano — cubierto por los <strong>$498 USD en créditos</strong> ya existentes en la cuenta</td>
+            <td class="cost-value" style="color:#059669;">$0 (créditos)</td>
+          </tr>
+          <tr>
+            <td><strong>Datadog (logs)</strong></td>
+            <td>Organización compartida con plan "Puesta en marcha" — volumen de Guardia Digital es marginal frente a la cuota ya contratada</td>
+            <td class="cost-value" style="color:#059669;">~$0 (cuota compartida)</td>
+          </tr>
+          <tr>
+            <td><strong>Auth0</strong></td>
+            <td>Tenant nuevo bajo el "Convenio colectivo" (Enterprise) ya existente de la organización — sin costo marginal visible desde acá</td>
+            <td class="cost-value" style="color:#d97706;">A confirmar con Auth0</td>
+          </tr>
+          <tr style="background:#fef2f2;">
+            <td colspan="2" style="text-align:right; font-weight:700; color:#0f172a;">Total estimado real (hoy, con 0 usuarios):</td>
+            <td class="cost-value" style="color:#dc2626; font-weight:700;">~$70–75 USD/mes</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:#64748b;margin-top:12px;margin-bottom:0;">
+        Auth0 no tiene costo marginal <em>confirmado</em> porque el tenant vive dentro de un contrato Enterprise
+        compartido con otros productos Wayweb — pero no hay visibilidad de si Auth0 cobra por tenant adicional
+        bajo ese convenio. Vale la pena confirmarlo directamente con el account manager antes de asumir que es $0.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Cómo bajar el costo dominante a casi $0</h3>
+      <p>
+        La opción real para reducir el gasto mientras no hay usuarios es cambiar el endpoint de Vertex a
+        <strong><code>min_replica_count=0</code></strong> (escala a cero). Esto elimina el costo de cómputo
+        24/7 — solo se paga cuando efectivamente llega una predicción.
+      </p>
+      <div class="callout callout-info">
+        <div class="callout-icon">⚖️</div>
+        <div>
+          <strong>El trade-off:</strong> con escala a cero, la <em>primera</em> predicción después de un
+          período inactivo sufre un "cold start". Ya lo medimos en la campaña de validación de la Sesión #6:
+          <strong>~11 segundos</strong> en frío vs. 0.8–2.1 segundos en caliente. Dado que el job de Modal
+          corre cada 15 minutos, es probable que el endpoint nunca llegue a "enfriarse" del todo si hay
+          actividad regular — pero si hoy no hay ningún usuario real generando logins, cada ciclo de Modal
+          probablemente golpeará un endpoint frío.
+        </div>
+      </div>
+      <p style="margin-top:10px;margin-bottom:0;">
+        <strong>Recomendación:</strong> si no vas a tener actividad real en las próximas semanas, escalar a
+        cero ahorra ~$69 USD/mes a cambio de que la detección de anomalías tarde ~11s en vez de ~1-2s en el
+        primer ciclo de cada racha de actividad — una diferencia irrelevante para un job batch que corre en
+        background cada 15 minutos, nadie espera esa respuesta en vivo.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
        COSTOS POR ESCENARIO
   ══════════════════════════════════════════════════════ -->
   <section class="page-section" id="fases">
     <div class="section-header">
-      <h2>Costos por escenario</h2>
+      <h2>Costos por escenario (proyección con clientes)</h2>
       <p>Desglose mensual según el número de tenants y MAU bajo gestión.</p>
     </div>
 
