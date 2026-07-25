@@ -373,7 +373,7 @@
       <div style="text-align:right;flex-shrink:0;">
         <div style="font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">última actualización</div>
         <div style="font-size:15px;font-weight:600;color:#334155;">2026-07-25</div>
-        <div style="font-size:12px;color:#64748b;">Sesión #6</div>
+        <div style="font-size:12px;color:#64748b;">Sesión #7</div>
       </div>
     </div>
   </div>
@@ -780,6 +780,91 @@
     </div>
 
     <div class="timeline">
+
+      <!-- ── ENTRADA #7 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-7">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-25</span>
+          <span class="badge badge-indigo">Sesión #7</span>
+          <span class="badge badge-red">Corrección: el lazo "automático" no lo era · 2 bugs reales encontrados y resueltos</span>
+        </div>
+
+        <div class="entry-title">La prueba que expuso que el ciclo programado nunca había funcionado solo, y su corrección real</div>
+        <div class="entry-summary">
+          La Sesión #6 declaró el lazo de respuesta como cerrado y automático, pero esa validación se hizo
+          invocando <code>detect_anomalies</code> manualmente con datos ya preparados — nunca se había
+          observado el <strong>job programado</strong> (el que corre solo cada 15 min, usando
+          <code>_fetch_pending_logs()</code>) reaccionar sin intervención. Al probarlo de verdad —mandar un
+          login anómalo real y esperar sin tocar nada— se descubrió que <strong>nunca había funcionado</strong>:
+          la query a Datadog tenía un error que devolvía "0 logs" en absolutamente todos los ciclos, siempre,
+          sin ningún error visible. Se corrigieron 2 bugs reales (más un tercero relacionado, causado por
+          nuestra propia decisión de escalar a cero) y, al tercer intento, el lazo actuó completamente solo:
+          detectó, clasificó y bloqueó una cuenta real sin ninguna intervención manual.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>Bug 1 — la query de Datadog nunca encontraba nada</h4>
+            <p><code>_fetch_pending_logs()</code> filtraba por <code>service:guardia-iam</code>, asumiendo que ese
+            era el facet de servicio de Datadog. En realidad "guardia-iam" es el valor de un campo <em>anidado</em>
+            dentro de nuestro propio JSON (<code>attributes.attributes.service</code>) — el facet reservado
+            <code>service:</code> de Datadog usa el valor que asigna el Forwarder desde el nombre real de la
+            Lambda (<code>guardia-auth0-webhook-staging</code>). Cada uno de los ciclos programados desde la
+            Sesión #6 imprimió "Ingesta Datadog: 0 logs" — literalmente siempre, sin ninguna señal de error.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Bug 2 — el campo timestamp colisionaba con un atributo reservado</h4>
+            <p>El campo que <code>handler.js</code> emitía como <code>timestamp</code> choca de nombre con un
+            atributo propio de Datadog, y llega de vuelta como una <strong>lista</strong> <code>[iso, epoch_ms]</code>
+            en vez de un string — habría roto <code>_hour_local_santiago()</code> apenas se arreglara el Bug 1.
+            Renombrado a <code>auth0_timestamp</code>, con manejo defensivo del caso lista de todas formas.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Bug 3 (relacionado) — cold-start del endpoint escalado a cero mataba el ciclo completo</h4>
+            <p>Consecuencia directa de la decisión de la Sesión #6 de escalar Vertex a <code>min_replica_count=0</code>
+            para ahorrar ~$69 USD/mes: la primera predicción tras inactividad puede pegarle a un endpoint sin
+            réplicas listas, y Vertex responde <code>429 Model is not yet ready for inference</code>. El código
+            no manejaba ese caso — la excepción tumbaba <code>detect_anomalies</code> completo, y como el cursor
+            de Datadog ya se había confirmado <em>antes</em> de intentar la predicción, el evento quedaba perdido
+            para siempre (el próximo ciclo nunca lo volvía a pedir). Se agregó reintento con backoff
+            (hasta 8 intentos, 15s entre cada uno) y se movió la confirmación del cursor para que ocurra
+            <strong>solo si la predicción tuvo éxito</strong>.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>La prueba real, paso a paso</h4>
+            <table class="files-table">
+              <thead><tr><th>Intento</th><th>Qué se hizo</th><th>Resultado</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Login anómalo real (Rusia) con user_id real, esperado 17 min sin tocar nada</td><td class="change-deleted">Sin cambio — Bug 1 (query rota) nunca encontró el evento</td></tr>
+                <tr><td>2</td><td>Bug 1 y 2 corregidos, redeploy, nuevo evento (Nigeria), esperado 17 min</td><td class="change-deleted">Sin cambio — logs de Modal revelaron el 429 por cold-start (Bug 3)</td></tr>
+                <tr><td>3</td><td>Bug 3 corregido (retry + cursor condicional), redeploy, nuevo evento (Rusia), esperado 17 min</td><td class="change-created">✓ <code>blocked:true</code> a los ~14 min — el job actuó completamente solo</td></tr>
+              </tbody>
+            </table>
+            <p style="margin-top:10px;font-size:12.5px;">Traza real del ciclo exitoso (logs de Modal): <code>"Ingesta Datadog: 1 logs entre 22:40:03 y 22:55:06"</code> → <code>anomaly_score: 1.0</code> → <code>enforce_action: "blocked"</code>. Cuenta desbloqueada después de confirmar.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Decisiones / observaciones</h4>
+            <div class="callout callout-warn">
+              <div class="callout-icon">🧭</div>
+              <div>
+                <strong>Corrección honesta a la Sesión #6:</strong> "el lazo está cerrado y verificado" era
+                cierto para las piezas probadas manualmente, pero falso para el modo de operación real
+                (programado, sin intervención). La lección: probar cada componente por separado no reemplaza
+                probar el sistema completo, en su modo real de ejecución, sin atajos. Esta sesión es la primera
+                vez que se observa el sistema funcionando <strong>genuinamente solo</strong>, de principio a fin.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #7 ──────────────────────────────────────── -->
 
       <!-- ── ENTRADA #6 ──────────────────────────────────────────── -->
       <article class="entry" id="sesion-6">
