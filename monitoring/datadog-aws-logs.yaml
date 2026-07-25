@@ -1,37 +1,44 @@
 # Datadog — Ingesta de logs AWS (CloudWatch -> Datadog Forwarder)
-# Despliegue del Forwarder oficial (CloudFormation) + suscripción al log group de la Lambda.
+# Desplegado de verdad vía Terraform (ver infra/datadog_forwarder.tf), no vía
+# este YAML directamente — este archivo documenta la configuración real
+# aplicada, para referencia.
+#
+# IMPORTANTE (Sesión #7): "service:guardia-iam" NO es una query válida —
+# es el valor de un campo anidado dentro de nuestro propio JSON
+# (attributes.attributes.service), no el facet reservado `service:` que
+# Datadog asigna desde el nombre real de la Lambda. Este bug causó que la
+# ingesta automática de anomaly_detector.py devolviera "0 logs" en todos
+# los ciclos durante toda la Sesión #6, sin ningún error visible. Las
+# queries correctas usan el facet real: guardia-auth0-webhook-staging.
 forwarder:
-  stack_name: datadog-forwarder
+  stack_name: guardia-digital-datadog-forwarder-staging
   template_url: https://datadog-cloudformation-template.s3.amazonaws.com/aws/forwarder/latest.yaml
   parameters:
     DdApiKey: ${DD_API_KEY}
-    DdSite: datadoghq.com
-    DdTags: "env:prod,producto:guardia-digital,pais:cl"
+    DdSite: ${DD_SITE}
 
 log_subscriptions:
-  - log_group: /aws/lambda/guardia-auth0-webhook
+  - log_group: /aws/lambda/guardia-auth0-webhook-staging
     filter_pattern: ""            # enviar todo: trazabilidad completa para auditoría
-    destination: datadog-forwarder
+    destination: guardia-digital-datadog-forwarder-staging
 
-pipelines:
-  - name: guardia-iam-auth0
-    filter: "source:auth0 service:guardia-iam"
-    processors:
-      - type: geo-ip
-        sources: [ip]
-      - type: category
-        name: clasificacion_evento
-        categories:
-          - { filter: "@type:s",  name: "login_exitoso" }
-          - { filter: "@type:f",  name: "login_fallido" }
-          - { filter: "@type:limit_mu", name: "cuenta_bloqueada" }
+# Servicios reales que emiten telemetría (ver monitoring/build_dashboard.py):
+#   - guardia-auth0-webhook-staging: eventos de login normalizados (Lambda)
+#   - guardia-ia-pipeline: telemetría del job de IA (Modal, vía _ship_to_datadog())
 
 monitors:
-  - name: "[Guardia] Ráfaga de logins fallidos"
+  - name: "[Guardia Digital] Ráfaga de logins fallidos"
     type: log alert
-    query: "logs(\"@type:f service:guardia-iam\").index(\"*\").rollup(\"count\").last(\"5m\") > 20"
-    message: "Posible ataque de fuerza bruta. @slack-seguridad"
-  - name: "[Guardia] Anomalía IA detectada"
+    query: "logs(\"service:guardia-auth0-webhook-staging @type:f\").index(\"*\").rollup(\"count\").last(\"5m\") > 20"
+    message: "Más de 20 logins fallidos en 5 minutos — posible ataque de fuerza bruta."
+  - name: "[Guardia Digital] Anomalía de acceso detectada por IA"
     type: log alert
-    query: "logs(\"service:guardia-ia @anomalies.anomaly_score:>=0.8\").index(\"*\").rollup(\"count\").last(\"15m\") > 0"
-    message: "Vertex AI detectó acceso anómalo (viaje imposible / fuera de turno). @pagerduty"
+    query: "logs(\"service:guardia-ia-pipeline @event_type:anomaly_detected\").index(\"*\").rollup(\"count\").last(\"15m\") > 0"
+    message: "Vertex AI detectó acceso anómalo (viaje imposible / fuera de turno / geo-IP nueva)."
+  - name: "[Guardia Digital] Error en el pipeline de detección de anomalías"
+    type: log alert
+    query: "logs(\"service:guardia-ia-pipeline @event_type:error\").index(\"*\").rollup(\"count\").last(\"15m\") > 0"
+    message: "El job de detección de anomalías reportó un error (ingesta, Vertex, o Auth0 Management API)."
+
+# Los 3 monitores de arriba están desplegados vía monitoring/build_monitors.py
+# (API de Datadog), no configurados a mano en la consola.

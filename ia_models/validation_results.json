@@ -4,41 +4,41 @@
     "expected": "sin anomalía",
     "detected_as_anomaly": false,
     "anomaly_score": null,
-    "latency_ms": 11026.7
+    "latency_ms": 10157.4
   },
   {
     "scenario": "Fuera de turno (03:00 CLT, Chile)",
     "expected": "anomalía (re-MFA o bloqueo)",
     "detected_as_anomaly": true,
     "anomaly_score": 0.98417241601676,
-    "latency_ms": 1146.4
+    "latency_ms": 1372.0
   },
   {
     "scenario": "Viaje imposible / país inusual (Rusia)",
     "expected": "anomalía (re-MFA o bloqueo)",
     "detected_as_anomaly": true,
     "anomaly_score": 1.0,
-    "latency_ms": 1615.7
+    "latency_ms": 1287.1
   },
   {
     "scenario": "Geo-IP nueva combinada (Nigeria, tarde-noche)",
     "expected": "anomalía (re-MFA o bloqueo)",
     "detected_as_anomaly": true,
     "anomaly_score": 1.0,
-    "latency_ms": 1432.1
+    "latency_ms": 1288.1
   },
   {
     "scenario": "Borde de horario laboral (07:00 CLT, límite inferior)",
     "expected": "sin anomalía (límite del rango normal)",
     "detected_as_anomaly": false,
     "anomaly_score": null,
-    "latency_ms": 2122.7
+    "latency_ms": 597.5
   },
   {
     "scenario": "Login fallido en horario normal (Chile)",
     "expected": "sin anomalía por geo/horario",
     "detected_as_anomaly": false,
     "anomaly_score": null,
-    "latency_ms": 774.3
+    "latency_ms": 647.0
   }
 ]

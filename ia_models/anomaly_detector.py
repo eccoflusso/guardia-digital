@@ -103,7 +103,9 @@ def detect_anomalies(log_batch: list | None = None) -> list:
         # No se pudo predecir tras agotar los reintentos: NO avanzamos el cursor
         # de Datadog, para que el próximo ciclo vuelva a tomar estos mismos logs
         # en vez de perderlos silenciosamente.
-        print(json.dumps({"service": "guardia-ia", "error": "vertex_endpoint_unavailable_after_retries"}))
+        event = {"event_type": "error", "error": "vertex_endpoint_unavailable_after_retries"}
+        print(json.dumps(event))
+        _ship_to_datadog(event)
         return []
 
     if pending_cursor is not None:
@@ -116,12 +118,55 @@ def detect_anomalies(log_batch: list | None = None) -> list:
             anomalies.append({**log, "anomaly_score": anomaly_score})
 
     if anomalies:
-        # stdout JSON -> Datadog (alertas tempranas SIEM)
-        print(json.dumps({"service": "guardia-ia", "anomalies": anomalies}))
+        print(json.dumps({"event_type": "anomaly_detected", "anomalies": anomalies}))
         for anomaly in anomalies:
+            # Un evento por anomalía (no una lista embebida) para que
+            # anomaly_score/country/etc. sean facets planos y graficables.
+            _ship_to_datadog({
+                "event_type": "anomaly_detected",
+                "user_id": anomaly.get("user_id"),
+                "anomaly_score": anomaly.get("anomaly_score"),
+                "country_code": (anomaly.get("geo") or {}).get("country_code"),
+                "hour_local": anomaly.get("hour_local"),
+                "auth0_log_id": anomaly.get("auth0_log_id"),
+            })
             _enforce_auth0_response(anomaly)
 
     return anomalies
+
+
+def _ship_to_datadog(event: dict) -> None:
+    """Envía telemetría del propio pipeline (ingesta, anomalías, enforcement,
+    errores) a Datadog vía su API de intake de logs. Sin esto, esos datos
+    solo vivían en los logs de Modal (`modal app logs`) — invisibles para
+    cualquier dashboard o alerta, y la razón por la que el bug de ingesta
+    de la Sesión #7 pasó desapercibido tanto tiempo.
+
+    Usa el nombre de servicio "guardia-ia-pipeline" (no "guardia-iam", que
+    ya sabemos que colisiona con el facet reservado `service:` de Datadog
+    cuando se anida dentro del JSON en vez de ir en el campo top-level).
+    """
+    import requests
+
+    api_key = os.environ.get("DD_API_KEY")
+    site = os.environ.get("DD_SITE", "datadoghq.com")
+    if not api_key:
+        return
+
+    try:
+        requests.post(
+            f"https://http-intake.logs.{site}/api/v2/logs",
+            headers={"DD-API-KEY": api_key, "Content-Type": "application/json"},
+            json=[{
+                "ddsource": "modal",
+                "service": "guardia-ia-pipeline",
+                "ddtags": "env:staging,project:guardia-digital-inteligente",
+                "message": json.dumps(event),
+            }],
+            timeout=10,
+        )
+    except Exception as e:  # nunca dejar que un fallo de telemetría tumbe el job real
+        print(f"(no se pudo enviar telemetría a Datadog: {e})")
 
 
 def _vertex_credentials():
@@ -223,10 +268,16 @@ def _fetch_pending_logs() -> tuple[list, str | None]:
             if not cursor:
                 break
     except requests.RequestException as e:
-        print(json.dumps({"service": "guardia-ia", "datadog_fetch_error": str(e)}))
+        event = {"event_type": "error", "error": "datadog_fetch_error", "detail": str(e)}
+        print(json.dumps(event))
+        _ship_to_datadog(event)
         return [], None
 
     print(f"Ingesta Datadog: {len(logs)} logs entre {query_from} y {query_to}.")
+    _ship_to_datadog({
+        "event_type": "ingestion_cycle", "logs_found": len(logs),
+        "from": query_from, "to": query_to,
+    })
     return logs, query_to
 
 
@@ -298,15 +349,19 @@ def _enforce_auth0_response(anomaly: dict) -> None:
             timeout=10,
         )
         patch_resp.raise_for_status()
-        print(json.dumps({
-            "service": "guardia-ia", "enforce_action": action,
+        event = {
+            "event_type": "enforcement", "enforce_action": action,
             "user_id": user_id, "anomaly_score": score,
-        }))
+        }
+        print(json.dumps(event))
+        _ship_to_datadog(event)
     except requests.RequestException as e:
-        print(json.dumps({
-            "service": "guardia-ia", "enforce_error": str(e),
+        event = {
+            "event_type": "error", "error": "enforce_error", "detail": str(e),
             "user_id": user_id, "anomaly_score": score,
-        }))
+        }
+        print(json.dumps(event))
+        _ship_to_datadog(event)
 
 
 @app.local_entrypoint()

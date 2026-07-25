@@ -1,36 +1,656 @@
 {
-  "title": "Guardia Digital — Auditoría y Compliance (Ley 20.393)",
+  "id": "bu4-tb7-8tt",
+  "title": "Guardia Digital — Operación y Compliance",
+  "description": "Resumen ejecutivo, mapa de accesos, detección de anomalías IA, salud del pipeline y trazabilidad de auditoría (Ley 20.393).",
+  "author_handle": "aws@wayweb.cl",
+  "author_name": "Mario  Franjola",
   "layout_type": "ordered",
-  "tags": ["producto:guardia-digital", "pais:cl"],
+  "url": "/dashboard/bu4-tb7-8tt/guardia-digital--operacin-y-compliance",
+  "template_variables": null,
   "widgets": [
     {
       "definition": {
-        "title": "Logins por resultado (24h)",
-        "type": "timeseries",
-        "requests": [{ "queries": [{ "data_source": "logs", "name": "q1",
-          "search": { "query": "service:guardia-iam" },
-          "compute": { "aggregation": "count" },
-          "group_by": [{ "facet": "@clasificacion_evento", "limit": 5 }] }] }]
-      }
+        "title": "1. Resumen ejecutivo",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Total logins (24h)",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-auth0-webhook-staging @type:(s OR f OR fp)"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "id": 8291131480948099
+          },
+          {
+            "definition": {
+              "title": "Logins exitosos (24h)",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-auth0-webhook-staging @type:s"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "id": 8731543467002719
+          },
+          {
+            "definition": {
+              "title": "Logins fallidos (24h)",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-auth0-webhook-staging @type:f"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "id": 2557381980299476
+          },
+          {
+            "definition": {
+              "title": "Anomalías IA detectadas (24h)",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-ia-pipeline @event_type:anomaly_detected"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "id": 1188600866208716
+          },
+          {
+            "definition": {
+              "title": "Acciones de enforcement",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-ia-pipeline @event_type:enforcement"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@enforce_action",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "id": 5627730039466052
+          }
+        ]
+      },
+      "id": 4466202270969842
     },
     {
       "definition": {
-        "title": "Anomalías IA (score >= 0.8)",
-        "type": "query_value",
-        "requests": [{ "queries": [{ "data_source": "logs", "name": "q1",
-          "search": { "query": "service:guardia-ia" },
-          "compute": { "aggregation": "count" } }] }]
-      }
+        "title": "2. Mapa de accesos (Zero-Trust)",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Origen geográfico de logins",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "geomap",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-auth0-webhook-staging @type:(s OR f)"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@geo.country_code",
+                          "limit": 50
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "id": 6506651431952666
+          },
+          {
+            "definition": {
+              "title": "Top países por volumen de login",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-auth0-webhook-staging @type:(s OR f)"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@geo.country_code",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "id": 4313269633011493
+          }
+        ]
+      },
+      "id": 572059207087460
     },
     {
       "definition": {
-        "title": "Top conexiones (AD sucursales / contratistas)",
-        "type": "toplist",
-        "requests": [{ "queries": [{ "data_source": "logs", "name": "q1",
-          "search": { "query": "service:guardia-iam" },
-          "compute": { "aggregation": "count" },
-          "group_by": [{ "facet": "@connection", "limit": 10 }] }] }]
-      }
+        "title": "3. Detección de anomalías (Vertex AI)",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Anomaly score en el tiempo (promedio)",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-ia-pipeline @event_type:anomaly_detected"
+                      },
+                      "compute": {
+                        "aggregation": "avg"
+                      }
+                    }
+                  ],
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "id": 7917110751217248
+          },
+          {
+            "definition": {
+              "title": "Score promedio por país de origen",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-ia-pipeline @event_type:anomaly_detected"
+                      },
+                      "compute": {
+                        "aggregation": "avg"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@country_code",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "avg"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "id": 6597754371893981
+          },
+          {
+            "definition": {
+              "title": "Anomalías recientes (detalle)",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "list_stream",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "service:guardia-ia-pipeline @event_type:anomaly_detected",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@user_id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@country_code",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@anomaly_score",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@hour_local",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ]
+            },
+            "id": 1204188891554406
+          }
+        ]
+      },
+      "id": 5089973286652900
+    },
+    {
+      "definition": {
+        "title": "4. Salud operacional del pipeline",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Logs ingeridos por ciclo (cada 15 min)",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-ia-pipeline @event_type:ingestion_cycle"
+                      },
+                      "compute": {
+                        "aggregation": "avg"
+                      }
+                    }
+                  ],
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "id": 179103808483924
+          },
+          {
+            "definition": {
+              "title": "Errores del pipeline (24h)",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-ia-pipeline @event_type:error"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "id": 8053380991511183
+          },
+          {
+            "definition": {
+              "title": "Tipos de error",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-ia-pipeline @event_type:error"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@error",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "id": 811854333672644
+          },
+          {
+            "definition": {
+              "title": "Errores recientes (detalle)",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "list_stream",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "service:guardia-ia-pipeline @event_type:error",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@error",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@detail",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ]
+            },
+            "id": 8077718892015967
+          }
+        ]
+      },
+      "id": 2812261698871639
+    },
+    {
+      "definition": {
+        "title": "5. Auditoría y compliance (Ley 20.393)",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "**Trazabilidad de auditoría** — cada decisión de acceso (login, MFA, bloqueo) queda registrada con usuario, fecha/hora, geolocalización y resultado. Retención actual: según plan de Datadog contratado por la organización (confirmar período exacto con el account manager antes de certificar ante un auditor externo).",
+              "background_color": "yellow",
+              "font_size": "14"
+            },
+            "id": 4919095763295732
+          },
+          {
+            "definition": {
+              "title": "Trazabilidad de accesos (auditoría)",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "list_stream",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "service:guardia-auth0-webhook-staging @type:(s OR f OR fp OR limit_mu)",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@user_id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@type",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@geo.country_code",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@connection",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@tenant",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ]
+            },
+            "id": 6459245867430139
+          }
+        ]
+      },
+      "id": 4583078226575881
+    },
+    {
+      "definition": {
+        "title": "6. Actividad por conexión / tenant",
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "title": "Logins por conexión (AD sucursal / contratistas)",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-auth0-webhook-staging @type:(s OR f)"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@connection",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "id": 7603370031498072
+          },
+          {
+            "definition": {
+              "title": "Logins por tenant",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-auth0-webhook-staging @type:(s OR f)"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@tenant",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "id": 136347344971486
+          }
+        ]
+      },
+      "id": 1056510436258035
     }
-  ]
+  ],
+  "notify_list": null,
+  "created_at": "2026-07-25T23:14:10.981391+00:00",
+  "modified_at": "2026-07-25T23:14:10.981391+00:00",
+  "restricted_roles": []
 }
