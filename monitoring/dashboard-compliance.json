@@ -38,9 +38,12 @@
                 }
               ],
               "autoscale": true,
-              "precision": 0
+              "precision": 0,
+              "time": {
+                "live_span": "1d"
+              }
             },
-            "id": 8291131480948099
+            "id": 4089804501588453
           },
           {
             "definition": {
@@ -66,9 +69,12 @@
                 }
               ],
               "autoscale": true,
-              "precision": 0
+              "precision": 0,
+              "time": {
+                "live_span": "1d"
+              }
             },
-            "id": 8731543467002719
+            "id": 120682192067781
           },
           {
             "definition": {
@@ -94,9 +100,12 @@
                 }
               ],
               "autoscale": true,
-              "precision": 0
+              "precision": 0,
+              "time": {
+                "live_span": "1d"
+              }
             },
-            "id": 2557381980299476
+            "id": 1593310014680982
           },
           {
             "definition": {
@@ -122,9 +131,12 @@
                 }
               ],
               "autoscale": true,
-              "precision": 0
+              "precision": 0,
+              "time": {
+                "live_span": "1d"
+              }
             },
-            "id": 1188600866208716
+            "id": 1932283034323392
           },
           {
             "definition": {
@@ -160,11 +172,11 @@
                 }
               ]
             },
-            "id": 5627730039466052
+            "id": 2492201460387033
           }
         ]
       },
-      "id": 4466202270969842
+      "id": 2411506595760046
     },
     {
       "definition": {
@@ -209,7 +221,7 @@
                 "focus": "WORLD"
               }
             },
-            "id": 6506651431952666
+            "id": 6773266045705155
           },
           {
             "definition": {
@@ -245,11 +257,11 @@
                 }
               ]
             },
-            "id": 4313269633011493
+            "id": 4429953249614483
           }
         ]
       },
-      "id": 572059207087460
+      "id": 4496272183758694
     },
     {
       "definition": {
@@ -274,7 +286,8 @@
                         "query": "service:guardia-ia-pipeline @event_type:anomaly_detected"
                       },
                       "compute": {
-                        "aggregation": "avg"
+                        "aggregation": "avg",
+                        "metric": "@anomaly_score"
                       }
                     }
                   ],
@@ -282,7 +295,7 @@
                 }
               ]
             },
-            "id": 7917110751217248
+            "id": 2476529282513265
           },
           {
             "definition": {
@@ -301,7 +314,8 @@
                         "query": "service:guardia-ia-pipeline @event_type:anomaly_detected"
                       },
                       "compute": {
-                        "aggregation": "avg"
+                        "aggregation": "avg",
+                        "metric": "@anomaly_score"
                       },
                       "group_by": [
                         {
@@ -309,7 +323,8 @@
                           "limit": 10,
                           "sort": {
                             "order": "desc",
-                            "aggregation": "avg"
+                            "aggregation": "avg",
+                            "metric": "@anomaly_score"
                           }
                         }
                       ]
@@ -318,7 +333,7 @@
                 }
               ]
             },
-            "id": 6597754371893981
+            "id": 1552913679894376
           },
           {
             "definition": {
@@ -360,11 +375,11 @@
                 }
               ]
             },
-            "id": 1204188891554406
+            "id": 7220662997092943
           }
         ]
       },
-      "id": 5089973286652900
+      "id": 7513053516500516
     },
     {
       "definition": {
@@ -389,7 +404,8 @@
                         "query": "service:guardia-ia-pipeline @event_type:ingestion_cycle"
                       },
                       "compute": {
-                        "aggregation": "avg"
+                        "aggregation": "avg",
+                        "metric": "@logs_found"
                       }
                     }
                   ],
@@ -397,7 +413,7 @@
                 }
               ]
             },
-            "id": 179103808483924
+            "id": 2552693675917332
           },
           {
             "definition": {
@@ -423,9 +439,12 @@
                 }
               ],
               "autoscale": true,
-              "precision": 0
+              "precision": 0,
+              "time": {
+                "live_span": "1d"
+              }
             },
-            "id": 8053380991511183
+            "id": 329855850865564
           },
           {
             "definition": {
@@ -461,7 +480,7 @@
                 }
               ]
             },
-            "id": 811854333672644
+            "id": 2312326233656085
           },
           {
             "definition": {
@@ -495,11 +514,11 @@
                 }
               ]
             },
-            "id": 8077718892015967
+            "id": 4233266414011701
           }
         ]
       },
-      "id": 2812261698871639
+      "id": 3335248803238112
     },
     {
       "definition": {
@@ -514,7 +533,7 @@
               "background_color": "yellow",
               "font_size": "14"
             },
-            "id": 4919095763295732
+            "id": 4112685239498749
           },
           {
             "definition": {
@@ -560,11 +579,11 @@
                 }
               ]
             },
-            "id": 6459245867430139
+            "id": 6651899675996194
           }
         ]
       },
-      "id": 4583078226575881
+      "id": 5908802902320371
     },
     {
       "definition": {
@@ -606,7 +625,7 @@
                 }
               ]
             },
-            "id": 7603370031498072
+            "id": 2289931723832263
           },
           {
             "definition": {
@@ -642,15 +661,15 @@
                 }
               ]
             },
-            "id": 136347344971486
+            "id": 662007100676274
           }
         ]
       },
-      "id": 1056510436258035
+      "id": 7062130572847650
     }
   ],
   "notify_list": null,
   "created_at": "2026-07-25T23:14:10.981391+00:00",
-  "modified_at": "2026-07-25T23:14:10.981391+00:00",
+  "modified_at": "2026-07-25T23:23:14.013982+00:00",
   "restricted_roles": []
 }

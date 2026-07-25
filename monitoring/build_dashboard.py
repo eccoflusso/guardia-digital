@@ -27,7 +27,10 @@ LOGIN_SVC = "guardia-auth0-webhook-staging"
 IA_SVC = "guardia-ia-pipeline"
 
 
-def qv(title, query, aggregation="count"):
+def qv(title, query, aggregation="count", live_span="1d"):
+    # live_span fija la ventana de tiempo del widget (independiente del selector
+    # global del dashboard) para que el título "(24h)" sea cierto siempre,
+    # no solo cuando el usuario tiene elegido "Past 1 Day" arriba a la derecha.
     return {
         "definition": {
             "title": title,
@@ -44,11 +47,19 @@ def qv(title, query, aggregation="count"):
             }],
             "autoscale": True,
             "precision": 0,
+            "time": {"live_span": live_span},
         }
     }
 
 
-def toplist(title, query, facet, limit=10, aggregation="count"):
+def toplist(title, query, facet, limit=10, aggregation="count", metric=None):
+    compute = {"aggregation": aggregation}
+    sort = {"order": "desc", "aggregation": aggregation}
+    if aggregation != "count":
+        # Promediar/sumar un campo numérico exige decirle a Datadog CUÁL campo
+        # (bug real: sin esto, la query es inválida y el widget muestra error).
+        compute["metric"] = metric
+        sort["metric"] = metric
     return {
         "definition": {
             "title": title,
@@ -60,15 +71,18 @@ def toplist(title, query, facet, limit=10, aggregation="count"):
                 "queries": [{
                     "data_source": "logs", "name": "q1",
                     "search": {"query": query},
-                    "compute": {"aggregation": aggregation},
-                    "group_by": [{"facet": facet, "limit": limit, "sort": {"order": "desc", "aggregation": aggregation}}],
+                    "compute": compute,
+                    "group_by": [{"facet": facet, "limit": limit, "sort": sort}],
                 }],
             }],
         }
     }
 
 
-def timeseries(title, query, aggregation="count"):
+def timeseries(title, query, aggregation="count", metric=None):
+    compute = {"aggregation": aggregation}
+    if aggregation != "count":
+        compute["metric"] = metric
     return {
         "definition": {
             "title": title,
@@ -80,7 +94,7 @@ def timeseries(title, query, aggregation="count"):
                 "queries": [{
                     "data_source": "logs", "name": "q1",
                     "search": {"query": query},
-                    "compute": {"aggregation": aggregation},
+                    "compute": compute,
                 }],
                 "display_type": "bars",
             }],
@@ -164,13 +178,16 @@ dashboard = {
             toplist("Top países por volumen de login", f"service:{LOGIN_SVC} @type:(s OR f)", "@geo.country_code"),
         ]),
         group("3. Detección de anomalías (Vertex AI)", [
-            timeseries("Anomaly score en el tiempo (promedio)", f"service:{IA_SVC} @event_type:anomaly_detected", "avg"),
-            toplist("Score promedio por país de origen", f"service:{IA_SVC} @event_type:anomaly_detected", "@country_code", aggregation="avg"),
+            timeseries("Anomaly score en el tiempo (promedio)", f"service:{IA_SVC} @event_type:anomaly_detected",
+                       "avg", metric="@anomaly_score"),
+            toplist("Score promedio por país de origen", f"service:{IA_SVC} @event_type:anomaly_detected", "@country_code",
+                    aggregation="avg", metric="@anomaly_score"),
             log_stream("Anomalías recientes (detalle)", f"service:{IA_SVC} @event_type:anomaly_detected",
                        ["timestamp", "@user_id", "@country_code", "@anomaly_score", "@hour_local"]),
         ]),
         group("4. Salud operacional del pipeline", [
-            timeseries("Logs ingeridos por ciclo (cada 15 min)", f"service:{IA_SVC} @event_type:ingestion_cycle", "avg"),
+            timeseries("Logs ingeridos por ciclo (cada 15 min)", f"service:{IA_SVC} @event_type:ingestion_cycle",
+                       "avg", metric="@logs_found"),
             qv("Errores del pipeline (24h)", f"service:{IA_SVC} @event_type:error"),
             toplist("Tipos de error", f"service:{IA_SVC} @event_type:error", "@error"),
             log_stream("Errores recientes (detalle)", f"service:{IA_SVC} @event_type:error",
@@ -195,22 +212,33 @@ dashboard = {
     ],
 }
 
-resp = requests.post(
-    f"https://api.{DD_SITE}/api/v1/dashboard",
-    headers={
-        "DD-API-KEY": DD_API_KEY,
-        "DD-APPLICATION-KEY": DD_APP_KEY,
-        "Content-Type": "application/json",
-    },
-    json=dashboard,
-    timeout=30,
-)
+# Si ya existe (guardado en dashboard_id.txt tras la primera corrida), lo
+# actualiza in-place con PUT en vez de crear un duplicado.
+EXISTING_ID_FILE = "dashboard_id.txt"
+existing_id = None
+if os.path.exists(EXISTING_ID_FILE):
+    existing_id = open(EXISTING_ID_FILE, encoding="utf-8").read().strip()
+
+headers = {
+    "DD-API-KEY": DD_API_KEY,
+    "DD-APPLICATION-KEY": DD_APP_KEY,
+    "Content-Type": "application/json",
+}
+
+if existing_id:
+    resp = requests.put(f"https://api.{DD_SITE}/api/v1/dashboard/{existing_id}", headers=headers, json=dashboard, timeout=30)
+else:
+    resp = requests.post(f"https://api.{DD_SITE}/api/v1/dashboard", headers=headers, json=dashboard, timeout=30)
+
 if not resp.ok:
     print("ERROR", resp.status_code, resp.text)
 resp.raise_for_status()
 result = resp.json()
 
-print("Dashboard creado:", result.get("title"))
+with open(EXISTING_ID_FILE, "w", encoding="utf-8") as f:
+    f.write(result["id"])
+
+print("Dashboard actualizado" if existing_id else "Dashboard creado:", result.get("title"))
 print("ID:", result.get("id"))
 print("URL:", f"https://app.{DD_SITE}{result.get('url')}")
 
