@@ -74,6 +74,9 @@ def toplist(title, query, facet, limit=10, aggregation="count", metric=None):
                     "compute": compute,
                     "group_by": [{"facet": facet, "limit": limit, "sort": sort}],
                 }],
+                # Sin "formulas", Datadog no sabe qué query mostrar en un widget
+                # toplist -- se guarda sin error, pero renderiza vacío siempre.
+                "formulas": [{"formula": "q1"}],
             }],
         }
     }
