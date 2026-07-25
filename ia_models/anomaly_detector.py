@@ -14,6 +14,7 @@ Requiere secrets en Modal:
 """
 import json
 import os
+import time
 from datetime import datetime, timedelta, timezone
 
 import modal
@@ -29,6 +30,15 @@ cursor_store = modal.Dict.from_name("guardia-datadog-cursor", create_if_missing=
 ANOMALY_THRESHOLD = 0.8       # re-MFA (step-up)
 BLOCK_THRESHOLD = 0.95        # bloqueo directo — anomalía extrema
 FORCE_MFA_WINDOW_HOURS = 6    # cuánto tiempo queda "forzado" el re-MFA tras una anomalía
+
+# El endpoint de Vertex corre con min_replica_count=0 (escala a cero, ver
+# costos.html): si no hubo tráfico reciente, la primera predicción de cada
+# ciclo puede pegarle a un endpoint "frío" y Vertex responde 429 mientras
+# levanta la réplica. Se reintenta en vez de dejar que la excepción tumbe
+# todo el ciclo (bug real encontrado en Sesión #7: sin retry, el evento se
+# perdía porque el cursor de Datadog ya había avanzado).
+PREDICT_MAX_RETRIES = 8
+PREDICT_RETRY_DELAY_SECONDS = 15
 
 
 @app.function(
@@ -48,14 +58,16 @@ def detect_anomalies(log_batch: list | None = None) -> list:
     Retorna la lista de eventos clasificados como anómalos, ya con la
     respuesta (re-MFA/bloqueo) aplicada sobre Auth0.
     """
+    from google.api_core.exceptions import ResourceExhausted
     from google.cloud import aiplatform
 
     project = os.environ["GCP_PROJECT"]
     region = os.environ.get("VERTEX_REGION", "us-central1")
     endpoint_id = os.environ["VERTEX_ENDPOINT_ID"]
 
+    pending_cursor = None
     if log_batch is None:
-        log_batch = _fetch_pending_logs()
+        log_batch, pending_cursor = _fetch_pending_logs()
 
     if not log_batch:
         print("Sin logs pendientes en este ciclo.")
@@ -77,7 +89,25 @@ def detect_anomalies(log_batch: list | None = None) -> list:
         for l in log_batch
     ]
 
-    prediction = endpoint.predict(instances=instances)
+    prediction = None
+    for attempt in range(1, PREDICT_MAX_RETRIES + 1):
+        try:
+            prediction = endpoint.predict(instances=instances)
+            break
+        except ResourceExhausted:
+            print(f"Endpoint frío (escalando desde cero) — reintento {attempt}/{PREDICT_MAX_RETRIES} "
+                  f"en {PREDICT_RETRY_DELAY_SECONDS}s.")
+            time.sleep(PREDICT_RETRY_DELAY_SECONDS)
+
+    if prediction is None:
+        # No se pudo predecir tras agotar los reintentos: NO avanzamos el cursor
+        # de Datadog, para que el próximo ciclo vuelva a tomar estos mismos logs
+        # en vez de perderlos silenciosamente.
+        print(json.dumps({"service": "guardia-ia", "error": "vertex_endpoint_unavailable_after_retries"}))
+        return []
+
+    if pending_cursor is not None:
+        cursor_store["last_run_at"] = pending_cursor
 
     anomalies = []
     for log, score in zip(log_batch, prediction.predictions):
@@ -109,13 +139,17 @@ def _vertex_credentials():
     )
 
 
-def _fetch_pending_logs() -> list:
+def _fetch_pending_logs() -> tuple[list, str | None]:
     """Ingesta real: consulta la Datadog Logs Search API por eventos de login
     de Auth0 emitidos desde el último cursor guardado, y los devuelve en el
     formato esperado por `detect_anomalies` (user_id, ip, geo, hour_local, type).
 
     Requiere DD_API_KEY, DD_APP_KEY (Application Key, distinto del API Key —
     la Logs Search API v2 exige ambos) y DD_SITE en el secret `datadog-api`.
+
+    Devuelve (logs, cursor_pendiente): el cursor NO se confirma acá — lo hace
+    el llamador (`detect_anomalies`) solo si la predicción de Vertex tuvo
+    éxito, para no perder eventos si el endpoint está frío (ver Sesión #7).
     """
     import requests
 
@@ -125,7 +159,7 @@ def _fetch_pending_logs() -> list:
 
     if not api_key or not app_key:
         print("Datadog no configurado (DD_API_KEY/DD_APP_KEY ausentes) — sin ingesta este ciclo.")
-        return []
+        return [], None
 
     last_run_iso = cursor_store.get("last_run_at")
     query_from = last_run_iso or (datetime.now(timezone.utc) - timedelta(minutes=20)).isoformat()
@@ -137,9 +171,15 @@ def _fetch_pending_logs() -> list:
         "DD-APPLICATION-KEY": app_key,
         "Content-Type": "application/json",
     }
+    # "service:guardia-iam" NO funciona: ese es el nombre de un campo anidado
+    # dentro de nuestro JSON (attributes.attributes.service), pero el facet
+    # reservado `service:` de Datadog usa el que asigna el Forwarder desde el
+    # nombre real de la Lambda (ver DD_LAMBDA_SERVICE). Bug real encontrado en
+    # Sesión #7: la query devolvía 0 resultados en todos los ciclos.
+    lambda_service = os.environ.get("DD_LAMBDA_SERVICE", "guardia-auth0-webhook-staging")
     body = {
         "filter": {
-            "query": "service:guardia-iam @type:(s OR f OR fp)",
+            "query": f"service:{lambda_service} @type:(s OR f OR fp)",
             "from": query_from,
             "to": query_to,
         },
@@ -160,14 +200,19 @@ def _fetch_pending_logs() -> list:
             for item in payload.get("data", []):
                 attrs = item.get("attributes", {}).get("attributes", {})
                 geo = attrs.get("geo") or {}
-                ts = attrs.get("timestamp") or item.get("attributes", {}).get("timestamp")
+                # "auth0_timestamp" es nuestro campo (ver handler.js). Si Datadog
+                # igual lo devuelve como lista (colisión de nombre con su propio
+                # atributo reservado), tomamos el primer valor (el string ISO).
+                ts = attrs.get("auth0_timestamp")
+                if isinstance(ts, list):
+                    ts = ts[0] if ts else None
                 logs.append({
                     "user_id": attrs.get("user_id"),
                     "ip": attrs.get("ip"),
                     "geo": {
                         "latitude": geo.get("latitude"),
                         "longitude": geo.get("longitude"),
-                        "country_code": geo.get("country_code") or attrs.get("geo", {}).get("country_code"),
+                        "country_code": geo.get("country_code"),
                     },
                     "hour_local": _hour_local_santiago(ts),
                     "type": attrs.get("type"),
@@ -179,11 +224,10 @@ def _fetch_pending_logs() -> list:
                 break
     except requests.RequestException as e:
         print(json.dumps({"service": "guardia-ia", "datadog_fetch_error": str(e)}))
-        return []
+        return [], None
 
-    cursor_store["last_run_at"] = query_to
     print(f"Ingesta Datadog: {len(logs)} logs entre {query_from} y {query_to}.")
-    return logs
+    return logs, query_to
 
 
 def _hour_local_santiago(iso_timestamp: str | None) -> int | None:

@@ -64,7 +64,10 @@ exports.handler = async (event) => {
         ip: d.ip,
         geo: d.location_info || null,       // insumo para anomalías geográficas
         user_agent: d.user_agent,
-        timestamp: d.date,
+        // "auth0_timestamp" (no "timestamp"): Datadog reserva ese nombre para su
+        // propio atributo de ingesta y, si coinciden, devuelve un array [iso, epoch_ms]
+        // en vez de un string, rompiendo el parseo aguas abajo (ver Sesión #7).
+        auth0_timestamp: d.date,
         tenant: d.tenant_name,
       };
     });
