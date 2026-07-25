@@ -5,6 +5,10 @@
 *.pem
 *-credentials.json
 gcp-credentials*.json
+guardia-digital-ky.json
+archivos/*.json
+*-ky.json
+**/*service-account*.json
 
 # --- Node (lambdas) ---
 node_modules/
@@ -17,6 +21,9 @@ package-lock.json.bak
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+*.tfplan
+backend.*.hcl
+!backend.example.hcl
 crash.log
 override.tf
 override.tf.json
@@ -28,6 +35,11 @@ __pycache__/
 .venv/
 venv/
 .modal/
+
+# Copias del build context de Docker (derivadas de ia_models/*.py y
+# ia_models/model_artifact/ — regenerar con `cp` antes de `docker build`)
+ia_models/serving/anomaly_scorer.py
+ia_models/serving/model_artifact/
 
 # --- Artefactos / SO / editor ---
 proyecto_guardia_digital.zip

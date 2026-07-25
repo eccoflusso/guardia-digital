@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitácora — Guardia Digital Inteligente · Wayweb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset & base ──────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f0f4f8;
+    color: #1e293b;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ────────────────────────────────────────────────────── */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px; flex-shrink: 0;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    padding: 28px 0;
+  }
+  .main { flex: 1; max-width: 900px; padding: 40px 48px; }
+
+  /* ── Sidebar ───────────────────────────────────────────────────── */
+  .sidebar-logo {
+    padding: 0 24px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 20px;
+  }
+  .sidebar-logo h1 { font-size: 14px; font-weight: 700; color: #4f46e5; letter-spacing: -.3px; }
+  .sidebar-logo span { font-size: 11px; color: #94a3b8; font-weight: 400; }
+  .sidebar-nav { padding: 0 12px; }
+  .nav-section { margin-bottom: 24px; }
+  .nav-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .8px;
+    text-transform: uppercase; color: #94a3b8;
+    padding: 0 12px; margin-bottom: 6px;
+  }
+  .nav-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; border-radius: 6px;
+    color: #475569; text-decoration: none;
+    font-size: 13.5px; font-weight: 400;
+    transition: all .15s;
+  }
+  .nav-link:hover { background: #f1f5f9; color: #1e293b; }
+  .nav-link.active { background: #eef2ff; color: #4f46e5; font-weight: 500; }
+  .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    margin-top: 12px;
+  }
+  .pill-ok    { background: #d1fae5; color: #065f46; }
+  .pill-warn  { background: #fef3c7; color: #92400e; }
+  .pill-info  { background: #dbeafe; color: #1e40af; }
+  .pill-dot   { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ── Typography ─────────────────────────────────────────────────── */
+  h2 { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  h3 { font-size: 16px; font-weight: 600; color: #0f172a; margin-bottom: 12px; }
+  h4 { font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase;
+       letter-spacing: .5px; margin-bottom: 8px; }
+  p  { color: #475569; font-size: 14.5px; line-height: 1.7; margin-bottom: 10px; }
+
+  .section-header {
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 28px;
+  }
+  .section-header p { margin-bottom: 0; color: #64748b; font-size: 14px; }
+
+  /* ── Cards ──────────────────────────────────────────────────────── */
+  .card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .card-sm { padding: 14px 18px; }
+
+  /* ── Badges ─────────────────────────────────────────────────────── */
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; letter-spacing: .3px;
+  }
+  .badge-indigo  { background: #eef2ff; color: #4338ca; }
+  .badge-green   { background: #d1fae5; color: #065f46; }
+  .badge-amber   { background: #fef3c7; color: #92400e; }
+  .badge-red     { background: #fee2e2; color: #991b1b; }
+  .badge-slate   { background: #f1f5f9; color: #334155; }
+  .badge-purple  { background: #f3e8ff; color: #6b21a8; }
+  .badge-cyan    { background: #ecfeff; color: #155e75; }
+  .badge-pink    { background: #fdf2f8; color: #9d174d; }
+  .badge-emerald { background: #ecfdf5; color: #065f46; }
+
+  /* ── Code ───────────────────────────────────────────────────────── */
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 12.5px; background: #f1f5f9;
+    color: #c026d3; padding: 1px 5px; border-radius: 3px;
+  }
+  pre {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 16px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: #334155;
+    overflow-x: auto; margin: 12px 0;
+    line-height: 1.8;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+
+  /* ── Sections ───────────────────────────────────────────────────── */
+  .page-section { margin-bottom: 60px; }
+
+  /* ── Stats grid ─────────────────────────────────────────────────── */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-card {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 10px; padding: 16px 20px;
+    text-align: center;
+  }
+  .stat-value { font-size: 28px; font-weight: 700; color: #4f46e5; }
+  .stat-label { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+  .stat-sub { font-size: 11px; color: #64748b; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Tech stack ─────────────────────────────────────────────────── */
+  .stack-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .stack-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 12px 16px;
+  }
+  .stack-icon {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .stack-info { min-width: 0; }
+  .stack-name { font-size: 13px; font-weight: 600; color: #1e293b; }
+  .stack-desc { font-size: 12px; color: #64748b; margin-top: 1px; }
+
+  /* ── Flow diagram ───────────────────────────────────────────────── */
+  .flow {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: 0; background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 10px; padding: 20px 24px; margin: 16px 0;
+  }
+  .flow-node {
+    background: #f8fafc; border: 1.5px solid #cbd5e1;
+    border-radius: 8px; padding: 8px 14px;
+    font-size: 12.5px; font-weight: 500; color: #334155;
+    text-align: center; min-width: 90px;
+  }
+  .flow-node.primary { background: #eef2ff; border-color: #a5b4fc; color: #3730a3; }
+  .flow-node.success { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
+  .flow-node.warning { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
+  .flow-node.danger  { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+  .flow-arrow { color: #94a3b8; font-size: 16px; padding: 0 6px; flex-shrink: 0; }
+  .flow-split { display: flex; flex-direction: column; gap: 6px; }
+
+  /* ── File tree ──────────────────────────────────────────────────── */
+  .file-tree { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
+  .tree-row {
+    display: grid; grid-template-columns: 240px 1fr;
+    align-items: baseline; gap: 16px;
+    padding: 5px 0; border-bottom: 1px solid #f8fafc;
+  }
+  .tree-row:hover { background: #fafbfc; }
+  .tree-path { color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tree-path .folder-name { color: #4f46e5; font-weight: 500; }
+  .tree-path .file-name   { color: #0f172a; }
+  .tree-desc { color: #64748b; font-family: 'Inter', sans-serif; font-size: 12.5px; line-height: 1.5; }
+  .indent-1 { padding-left: 16px; }
+  .indent-2 { padding-left: 32px; }
+  .indent-3 { padding-left: 48px; }
+
+  /* ── Data table ─────────────────────────────────────────────────── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th {
+    background: #f1f5f9; padding: 9px 12px;
+    text-align: left; font-size: 11.5px; font-weight: 600;
+    color: #475569; text-transform: uppercase; letter-spacing: .5px;
+  }
+  .data-table td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #fafbfc; }
+
+  /* ── Completion bar ─────────────────────────────────────────────── */
+  .progress-row { margin-bottom: 10px; }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 12.5px; font-weight: 500; color: #334155;
+    margin-bottom: 4px;
+  }
+  .progress-bar-bg { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+  .fill-indigo { background: #4f46e5; }
+  .fill-green  { background: #059669; }
+  .fill-amber  { background: #d97706; }
+  .fill-red    { background: #dc2626; }
+
+  /* ── Callout ────────────────────────────────────────────────────── */
+  .callout {
+    display: flex; gap: 12px; padding: 12px 16px;
+    border-radius: 8px; border-left: 3px solid; margin: 12px 0;
+    font-size: 13.5px;
+  }
+  .callout-info    { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+  .callout-warn    { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+  .callout-success { background: #f0fdf4; border-color: #22c55e; color: #166534; }
+  .callout-icon    { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Roadmap checkboxes ─────────────────────────────────────────── */
+  .rdm-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 13.5px; color: #475569; line-height: 1.5;
+    transition: background .12s;
+    border: 1px solid transparent;
+    margin-bottom: 4px;
+  }
+  .rdm-item:hover { background: #f8fafc; border-color: #e2e8f0; }
+  .rdm-item.done  { background: #f0fdf4; border-color: #bbf7d0; color: #166534; text-decoration: line-through; }
+  .rdm-check {
+    width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px;
+    accent-color: #4f46e5; cursor: pointer;
+  }
+
+  /* ── Timeline / Bitácora ────────────────────────────────────────── */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 7px; top: 8px; bottom: 0;
+    width: 2px; background: #e2e8f0;
+  }
+  .entry { position: relative; margin-bottom: 40px; }
+  .entry::before {
+    content: ''; position: absolute;
+    left: -24px; top: 8px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: #4f46e5; border: 3px solid #fff;
+    box-shadow: 0 0 0 2px #c7d2fe;
+  }
+  .entry-meta {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+  .entry-date {
+    font-size: 12px; color: #94a3b8;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .entry-title { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+  .entry-summary { font-size: 14px; color: #475569; margin-bottom: 18px; }
+
+  .entry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .entry-block {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 14px 16px;
+  }
+  .entry-block.full { grid-column: 1 / -1; }
+
+  /* ── Files affected table ───────────────────────────────────────── */
+  .files-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+  .files-table th {
+    background: #f1f5f9; padding: 7px 10px;
+    text-align: left; font-weight: 600; color: #475569;
+    font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+  }
+  .files-table td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  .files-table tr:last-child td { border-bottom: none; }
+  .files-table td:first-child code { color: #0f172a; background: none; padding: 0; }
+  .change-created  { color: #059669; font-weight: 600; }
+  .change-modified { color: #d97706; font-weight: 600; }
+  .change-deleted  { color: #dc2626; font-weight: 600; }
+  .change-added    { color: #92400e; font-weight: 600; }
+
+  /* ── Responsive ─────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { padding: 24px 20px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .stack-grid { grid-template-columns: 1fr; }
+    .entry-grid { grid-template-columns: 1fr; }
+    .tree-row { grid-template-columns: 1fr; }
+    .tree-desc { display: none; }
+  }
+
+  /* ── Print ──────────────────────────────────────────────────────── */
+  @media print {
+    .sidebar { display: none; }
+    body { background: #fff; }
+    .main { max-width: 100%; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ══════════════════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>GUARDIA DIGITAL I.</h1>
+    <span>Plataforma IAM/IGA · Wayweb</span>
+    <div>
+      <span class="status-pill pill-warn"><span class="pill-dot"></span>TRL 3 · Scaffolding</span>
+    </div>
+    <div>
+      <span class="status-pill pill-info"><span class="pill-dot"></span>En planificación activa</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-label">Proyecto</div>
+      <a href="#overview"      class="nav-link active"><span class="nav-icon">📋</span>Resumen general</a>
+      <a href="#arquitectura"  class="nav-link"><span class="nav-icon">🏗️</span>Arquitectura técnica</a>
+      <a href="#modulos"       class="nav-link"><span class="nav-icon">📦</span>Componentes del sistema</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Código</div>
+      <a href="#estructura"    class="nav-link"><span class="nav-icon">📁</span>Estructura de archivos</a>
+      <a href="#integraciones" class="nav-link"><span class="nav-icon">🔌</span>Integraciones externas</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Registro</div>
+      <a href="#bitacora"      class="nav-link"><span class="nav-icon">📝</span>Bitácora de cambios</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Estado</div>
+      <a href="#pendientes"    class="nav-link"><span class="nav-icon">⏳</span>Pendientes / deuda técnica</a>
+      <a href="#roadmap"       class="nav-link"><span class="nav-icon">🗺️</span>Roadmap de despliegue</a>
+      <a href="#implementacion" class="nav-link"><span class="nav-icon">🚀</span>Implementación</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Seguridad</div>
+      <a href="#seguridad"     class="nav-link"><span class="nav-icon">🔒</span>Seguridad y compliance</a>
+    </div>
+  </nav>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- ── HEADER ──────────────────────────────────────────────── -->
+  <div style="margin-bottom:40px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span class="badge badge-indigo">Wayweb · SaaS IAM/IGA</span>
+          <span class="badge badge-slate">AWS · Auth0 · Node · Vertex AI</span>
+          <span class="badge badge-green">TRL 5 · lazo validado en entorno real</span>
+        </div>
+        <h2 style="font-size:28px;margin-bottom:4px;">Guardia Digital Inteligente</h2>
+        <p style="font-size:15px;color:#475569;margin:0;">
+          Plataforma modular de Gestión de Identidades y Accesos (IAM/IGA) para Mid-Market chileno.<br>
+          Zero-Trust · reducción de costo TI · cumplimiento de auditoría (<strong>Ley 20.393</strong>)
+        </p>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">última actualización</div>
+        <div style="font-size:15px;font-weight:600;color:#334155;">2026-07-25</div>
+        <div style="font-size:12px;color:#64748b;">Sesión #5</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       RESUMEN GENERAL
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="overview">
+    <div class="section-header">
+      <h2>Resumen general</h2>
+      <p>Estado actual del proyecto y métricas clave.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">TRL 5</div>
+        <div class="stat-label">Nivel de madurez</div>
+        <div class="stat-sub">Lazo cerrado, validado en real</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">6</div>
+        <div class="stat-label">Componentes modulares</div>
+        <div class="stat-sub">infra · lambdas · auth0 · ia · obs · soporte</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">5</div>
+        <div class="stat-label">Fases para go-live</div>
+        <div class="stat-sub">Fase 0 completada</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Descripción del sistema</h3>
+      <p>
+        <strong>Guardia Digital Inteligente</strong> es una <strong>plataforma SaaS B2B de IAM/IGA</strong>
+        (Gestión de Identidades y Accesos) desarrollada por Wayweb para el <strong>Mid-Market chileno</strong>.
+        Aplica un enfoque <strong>Zero-Trust</strong> con MFA adaptativo, captura y normaliza los eventos
+        de inicio de sesión, y detecta accesos anómalos para forzar re-autenticación o bloqueo.
+      </p>
+      <p>
+        La identidad se gestiona en <strong>Auth0</strong> (Universal Login + Adaptive MFA). Los
+        <em>Log Streams</em> de Auth0 se envían vía <strong>API Gateway → AWS Lambda (Node 20)</strong>,
+        que valida, normaliza y emite eventos estructurados a <strong>CloudWatch → Datadog</strong> (SIEM,
+        pipelines y dashboard de compliance). Un job batch en <strong>Modal</strong> (cada 15 min) consulta
+        un endpoint de <strong>Vertex AI</strong> para detectar anomalías de acceso (viaje imposible, fuera
+        de turno, dispositivo nuevo) y cerrar el lazo de respuesta sobre Auth0.
+      </p>
+      <p>
+        La propuesta de valor se centra en tres ejes para el Mid-Market local: <strong>Zero-Trust</strong>
+        sin la complejidad de un IAM enterprise; <strong>reducción de costo TI</strong> mediante una
+        arquitectura 100% serverless (Lambda + API GW HTTP API + Modal); y <strong>cumplimiento de
+        auditoría</strong> con trazabilidad completa de decisiones de acceso para la <strong>Ley 20.393</strong>.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Progreso por área</h3>
+      <div class="progress-row">
+        <div class="progress-label"><span>Fase 0 — Higiene del repo (git · .gitignore · .env.example · package.json)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Plan de implementación end-to-end (PLAN_IMPLEMENTACION.md)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Boilerplate de los 6 componentes (bootstrap)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Fase 1 — Ingreso de identidad (Auth0 + MFA)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Fase 2 — Captura y normalización (API Gateway + Lambda)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Fase 3 — Observabilidad / SIEM (Datadog)</span><span>15%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-amber" style="width:15%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Fase 4 — Detección de anomalías (Modal → Vertex AI)</span><span>90%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:90%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Fase 5 — Endurecimiento y go-live</span><span>5%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-red" style="width:5%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Portafolio Wayweb: ciclo de seguridad Exterior → Identidad → Respuesta</h3>
+      <p>
+        Guardia Digital Inteligente no es un producto aislado: es la pieza <strong>"Identidad"</strong> de
+        un portafolio de 3 productos Wayweb integrados <strong>solo por API, sin unificar código</strong>.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Producto</th><th>Rol</th><th>TRL / estado</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>SCAN-SIGHT I.A.</strong> (<code>scan.wayweb.cl</code>)</td><td>Exterior — EASM, escanea dominios y detecta exposición externa</td><td><span class="badge badge-green">TRL 6 · live en producción</span></td></tr>
+          <tr><td><strong>Guardia Digital Inteligente</strong> (este repo)</td><td>Identidad — IAM/Zero-Trust, reacciona al riesgo detectado afuera</td><td><span class="badge badge-green">TRL 5 · validado en real</span></td></tr>
+          <tr><td><strong>SPC I.A.</strong> (<code>ventisqueros.wayweb.cl</code>)</td><td>Respuesta — simulacros de crisis/TTX con datos reales</td><td><span class="badge badge-cyan">TRL ~5–6 · cliente piloto</span></td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;">
+        La integración concreta con este proyecto: el Action de Auth0 consume <code>GET /risk-signal?domain=</code>
+        del scanner (endpoint <code>handle_risk_signal</code> en <code>scanner-ia/src/api/handler.py</code>,
+        construido específicamente para Guardia). Verificado en código: el lado SCAN-SIGHT está
+        <strong>desplegado en producción y probado end-to-end</strong> (Sesión #24 de su bitácora, dominio
+        real <code>wayweb.cl</code> → postura <code>"enforce"</code>). <strong>Actualizado en Sesión #5:</strong>
+        el Action ya está desplegado y aplicado en el tenant real <code>guardia-digital</code> — el
+        eslabón que faltaba en el portafolio quedó cerrado.
+      </p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">ℹ️</div>
+      <div>
+        <strong>Detección de anomalías cada 15 min:</strong> el job de Modal está programado con
+        <code>modal.Period(minutes=15)</code> — balance costo/latencia. Consulta el endpoint de Vertex AI
+        y marca como anómalo todo evento con <code>anomaly_score ≥ 0.8</code> (viaje imposible / fuera de turno).
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">🛡️</div>
+      <div>
+        <strong>MFA adaptativo Zero-Trust:</strong> la Auth0 Action <code>post-login</code> fuerza MFA
+        cuando hay señales de riesgo — score alto, país ≠ CL, horario fuera de turno (07:00–22:00 CLT),
+        dispositivo nuevo o IP no vista. La decisión queda en <code>app_metadata</code> para auditoría.
+      </div>
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-icon">✅</div>
+      <div>
+        <strong>Decisión tomada (Fase 4):</strong> se implementará <strong>Vertex AI desde el inicio</strong>
+        (no se parte con heurísticas). Mitigación del camino crítico: definir features y dataset de
+        entrenamiento temprano, en paralelo con la Fase 3.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       ARQUITECTURA
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="arquitectura">
+    <div class="section-header">
+      <h2>Arquitectura técnica</h2>
+      <p>Stack, flujo de datos y decisiones de diseño.</p>
+    </div>
+
+    <div class="card">
+      <h3>Flujo de identidad y respuesta (happy path)</h3>
+      <div class="flow">
+        <div class="flow-node primary">Auth0<br><small style="color:#94a3b8;">Universal Login + MFA</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node primary">API Gateway<br><small>HTTP API</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node primary">Lambda<br><small>Node 20 · normaliza</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-split">
+          <div class="flow-node" style="font-size:11px;">CloudWatch<br><small>Logs</small></div>
+          <div class="flow-node success" style="font-size:11px;">Datadog<br><small>SIEM</small></div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node primary">Modal → Vertex AI<br><small>anomalías</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node danger">Re-MFA / bloqueo<br><small>Auth0 Mgmt API</small></div>
+      </div>
+      <p style="font-size:12.5px;color:#64748b;margin-top:16px;">
+        Auth0 emite los <strong>Log Streams</strong> → la Lambda valida el <code>Bearer</code> secret,
+        normaliza el evento y lo emite como JSON a CloudWatch → Datadog. El job de Modal consulta Vertex AI
+        y, ante un <code>anomaly_score ≥ 0.8</code>, debe cerrar el lazo sobre Auth0. <strong>Hoy ese lazo de
+        respuesta aún no está cerrado</strong> (ver Pendientes / deuda técnica).
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Stack tecnológico</h3>
+      <div class="stack-grid">
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#eef2ff;">🔐</div>
+          <div class="stack-info">
+            <div class="stack-name">Auth0 (Universal Login + Adaptive MFA)</div>
+            <div class="stack-desc">Action <code>post-login</code> de MFA adaptativo Zero-Trust. Log Streams (HTTP) hacia API Gateway. Conexiones AD de sucursales / contratistas. Desde 2026-06-24 incorpora señal externa de <strong>SCAN-SIGHT I.A.</strong> (postura de superficie de ataque del dominio).</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fff7ed;">☁️</div>
+          <div class="stack-info">
+            <div class="stack-name">AWS API Gateway (HTTP API) + Lambda (Node 20)</div>
+            <div class="stack-desc">Webhook <code>POST /webhooks/auth0</code> → Lambda <code>guardia-auth0-webhook</code>. 128 MB, timeout 10s. Sin dependencias externas (optimización cold-start).</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#f0fdf4;">📊</div>
+          <div class="stack-info">
+            <div class="stack-name">Datadog (Forwarder + SIEM)</div>
+            <div class="stack-desc">Forwarder oficial (CloudFormation) suscrito al log group de la Lambda. Pipelines geo-ip + categorización. Monitores de fuerza bruta y anomalías. Dashboard de compliance.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fef9c3;">🧠</div>
+          <div class="stack-info">
+            <div class="stack-name">Modal → Google Vertex AI</div>
+            <div class="stack-desc">Job batch <code>guardia-anomaly-detector</code> cada 15 min. Consulta endpoint de Vertex AI para clasificar accesos anómalos (umbral <code>anomaly_score ≥ 0.8</code>).</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#f1f5f9;">⚙️</div>
+          <div class="stack-info">
+            <div class="stack-name">Terraform (IaC · AWS)</div>
+            <div class="stack-desc">IAM Role + Lambda + API Gateway HTTP API. Región por defecto <code>us-east-1</code> (evaluar <code>sa-east-1</code> por latencia/residencia LATAM). Pendiente backend remoto S3+DynamoDB.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fdf2f8;">💬</div>
+          <div class="stack-info">
+            <div class="stack-name">Intercom (soporte embebido)</div>
+            <div class="stack-desc">Widget/bot de autoservicio en la página de Universal Login. Cubre sin intervención humana: desbloqueo de cuenta y setup de MFA.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       COMPONENTES
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="modulos">
+    <div class="section-header">
+      <h2>Componentes del sistema</h2>
+      <p>Cada carpeta del repositorio y su responsabilidad.</p>
+    </div>
+
+    <div class="card">
+      <h3>Mapa de componentes</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Carpeta</th><th>Componente</th><th>Stack</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>/infra</code></td>
+            <td>Terraform: API Gateway + Lambda (AWS serverless)</td>
+            <td><span class="badge badge-slate">Terraform</span></td>
+            <td><span class="badge badge-green">Desplegado en AWS staging (sa-east-1) · verificado e2e</span></td>
+          </tr>
+          <tr>
+            <td><code>/lambdas</code></td>
+            <td>Handler receptor de webhooks de Auth0 (Log Streams)</td>
+            <td><span class="badge badge-slate">Node 20</span></td>
+            <td><span class="badge badge-green">En producción staging · 11 tests OK · NDJSON soportado</span></td>
+          </tr>
+          <tr>
+            <td><code>/auth0</code></td>
+            <td>Action post-login: MFA adaptativo Zero-Trust</td>
+            <td><span class="badge badge-slate">JS</span></td>
+            <td><span class="badge badge-green">Desplegado en tenant real · login de prueba verificado</span></td>
+          </tr>
+          <tr>
+            <td><code>/ia_models</code></td>
+            <td>Job batch en Modal → Vertex AI (detección de anomalías)</td>
+            <td><span class="badge badge-slate">Python</span></td>
+            <td><span class="badge badge-green">Lazo cerrado y verificado: detectó + bloqueó un usuario real</span></td>
+          </tr>
+          <tr>
+            <td><code>/monitoring</code></td>
+            <td>Datadog: forwarder de logs AWS + dashboard compliance</td>
+            <td><span class="badge badge-slate">YAML/JSON</span></td>
+            <td><span class="badge badge-amber">Credenciales verificadas · forwarder sin desplegar aún</span></td>
+          </tr>
+          <tr>
+            <td><code>/support</code></td>
+            <td>Widget/bot de Intercom embebido en el login</td>
+            <td><span class="badge badge-slate">JS</span></td>
+            <td><span class="badge badge-slate">Fuera de alcance para TRL 5</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Lambda — normalización del evento Auth0</h3>
+      <p>El handler valida el webhook y normaliza cada log relevante a un evento estructurado:</p>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px;">
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;color:#4f46e5;margin-bottom:4px;">type</div>
+          <div style="font-size:12px;color:#64748b;">'s' = login exitoso · 'f' = fallido · 'limit_mu' = cuenta bloqueada</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;color:#4f46e5;margin-bottom:4px;">geo</div>
+          <div style="font-size:12px;color:#64748b;">location_info de Auth0 → insumo para anomalías geográficas</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;color:#4f46e5;margin-bottom:4px;">connection</div>
+          <div style="font-size:12px;color:#64748b;">AD de la sucursal / contratistas — segmentación por origen</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;color:#4f46e5;margin-bottom:4px;">tenant / ip / user_agent</div>
+          <div style="font-size:12px;color:#64748b;">Trazabilidad completa para auditoría (Ley 20.393)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Auth0 Action — señales de riesgo que fuerzan MFA</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Señal</th><th>Condición</th><th>Fuente</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Score de riesgo</td><td><code>confidence</code> low o medium</td><td>Auth0 Adaptive MFA</td></tr>
+          <tr><td>País fuera de perímetro</td><td><code>countryCode ≠ CL</code></td><td>geoip del request</td></tr>
+          <tr><td>Fuera de turno</td><td>hora local &lt; 07:00 o ≥ 22:00 (CLT)</td><td>America/Santiago</td></tr>
+          <tr><td>Dispositivo nuevo</td><td><code>NewDevice.confidence = low</code></td><td>riskAssessment</td></tr>
+          <tr><td>IP no confiable</td><td><code>UntrustedIP.confidence = low</code></td><td>riskAssessment</td></tr>
+          <tr><td>Postura externa del dominio <span class="badge badge-cyan">nuevo</span></td><td><code>mfa_posture = enforce | step_up</code></td><td>SCAN-SIGHT I.A. (scanner de superficie de ataque, otro producto Wayweb) vía <code>GET /risk-signal?domain=</code>, timeout 1.5s, <strong>fail-open</strong> si no responde</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       ESTRUCTURA DE ARCHIVOS
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="estructura">
+    <div class="section-header">
+      <h2>Estructura de archivos</h2>
+      <p>Árbol del repositorio <code>guardia_digital_inteligente</code>.</p>
+    </div>
+    <div class="card">
+      <div class="file-tree">
+        <div class="tree-row"><div class="tree-path"><span class="folder-name">guardia_digital_inteligente/</span></div><div class="tree-desc">Raíz del proyecto (git inicializado)</div></div>
+        <div class="tree-row"><div class="tree-path indent-1"><span class="file-name">README.md</span></div><div class="tree-desc">Descripción, estructura y dependencias por carpeta</div></div>
+        <div class="tree-row"><div class="tree-path indent-1"><span class="file-name">PLAN_IMPLEMENTACION.md</span></div><div class="tree-desc">Plan maestro end-to-end: arquitectura, fases 0–5, riesgos, checklist</div></div>
+        <div class="tree-row"><div class="tree-path indent-1"><span class="file-name">.gitignore</span></div><div class="tree-desc">Secretos, *.tfstate, node_modules, credenciales GCP, artefactos</div></div>
+        <div class="tree-row"><div class="tree-path indent-1"><span class="file-name">.env.example</span></div><div class="tree-desc">Plantilla de variables de las 6 plataformas</div></div>
+        <div class="tree-row"><div class="tree-path indent-1"><span class="folder-name">infra/</span></div><div class="tree-desc">Terraform — IaC AWS</div></div>
+        <div class="tree-row"><div class="tree-path indent-2"><span class="file-name">main.tf</span></div><div class="tree-desc">IAM Role + Lambda + API Gateway HTTP API + outputs</div></div>
+        <div class="tree-row"><div class="tree-path indent-1"><span class="folder-name">lambdas/</span></div><div class="tree-desc">Receptor de webhooks Auth0</div></div>
+        <div class="tree-row"><div class="tree-path indent-2"><span class="file-name">handler.js</span></div><div class="tree-desc">Valida Bearer → normaliza → emite JSON a CloudWatch</div></div>
+        <div class="tree-row"><div class="tree-path indent-2"><span class="file-name">package.json</span></div><div class="tree-desc">Engine node ≥20, scripts test/lint (Fase 0)</div></div>
+        <div class="tree-row"><div class="tree-path indent-1"><span class="folder-name">auth0/</span></div><div class="tree-desc">Auth0 Action</div></div>
+        <div class="tree-row"><div class="tree-path indent-2"><span class="file-name">post-login-mfa-adaptativo.js</span></div><div class="tree-desc">MFA adaptativo Zero-Trust por señales de riesgo + señal externa SCAN-SIGHT I.A. (sin commitear)</div></div>
+        <div class="tree-row"><div class="tree-path indent-1"><span class="folder-name">ia_models/</span></div><div class="tree-desc">Job Modal → Vertex AI</div></div>
+        <div class="tree-row"><div class="tree-path indent-2"><span class="file-name">anomaly_detector.py</span></div><div class="tree-desc">Batch cada 15 min · umbral 0.8 · <code>_fetch_pending_logs()</code> es stub</div></div>
+        <div class="tree-row"><div class="tree-path indent-1"><span class="folder-name">monitoring/</span></div><div class="tree-desc">Datadog</div></div>
+        <div class="tree-row"><div class="tree-path indent-2"><span class="file-name">datadog-aws-logs.yaml</span></div><div class="tree-desc">Forwarder + pipelines + monitores</div></div>
+        <div class="tree-row"><div class="tree-path indent-2"><span class="file-name">dashboard-compliance.json</span></div><div class="tree-desc">Dashboard de auditoría / compliance (Ley 20.393)</div></div>
+        <div class="tree-row"><div class="tree-path indent-1"><span class="folder-name">support/</span></div><div class="tree-desc">Intercom</div></div>
+        <div class="tree-row"><div class="tree-path indent-2"><span class="file-name">intercom_widget.js</span></div><div class="tree-desc">Bot de autoservicio embebido en Universal Login</div></div>
+        <div class="tree-row"><div class="tree-path indent-1"><span class="folder-name">archivos/</span></div><div class="tree-desc">Documentación HTML (esta bitácora)</div></div>
+        <div class="tree-row"><div class="tree-path indent-2"><span class="file-name">bitacora.html</span></div><div class="tree-desc">Registro de sesiones de trabajo</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       INTEGRACIONES
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="integraciones">
+    <div class="section-header">
+      <h2>Integraciones externas</h2>
+      <p>Plataformas requeridas y variables de entorno asociadas.</p>
+    </div>
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr><th>Plataforma</th><th>Rol</th><th>Variable(s) de entorno</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Auth0</strong></td><td>Identidad, MFA, Log Streams</td><td><code>AUTH0_WEBHOOK_SECRET</code></td><td><span class="badge badge-amber">Pendiente cuenta</span></td></tr>
+          <tr><td><strong>AWS</strong></td><td>API Gateway + Lambda + CloudWatch</td><td><code>AWS_REGION</code></td><td><span class="badge badge-amber">Pendiente cuenta</span></td></tr>
+          <tr><td><strong>GCP / Vertex AI</strong></td><td>Endpoint de detección de anomalías</td><td><code>GCP_PROJECT</code> · <code>VERTEX_ENDPOINT_ID</code> · <code>VERTEX_REGION</code></td><td><span class="badge badge-red">Modelo no existe</span></td></tr>
+          <tr><td><strong>Modal</strong></td><td>Orquestación del batch IA</td><td>secret <code>gcp-credentials</code></td><td><span class="badge badge-amber">Pendiente token</span></td></tr>
+          <tr><td><strong>Datadog</strong></td><td>SIEM, pipelines, dashboard</td><td><code>DD_API_KEY</code> · <code>DD_SITE</code></td><td><span class="badge badge-amber">Pendiente cuenta</span></td></tr>
+          <tr><td><strong>Intercom</strong></td><td>Bot de soporte en login</td><td><code>INTERCOM_APP_ID</code></td><td><span class="badge badge-amber">Pendiente App ID</span></td></tr>
+          <tr><td><strong>SCAN-SIGHT I.A.</strong> <span class="badge badge-cyan">portafolio Wayweb</span></td><td>Señal de postura MFA (<code>/risk-signal</code>) según superficie de ataque del dominio</td><td><code>SCAN_SIGHT_API</code> (opcional, ya en <code>.env.example</code>)</td><td><span class="badge badge-green">Listo del lado scanner · falta activar Auth0 tenant</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       BITÁCORA DE CAMBIOS
+  ══════════════════════════════════════════════════════
+
+  INSTRUCCIONES PARA AGREGAR NUEVAS ENTRADAS:
+  1. Copia el bloque <article class="entry"> ... </article> más reciente.
+  2. Pégalo justo debajo de la apertura de <div class="timeline">.
+  3. Cambia el ID (ej: id="sesion-2").
+  4. Actualiza la fecha, los badges, el título y el resumen.
+  5. Completa los bloques "Qué se hizo", "Por qué" y "Cómo".
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="bitacora">
+    <div class="section-header">
+      <h2>Bitácora de cambios</h2>
+      <p>Registro acumulativo de sesiones de trabajo. Más reciente primero.</p>
+    </div>
+
+    <div class="timeline">
+
+      <!-- ── ENTRADA #5 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-5">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-25</span>
+          <span class="badge badge-indigo">Sesión #5</span>
+          <span class="badge badge-emerald">TRL 3 → TRL 5 · Despliegue real · Auth0 · AWS · GCP · Modal · Datadog</span>
+        </div>
+
+        <div class="entry-title">Salto de TRL 3 a TRL 5: despliegue completo contra cuentas reales y el lazo de respuesta verificado bloqueando un usuario real</div>
+        <div class="entry-summary">
+          Sesión de ejecución más larga e importante del proyecto hasta ahora. Se gestionaron las 5 cuentas
+          pendientes (Auth0, AWS, GCP+Vertex, Datadog, Modal), se desplegó la infraestructura completa contra
+          servicios reales, se entrenó y desplegó un modelo de detección de anomalías en Vertex AI, y —el hito
+          central— <strong>se verificó el lazo de respuesta completo con un login real</strong>: el modelo
+          calificó un acceso como anómalo (score 0.984) y la Auth0 Management API ejecutó el bloqueo de verdad
+          sobre la cuenta de prueba (revertido después). El TRL del proyecto pasa de <strong>3 a 5</strong> —
+          tecnología validada en un entorno relevante, con evidencia medible.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>Cuentas gestionadas y verificadas</h4>
+            <table class="files-table">
+              <thead><tr><th>Plataforma</th><th>Resultado</th></tr></thead>
+              <tbody>
+                <tr><td>AWS</td><td>Credenciales ya existían en la máquina (usuario <code>control</code>, cuenta 945484575802) — reusadas con prefijo <code>guardia-digital-staging</code>, sin colisión con otros proyectos</td></tr>
+                <tr><td>Auth0</td><td>Tenant nuevo <code>guardia-digital</code> (Staging, US-5). Evaluador de riesgo adaptativo ON. 3 factores MFA activos (OTP, Email, Recovery code). Application M2M creada para la Management API</td></tr>
+                <tr><td>GCP</td><td>Proyecto <code>guardia-digital-503518</code>, API "AI Platform Training and Prediction" habilitada (Vertex AI renombrado a "Gemini Enterprise Agent Platform"), cuenta de servicio con rol Vertex AI User</td></tr>
+                <tr><td>Datadog</td><td>Organización WAYWEB compartida — API Key + Application Key generadas y verificadas contra <code>/api/v1/validate</code> y la Logs Search API v2 real</td></tr>
+                <tr><td>Modal</td><td>Workspace <code>eccowork</code> ya autenticado (CLI 1.4.2) — 3 secrets creados: <code>gcp-credentials</code>, <code>datadog-api</code>, <code>auth0-management</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block">
+            <h4>Infraestructura AWS + Auth0 desplegada y verificada e2e</h4>
+            <p>Bootstrap del backend remoto de Terraform (bucket S3 versionado/cifrado + tabla DynamoDB de lock, creados y verificados sin colisión con otros proyectos del portafolio). <code>terraform apply</code> real: 9 recursos creados (Lambda, API Gateway, IAM Role, CloudWatch Log Group). Webhook probado con <code>curl</code> real: 401 sin auth, 200 con auth válida.</p>
+            <p><strong>Bug encontrado y corregido:</strong> el Log Stream de Auth0 ("Webhook personalizado") entrega el body como <strong>JSON Lines</strong> (un objeto por línea), no como un array JSON — <code>handler.js</code> solo sabía parsear un JSON único y habría fallado con <code>400</code> en cualquier batch de 2+ eventos. Se agregó <code>parseLogBody()</code> con soporte para ambos formatos, con 2 tests nuevos (11 en total), y se redesplegó.</p>
+            <p><strong>Login real verificado end-to-end:</strong> se creó el Action <code>Guardia Digital</code> (post-login), se aplicó al flujo de Login, y se hizo un login real (<code>wayweb.cl@gmail.com</code>) que llegó normalizado a CloudWatch con geolocalización real (Santiago, Chile) — cumple el hito de Fase 2 del plan.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Modelo de IA: de dataset sintético a endpoint real en Vertex AI</h4>
+            <p><strong>Decisión de alcance:</strong> en vez de AutoML Tabular (mínimo ~1 hora y ~20 USD de presupuesto de entrenamiento incluso para datasets chicos), se optó por entrenar un <strong>RandomForestClassifier</strong> localmente (segundos) y desplegarlo en un <strong>contenedor de predicción propio</strong> sobre Vertex AI — más rápido y barato para validar el lazo completo.</p>
+            <p><strong>Bug encontrado y corregido (pickle/joblib):</strong> la clase <code>AnomalyScorer</code> se serializó como perteneciente a <code>__main__</code> (el script de entrenamiento), y el servidor de predicción no podía deserializarla (<code>AttributeError</code>). Se movió a un módulo compartido <code>anomaly_scorer.py</code>, importado por igual desde <code>train_model.py</code> y <code>serving/serve.py</code>.</p>
+            <p><strong>Bug de permisos IAM:</strong> el Service Agent de Vertex AI no tenía permiso para leer la imagen desde Artifact Registry (<code>FAILED_PRECONDITION</code>). Se otorgó <code>roles/artifactregistry.reader</code> al service agent, a nivel de repositorio y de proyecto.</p>
+            <p><strong>Error propio detectado y reparado:</strong> al actualizar el secret <code>gcp-credentials</code> en Modal con el <code>VERTEX_ENDPOINT_ID</code> real, se usó por error una variable vacía y se sobrescribió el JSON de credenciales con un valor en blanco. Detectado de inmediato; se generó una clave nueva de la misma cuenta de servicio vía <code>gcloud iam service-accounts keys create</code>, se reconstruyó el secret correctamente, y se borró el archivo temporal.</p>
+            <p><strong>Validación final, con un usuario real:</strong> se ejecutó <code>anomaly_detector.py</code> contra el endpoint real de Vertex con el <code>user_id</code> real del login de prueba. Resultado: <code>anomaly_score: 0.984</code> (patrón "fuera de turno" correctamente detectado) → <code>_enforce_auth0_response()</code> llamó a la Management API real → <strong>la cuenta quedó efectivamente bloqueada</strong> (<code>blocked: true</code>, verificado por API), y se desbloqueó después de confirmar.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Incidente de seguridad menor: clave de GCP expuesta en el repo (sin llegar a git)</h4>
+            <div class="callout callout-warn">
+              <div class="callout-icon">🔑</div>
+              <div>
+                El usuario guardó el JSON de la cuenta de servicio de GCP como <code>archivos/guardia-digital-ky.json</code>
+                — un nombre que <strong>no coincidía</strong> con los patrones existentes de <code>.gitignore</code>
+                (<code>*-credentials.json</code>, <code>gcp-credentials*.json</code>). Verificado con <code>git status</code>:
+                el archivo nunca se commiteó (<code>??</code>, sin trackear). Se endureció <code>.gitignore</code>
+                (patrones adicionales para archivos de credenciales GCP), se usó el archivo para crear el secret de
+                Modal, y se borró del repo inmediatamente después.
+              </div>
+            </div>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos creados / modificados en esta sesión</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>infra/backend.staging.hcl</code></td><td><span class="change-created">CREADO</span></td><td>Backend real de Terraform (bucket + tabla ya creados en AWS)</td></tr>
+                <tr><td><code>lambdas/handler.js</code></td><td><span class="change-modified">MODIFICADO</span></td><td><code>parseLogBody()</code>: soporte NDJSON además de JSON único</td></tr>
+                <tr><td><code>lambdas/handler.test.js</code></td><td><span class="change-modified">MODIFICADO</span></td><td>2 tests nuevos para NDJSON (11 en total)</td></tr>
+                <tr><td><code>ia_models/train_model.py</code></td><td><span class="change-created">CREADO</span></td><td>Entrena RandomForest sobre el dataset sintético, evalúa (ROC-AUC 1.0 — esperable en datos sintéticos separables), exporta con <code>joblib</code></td></tr>
+                <tr><td><code>ia_models/anomaly_scorer.py</code></td><td><span class="change-created">CREADO</span></td><td>Módulo compartido: envuelve el pipeline para exponer <code>predict()</code> como score continuo</td></tr>
+                <tr><td><code>ia_models/serving/serve.py</code></td><td><span class="change-created">CREADO</span></td><td>Servidor FastAPI: health check + predict route, protocolo de contenedor custom de Vertex AI</td></tr>
+                <tr><td><code>ia_models/serving/Dockerfile</code></td><td><span class="change-created">CREADO</span></td><td>Contenedor de predicción, misma versión de scikit-learn que el entrenamiento</td></tr>
+                <tr><td><code>ia_models/deploy_vertex.py</code></td><td><span class="change-created">CREADO</span></td><td>Registra el Model, crea el Endpoint y despliega — reutilizable para futuras versiones del modelo</td></tr>
+                <tr><td><code>.gitignore</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Patrones adicionales para archivos de credenciales GCP sueltos</td></tr>
+                <tr><td><code>.env</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Todas las variables reales completas: AWS, Auth0, GCP, Datadog, Vertex endpoint</td></tr>
+                <tr><td><code>archivos/guardia-digital-ky.json</code></td><td><span class="change-deleted">CREADO Y BORRADO</span></td><td>Clave de servicio GCP — usada para crear el secret de Modal, eliminada del repo tras el uso</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Decisiones / observaciones</h4>
+            <div class="callout callout-success">
+              <div class="callout-icon">✅</div>
+              <div>
+                <strong>TRL sube de 3 a 5</strong>: no es un salto de código, es un salto de evidencia — el
+                mismo código de la Sesión #4 ahora corrió contra servicios reales y produjo una consecuencia
+                real y verificable (una cuenta bloqueada de verdad). Eso es exactamente la definición de TRL5
+                que se usó para planificar esto: "tecnología validada en un entorno relevante".<br>
+                <strong>Lo que falta para cerrar el ciclo completo:</strong> desplegar el job Modal en modo
+                programado (hoy solo se probó con <code>modal run</code> efímero), conectar el Datadog
+                Forwarder (Fase 3), y ejecutar la campaña de validación formal con múltiples escenarios
+                documentados (Semana 3 del plan de Implementación).
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #5 ──────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #4 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-4">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-25</span>
+          <span class="badge badge-indigo">Sesión #4</span>
+          <span class="badge badge-purple">Implementación real · Terraform · Lambda · Lazo de respuesta · Dataset sintético</span>
+        </div>
+
+        <div class="entry-title">Primer trabajo de código real: refactor de Terraform, tests de la Lambda, cierre del lazo de respuesta (Auth0 Management API) e ingesta real de Datadog — en paralelo a la gestión de cuentas</div>
+        <div class="entry-summary">
+          Mientras el usuario gestiona las cuentas reales (Auth0, AWS, GCP, Modal, Datadog) necesarias para
+          la Fase 1, se avanzó todo lo que no depende de credenciales: Terraform instalado y refactorizado
+          (validado con <code>terraform validate</code>), la Lambda ganó idempotencia real y 9 tests (antes
+          0%), el Auth0 Action dejó de fallar en silencio ante errores de SCAN-SIGHT, y <strong>los 3 TODOs
+          críticos de `ia_models/anomaly_detector.py` quedaron resueltos en código</strong>: ingesta real
+          contra Datadog Logs API y el lazo de respuesta cerrado vía Auth0 Management API. Se agregó también
+          un generador de dataset sintético para no depender de datos orgánicos al entrenar el modelo Vertex.
+          <strong>El TRL no cambia (sigue en 3)</strong>: nada de esto se ha desplegado ni validado contra
+          servicios reales todavía — es código completo y probado localmente, no un sistema en producción.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>¿Qué se hizo?</h4>
+            <p><strong>Terraform:</strong> instalado (1.15.8, winget). <code>infra/main.tf</code> refactorizado: variables y outputs separados en <code>variables.tf</code>/<code>outputs.tf</code>, backend remoto <code>s3</code> con partial config (<code>backend.example.hcl</code>, para no hardcodear cuenta AWS aún inexistente), tags comunes, <code>aws_cloudwatch_log_group</code> explícito con retención de 30 días, región default cambiada a <strong>sa-east-1</strong>. <code>terraform validate</code> y <code>terraform fmt</code> pasan limpio.</p>
+            <p><strong>Lambda (<code>handler.js</code>):</strong> corregido un bug real — <code>event_id</code> se generaba con <code>crypto.randomUUID()</code> (no determinístico), rompiendo la idempotencia prometida; ahora es un hash SHA-256 de <code>auth0_log_id</code>. Comparación del <code>Bearer</code> secret migrada a <code>crypto.timingSafeEqual</code> (antes comparación de string directa, vulnerable a timing attacks). Se escribieron <strong>9 tests</strong> (<code>handler.test.js</code>, <code>node --test</code>) cubriendo autenticación, parsing, filtrado de eventos e idempotencia — todos pasan.</p>
+            <p><strong>Auth0 Action:</strong> el <code>catch</code> de la llamada a SCAN-SIGHT era completamente silencioso si el login no resultaba "sospechoso" por otras señales; ahora siempre deja rastro en los logs de la Action. Se agregó lectura de <code>app_metadata.force_mfa_until</code> para consumir el cierre del lazo que ahora escribe <code>anomaly_detector.py</code>.</p>
+            <p><strong><code>ia_models/anomaly_detector.py</code> — los 3 TODOs históricos, resueltos:</strong> <code>_fetch_pending_logs()</code> ahora consulta la Datadog Logs Search API v2 (con <code>DD_API_KEY</code>+<code>DD_APP_KEY</code>) y persiste el cursor de paginación en <code>modal.Dict</code> para no reprocesar logs entre ciclos de 15 min. Nueva función <code>_enforce_auth0_response()</code> cierra el lazo: obtiene un token M2M de la Management API y hace <code>PATCH /users/{id}</code> — <code>blocked:true</code> si <code>anomaly_score ≥ 0.95</code>, o <code>app_metadata.force_mfa_until</code> (ventana de 6h) si ≥ 0.8.</p>
+            <p><strong>Dataset sintético:</strong> <code>generate_synthetic_dataset.py</code> genera logins etiquetados (normal / viaje imposible / fuera de turno / geo-IP nueva) en el esquema que espera Vertex AutoML. Verificado: 500 filas → 40 anómalas (8.0%), CSV válido.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Verificación real (no solo escrito, también ejecutado)</h4>
+            <table class="files-table">
+              <thead><tr><th>Comando</th><th>Resultado</th></tr></thead>
+              <tbody>
+                <tr><td><code>terraform validate</code> / <code>terraform init -backend=false</code></td><td><span class="change-created">OK · "The configuration is valid"</span></td></tr>
+                <tr><td><code>node --check handler.js</code> / <code>post-login-mfa-adaptativo.js</code></td><td><span class="change-created">OK · sin errores de sintaxis</span></td></tr>
+                <tr><td><code>npm test</code> (<code>lambdas/</code>)</td><td><span class="change-created">OK · 9/9 tests pasan</span></td></tr>
+                <tr><td><code>python -m py_compile anomaly_detector.py</code></td><td><span class="change-created">OK</span></td></tr>
+                <tr><td><code>python generate_synthetic_dataset.py --rows 500</code></td><td><span class="change-created">OK · 500 filas, 8.0% anómalas, esquema válido</span></td></tr>
+              </tbody>
+            </table>
+            <p style="margin-top:10px;font-size:12.5px;">Lo que <strong>no</strong> se pudo verificar todavía (requiere cuentas reales): <code>terraform apply</code>, el endpoint Vertex, la Datadog Logs API real, y la llamada real a la Auth0 Management API.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos creados / modificados en esta sesión</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>infra/variables.tf</code></td><td><span class="change-created">CREADO</span></td><td>Variables + tags comunes, default sa-east-1</td></tr>
+                <tr><td><code>infra/outputs.tf</code></td><td><span class="change-created">CREADO</span></td><td>webhook_url, lambda_function_name, lambda_log_group</td></tr>
+                <tr><td><code>infra/backend.example.hcl</code></td><td><span class="change-created">CREADO</span></td><td>Partial config del backend S3+DynamoDB</td></tr>
+                <tr><td><code>infra/main.tf</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Backend remoto, log group con retención, tags, naming por environment</td></tr>
+                <tr><td><code>lambdas/handler.js</code></td><td><span class="change-modified">MODIFICADO</span></td><td>event_id determinístico (idempotencia), comparación constant-time del secret</td></tr>
+                <tr><td><code>lambdas/handler.test.js</code></td><td><span class="change-created">CREADO</span></td><td>9 tests unitarios (node --test)</td></tr>
+                <tr><td><code>auth0/post-login-mfa-adaptativo.js</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Logging de fallos SCAN-SIGHT, lectura de force_mfa_until</td></tr>
+                <tr><td><code>ia_models/anomaly_detector.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>_fetch_pending_logs() real + _enforce_auth0_response() (cierre del lazo)</td></tr>
+                <tr><td><code>ia_models/generate_synthetic_dataset.py</code></td><td><span class="change-created">CREADO</span></td><td>Generador de dataset etiquetado para AutoML</td></tr>
+                <tr><td><code>.env.example</code></td><td><span class="change-modified">MODIFICADO</span></td><td>DD_APP_KEY, AUTH0_DOMAIN, AUTH0_M2M_CLIENT_ID/SECRET, AWS_REGION → sa-east-1</td></tr>
+                <tr><td><code>.gitignore</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Ignora backend.*.hcl real (mantiene el .example)</td></tr>
+                <tr><td><code>PLAN_IMPLEMENTACION.md</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Gap analysis, riesgos y prerrequisitos actualizados con el trabajo resuelto</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Componentes, pendientes y esta entrada de bitácora</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Decisiones / observaciones</h4>
+            <div class="callout callout-warn">
+              <div class="callout-icon">🧭</div>
+              <div>
+                <strong>TRL sigue en 3, a propósito:</strong> código completo y probado en local no es lo
+                mismo que un sistema validado en un entorno relevante (TRL 5). El próximo salto de TRL ocurre
+                recién cuando esto se despliegue contra Auth0/AWS/GCP/Datadog reales — que es exactamente lo
+                que está gestionando el usuario en paralelo.<br>
+                <strong>Pendiente de decisión:</strong> commitear todo este trabajo en git (sigue sin hacerse).
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #4 ──────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #3 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-3">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-23</span>
+          <span class="badge badge-indigo">Sesión #3</span>
+          <span class="badge badge-purple">Verificación cruzada de portafolio · Corrección de framing</span>
+        </div>
+
+        <div class="entry-title">Verificación en código de la integración con SCAN-SIGHT I.A. y SPC I.A., y corrección del framing de la dependencia de portafolio</div>
+        <div class="entry-summary">
+          A partir de la Sesión #2 (que trató la señal SCAN-SIGHT como una dependencia ad hoc y no documentada),
+          se revisó directamente el código fuente de los otros dos productos del portafolio Wayweb —
+          <strong>SCAN-SIGHT I.A.</strong> (repo <code>scanner-ia</code>) y <strong>SPC I.A.</strong> (repo
+          <code>simulacion-crisis-ttx</code>) — para verificar el estado real de la integración. Conclusión:
+          <strong>no es una dependencia ad hoc</strong>, es una integración de portafolio deliberada, documentada
+          y en producción del lado scanner; lo único pendiente es específico de Guardia (falta tenant Auth0 real).
+          Se corrigió el `PLAN_IMPLEMENTACION.md` y esta bitácora para reflejarlo con precisión.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>¿Qué se verificó?</h4>
+            <p><strong>SCAN-SIGHT I.A.</strong> (TRL 6, live en <code>scan.wayweb.cl</code>): en <code>src/api/handler.py</code> el endpoint <code>GET /risk-signal</code> (línea 2519 en <code>ROUTES</code>) tiene un comentario explícito de diseño ("Integración Guardia Digital: superficie externa → señal de postura MFA") y una implementación completa (<code>handle_risk_signal</code>, línea 579) que calcula <code>risk_score</code>/<code>tier</code> desde Firestore y devuelve <code>mfa_posture</code>. Su propia bitácora (Sesión #24, 2026-06-24) registra el endpoint como <strong>desplegado y verificado end-to-end</strong> con dominio real.</p>
+            <p><strong>SPC I.A.</strong> (TRL ~5-6, cliente piloto Ventisqueros): tiene su propia integración hermana con el mismo scanner — <code>apps/web/lib/scanner-scenario.ts</code> consume <code>GET /scenario/from-findings</code>, y <code>FacilitatorControl.tsx</code> tiene el botón "🛡️ Importar escenario del scanner" cableado y verificado en producción (<code>ventisqueros.wayweb.cl</code>). Confirma el patrón de portafolio: SCAN-SIGHT como hub de datos, consumido por Guardia (identidad) y SPC (respuesta).</p>
+            <p><strong>Corrección de framing:</strong> la Sesión #2 catalogó la señal SCAN-SIGHT como "riesgo" y "dependencia no documentada". Con el código de los 3 repos a la vista, la conclusión correcta es: la integración está lista y probada del lado scanner; lo que falta es exclusivamente que Guardia tenga un tenant Auth0 real donde pegar su Action — un bloqueo de la Fase 1 de Guardia, no un defecto de la integración.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Documentos actualizados</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Cambio</th></tr></thead>
+              <tbody>
+                <tr><td><code>PLAN_IMPLEMENTACION.md</code></td><td>Nueva sección §1bis (contexto de portafolio), gap analysis de <code>/auth0</code> corregido, variable <code>SCAN_SIGHT_API</code> en prerrequisitos, riesgo de dependencia re-evaluado como bajo (fail-open, ya verificado)</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td>Card "Portafolio Wayweb" en Resumen general, badge de integraciones corregido, pendiente eliminado (ya no aplica), esta entrada de bitácora</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Decisiones / observaciones</h4>
+            <div class="callout callout-info">
+              <div class="callout-icon">🧭</div>
+              <div>
+                <strong>TRL de Guardia no cambió</strong> (sigue en 3): esta sesión fue de verificación cruzada
+                y corrección documental, no de implementación propia. El desbloqueo real de la integración
+                sigue dependiendo de la Fase 1 (tenant Auth0 real).
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #3 ──────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #2 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-2">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-23</span>
+          <span class="badge badge-indigo">Sesión #2</span>
+          <span class="badge badge-purple">Análisis TRL · Auditoría de vigencia · Sección Implementación</span>
+        </div>
+
+        <div class="entry-title">Auditoría del estado actual del proyecto, plan de trabajo hacia TRL 5 y puesta al día de la bitácora</div>
+        <div class="entry-summary">
+          Se realizó un análisis completo del repositorio para responder: finalidad del proyecto, TRL actual,
+          grado de dependencia de Google Cloud y tiempo estimado a mercado. Se confirmó <strong>TRL 3</strong>
+          (scaffolding de diseño, sin código de producción probado) y que la dependencia de GCP es acotada
+          (solo Vertex AI, invocado desde Modal — el stack es mayormente AWS-céntrico). Se definió un
+          <strong>plan de trabajo de ~3 semanas hacia TRL 5</strong> (tecnología validada en entorno relevante),
+          con la generación de un dataset sintético como mitigación del cuello de botella de entrenamiento del
+          modelo Vertex. Se agregó la sección <strong>Implementación</strong> a esta bitácora con ese plan.
+          Además, se detectaron cambios locales sin commitear desde la Sesión #1 que no estaban reflejados aquí.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>¿Qué se hizo?</h4>
+            <p><strong>Auditoría de vigencia:</strong> se verificó que la bitácora seguía fechada en la Sesión #1 (2026-06-11, TRL 3) sin reflejar trabajo posterior. Se contrastó contra <code>git status</code> y <code>git diff</code> del repositorio real.</p>
+            <p><strong>Análisis de TRL/arquitectura/GCP/mercado:</strong> se determinó TRL 3 (un único commit, 0 tests, 0 CI, lazo de respuesta abierto, modelo Vertex inexistente), dependencia de GCP limitada a Vertex AI, y una estimación realista de 6–10 semanas a un go-live productivo (vs. los ~8.5–12.5 días optimistas del plan original).</p>
+            <p><strong>Plan hacia TRL 5:</strong> se diseñó un plan de 5 bloques (cuentas/esqueleto, ingesta real, dataset sintético + entrenamiento, cierre del lazo, campaña de validación) con estimación total de ~3 semanas, y se documentó qué queda explícitamente fuera de alcance (HMAC, IAM least-privilege, multi-tenancy, compliance formal Ley 20.393, Intercom, piloto real).</p>
+            <p><strong>Sección Implementación creada</strong> en <code>bitacora.html</code> (nav + contenido), entre "Roadmap de despliegue" y "Seguridad y compliance".</p>
+            <p><strong>Puesta al día de esta bitácora:</strong> fecha/sesión del header, tabla de señales de riesgo del Action, descripción del stack Auth0, árbol de archivos, tabla de integraciones y tabla de pendientes — todas actualizadas para reflejar el estado real del repo a esta fecha.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Hallazgo: cambios sin commitear no reflejados</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Cambio</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>auth0/post-login-mfa-adaptativo.js</code></td>
+                  <td>Integración con <strong>SCAN-SIGHT I.A.</strong> (2026-06-24): señal <code>mfa_posture</code> vía <code>GET /risk-signal?domain=</code> a <code>https://api-pupzjflnwa-uc.a.run.app</code> (Cloud Run, producto hermano de Wayweb). Timeout 1.5s, fail-open si no responde. Secret opcional <code>SCAN_SIGHT_API</code> no presente en <code>.env.example</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>PLAN_IMPLEMENTACION.md</code></td>
+                  <td>Solo diffs de formato Markdown (espaciado de tablas/listas, probablemente un formateador del editor) — sin cambio de contenido.</td>
+                </tr>
+                <tr>
+                  <td><code>archivos/</code></td>
+                  <td>Directorio completo (incluida esta bitácora) nunca trackeado en git — aparece como <code>??</code> en <code>git status</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos creados / modificados en esta sesión</h4>
+            <table class="files-table">
+              <thead>
+                <tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Nueva sección "Implementación" (plan hacia TRL 5), nueva fila SCAN-SIGHT en tabla de señales de riesgo e integraciones, descripciones de stack/árbol de archivos actualizadas, nuevos pendientes de higiene de repo, esta entrada de bitácora, header actualizado a Sesión #2.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Decisiones / observaciones</h4>
+            <div class="callout callout-warn">
+              <div class="callout-icon">🧭</div>
+              <div>
+                <strong>TRL no cambió</strong> en esta sesión (sigue en 3): el trabajo fue de diagnóstico y planificación, no de implementación. La barra de "Progreso por área" no se modifica hasta que se ejecuten Fases 1–5 reales.<br>
+                <strong>Pendiente de decisión del usuario:</strong> hacer <code>git add</code> + commit de los cambios detectados (Action SCAN-SIGHT, formato del plan, y trackear <code>archivos/</code>) — no se ejecutó automáticamente, queda listado en Pendientes.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #2 ──────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #1 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-1">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-06-11</span>
+          <span class="badge badge-indigo">Sesión #1</span>
+          <span class="badge badge-purple">Arranque · Plan · Fase 0 · Git</span>
+        </div>
+
+        <div class="entry-title">Arranque del proyecto: plan de implementación end-to-end y Fase 0 (higiene del repositorio)</div>
+        <div class="entry-summary">
+          Primera sesión de trabajo sobre el scaffolding generado por <code>bootstrap_guardia_digital.py</code>.
+          Se revisó el estado del repositorio (6 componentes en boilerplate), se documentó un plan maestro
+          de implementación en 5 fases (<code>PLAN_IMPLEMENTACION.md</code>) con arquitectura, gap analysis,
+          riesgos y checklist de go-live, y se ejecutó la <strong>Fase 0</strong>: <code>git init</code>,
+          <code>.gitignore</code>, <code>.env.example</code> y <code>lambdas/package.json</code>.
+          Se tomó la decisión de implementar <strong>Vertex AI desde el inicio</strong> para la detección
+          de anomalías (sin etapa heurística previa).
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>¿Qué se hizo?</h4>
+            <p><strong>Revisión del scaffolding:</strong> se mapearon los 6 componentes (<code>/infra</code>, <code>/lambdas</code>, <code>/auth0</code>, <code>/ia_models</code>, <code>/monitoring</code>, <code>/support</code>) y se verificó el tooling local disponible: node 24, python 3.13, aws-cli 2.34, gcloud 565, modal 1.4, git 2.53. <strong>Falta Terraform</strong> (no instalado).</p>
+            <p><strong>Plan de implementación:</strong> se creó <code>PLAN_IMPLEMENTACION.md</code> con diagrama de flujo de datos, gap analysis por componente, prerrequisitos (cuentas + variables), 5 fases con estimaciones, tabla de riesgos/decisiones y checklist de puesta en marcha. Se identificó la Fase 4 (Vertex AI + lazo de respuesta) como camino crítico.</p>
+            <p><strong>Fase 0 ejecutada:</strong> <code>git init</code> (rama <code>main</code>); <code>.gitignore</code> que protege secretos, <code>*.tfstate</code>, <code>node_modules</code>, credenciales GCP y artefactos; <code>.env.example</code> con las variables de las 6 plataformas; <code>lambdas/package.json</code> (engine node ≥20, scripts test/lint). Validación <code>node --check handler.js</code> → OK.</p>
+            <p><strong>Decisión Vertex AI:</strong> se registró en el plan la decisión de usar Vertex AI desde el inicio (sin heurísticas), con la mitigación de definir features y dataset de entrenamiento temprano.</p>
+            <p><strong>Commit inicial:</strong> 12 archivos rastreados en el commit <code>6862e3b</code>.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Deuda técnica detectada (TODOs en código)</h4>
+            <table class="files-table">
+              <thead><tr><th>Ubicación</th><th>Pendiente</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>lambdas/handler.js</code></td>
+                  <td>Encolar en SQS/Kinesis para el batch de <code>/ia_models</code> si crece el volumen</td>
+                </tr>
+                <tr>
+                  <td><code>ia_models/anomaly_detector.py</code></td>
+                  <td><code>_fetch_pending_logs()</code> es un stub — falta la ingesta real (Datadog Logs API / S3 / SQS)</td>
+                </tr>
+                <tr>
+                  <td><code>ia_models/anomaly_detector.py</code></td>
+                  <td>Falta webhook a Auth0 Management API para bloquear sesión / forzar re-MFA — el lazo de respuesta está abierto</td>
+                </tr>
+                <tr>
+                  <td><code>infra/main.tf</code></td>
+                  <td>Estado de Terraform local — falta backend remoto S3 + DynamoDB lock antes de cualquier <code>apply</code> compartido</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos creados / modificados en esta sesión</h4>
+            <table class="files-table">
+              <thead>
+                <tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>PLAN_IMPLEMENTACION.md</code></td><td><span class="change-created">CREADO</span></td><td>Plan maestro end-to-end: arquitectura, gap analysis, prerrequisitos, fases 0–5, riesgos y checklist de go-live. Decisión Vertex AI registrada.</td></tr>
+                <tr><td><code>.gitignore</code></td><td><span class="change-created">CREADO</span></td><td>Ignora <code>.env</code>, <code>*.tfstate*</code>, <code>node_modules/</code>, <code>*-credentials.json</code>, <code>__pycache__/</code>, <code>handler.zip</code>, el zip de artefactos y archivos de SO/editor.</td></tr>
+                <tr><td><code>.env.example</code></td><td><span class="change-created">CREADO</span></td><td>Plantilla con <code>AUTH0_WEBHOOK_SECRET</code>, <code>AWS_REGION</code>, <code>GCP_PROJECT</code>, <code>VERTEX_ENDPOINT_ID</code>, <code>VERTEX_REGION</code>, <code>DD_API_KEY</code>, <code>DD_SITE</code>, <code>INTERCOM_APP_ID</code>.</td></tr>
+                <tr><td><code>lambdas/package.json</code></td><td><span class="change-created">CREADO</span></td><td>Manifiesto del handler: engine node ≥20, scripts <code>test</code> (node --test) y <code>lint</code> (node --check), licencia UNLICENSED.</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-created">CREADO</span></td><td>Esta bitácora. Diseño replicado de <code>bt.html</code> con los datos de Guardia Digital Inteligente.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Operaciones realizadas</h4>
+            <table class="files-table">
+              <thead><tr><th>Acción</th><th>Resultado</th></tr></thead>
+              <tbody>
+                <tr><td><code>git init</code> + rama <code>main</code></td><td><span class="change-created">OK · repositorio inicializado</span></td></tr>
+                <tr><td><code>node --check lambdas/handler.js</code></td><td><span class="change-created">OK · handler válido</span></td></tr>
+                <tr><td>Verificación de tooling local (node, python, aws, gcloud, modal, git)</td><td><span class="change-created">OK · presentes</span> · <span class="change-deleted">Terraform faltante</span></td></tr>
+                <tr><td>Commit inicial (12 archivos)</td><td><span class="change-created">OK · 6862e3b</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Decisiones de arquitectura</h4>
+            <div class="callout callout-info">
+              <div class="callout-icon">🧭</div>
+              <div>
+                <strong>Detección de anomalías:</strong> Vertex AI desde el inicio (no se parte con heurísticas). Mitigación: definir features y dataset temprano.<br>
+                <strong>Región AWS:</strong> a evaluar <code>us-east-1</code> vs <code>sa-east-1</code> (São Paulo) por latencia y residencia de datos LATAM — recomendación preliminar sa-east-1.<br>
+                <strong>Validación del webhook:</strong> hoy <code>Bearer</code> estático; migrar a firma HMAC + rotación, secret en Secrets Manager.<br>
+                <strong>Estado de Terraform:</strong> backend remoto S3 + DynamoDB lock antes de cualquier <code>apply</code> compartido.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #1 ──────────────────────────────────────── -->
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       PENDIENTES / DEUDA TÉCNICA
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="pendientes">
+    <div class="section-header">
+      <h2>Pendientes / deuda técnica</h2>
+      <p>Lo que falta para cerrar el flujo end-to-end antes de producción.</p>
+    </div>
+    <div class="card">
+      <h3>Desplegado y verificado en entorno real (Sesión #5)</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Ítem</th><th>Evidencia</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Infra AWS real (S3+DynamoDB backend, Lambda, API Gateway) en <code>sa-east-1</code></td><td><code>/infra</code></td></tr>
+          <tr><td>Webhook probado e2e: 401 sin auth, 200 con auth, NDJSON soportado (bug encontrado y corregido)</td><td><code>/lambdas</code></td></tr>
+          <tr><td>Tenant Auth0 real, MFA activo, Action desplegada y aplicada, login real verificado en CloudWatch</td><td><code>/auth0</code></td></tr>
+          <tr><td>Modelo scikit-learn entrenado, contenedor propio en Vertex AI, endpoint real sirviendo predicciones</td><td><code>/ia_models</code></td></tr>
+          <tr><td>Lazo de respuesta verificado con usuario real: anomaly_score 0.984 → cuenta bloqueada de verdad en Auth0 (revertida tras la prueba)</td><td><code>/ia_models</code></td></tr>
+          <tr><td>Credenciales de Datadog y Auth0 M2M verificadas contra las APIs reales</td><td><code>/monitoring</code>, <code>/auth0</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr><th>Pendiente</th><th>Componente</th><th>Prioridad</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Desplegar el job Modal en modo programado (<code>modal deploy</code>, hoy solo probado con <code>modal run</code> efímero)</td><td><code>/ia_models</code></td><td><span class="badge badge-red">Alta</span></td></tr>
+          <tr><td>Desplegar Datadog Forwarder + pipelines + monitores + dashboard de compliance</td><td><code>/monitoring</code></td><td><span class="badge badge-amber">Media</span></td></tr>
+          <tr><td>Campaña de validación formal: escenarios controlados (login normal, viaje imposible, fuera de horario, dispositivo nuevo) con evidencia consolidada</td><td>General</td><td><span class="badge badge-amber">Media</span></td></tr>
+          <tr><td>Migrar validación de webhook a firma HMAC (mejora futura, no bloquea TRL5)</td><td><code>/lambdas</code></td><td><span class="badge badge-slate">Baja</span></td></tr>
+          <tr><td>Commitear todo el trabajo de las Sesiones #4 y #5 en git</td><td>Repo (git)</td><td><span class="badge badge-amber">Media</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       ROADMAP DE DESPLIEGUE
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="roadmap">
+    <div class="section-header">
+      <h2>Roadmap de despliegue</h2>
+      <p>Fases de implementación hacia el go-live.</p>
+    </div>
+    <div class="card">
+      <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Fase 0 — Higiene del repo.</strong> git init, .gitignore, .env.example, lambdas/package.json. Sin costo, todo reversible.</span></label>
+      <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Fase 1 — Ingreso de identidad.</strong> Auth0 (Universal Login + Action MFA) desplegado en tenant real, login de prueba verificado. <em>Completada Sesión #5.</em></span></label>
+      <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Fase 2 — Captura y normalización.</strong> Terraform apply en staging, Log Stream de Auth0, test e2e login → CloudWatch. <em>Completada Sesión #5.</em></span></label>
+      <label class="rdm-item"><input type="checkbox" class="rdm-check" disabled><span><strong>Fase 3 — Observabilidad / SIEM.</strong> Datadog Forwarder, pipelines, monitores y dashboard de compliance. Credenciales verificadas, forwarder pendiente.</span></label>
+      <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Fase 4 — Detección de anomalías (camino crítico).</strong> Modelo entrenado y desplegado en Vertex AI, lazo de respuesta cerrado y verificado con un usuario real (bloqueo ejecutado y revertido). Falta solo el <code>modal deploy</code> en modo programado. <em>Completada Sesión #5.</em></span></label>
+      <label class="rdm-item"><input type="checkbox" class="rdm-check" disabled><span><strong>Fase 5 — Endurecimiento y go-live.</strong> Seguridad (HMAC, least-privilege, rate-limit), resiliencia (DLQ, reintentos), compliance Ley 20.393, runbook.</span></label>
+    </div>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div>
+        <strong>Ruta crítica:</strong> la Fase 4 (modelo Vertex AI + cierre del lazo de respuesta) es la
+        más larga y riesgosa. Todo lo demás puede avanzar en paralelo una vez disponibles las cuentas.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       IMPLEMENTACIÓN — PLAN DE TRABAJO HACIA TRL 5
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="implementacion">
+    <div class="section-header">
+      <h2>Implementación</h2>
+      <p>Plan de trabajo enfocado para pasar de TRL 3 a TRL 5 (tecnología validada en un entorno relevante) lo antes posible.</p>
+    </div>
+
+    <div class="card">
+      <h3>Objetivo: TRL 3 → TRL 5</h3>
+      <p>
+        TRL 5 no exige producción con clientes reales (eso es TRL 7–9); exige un <strong>lazo completo
+        funcionando end-to-end en un entorno realista</strong> (cuentas de staging reales, no mocks) con
+        evidencia medible de que funciona. Esto reordena las prioridades respecto al plan original: el foco
+        pasa a <strong>cerrar el lazo crítico y validarlo</strong>, dejando el endurecimiento de seguridad y
+        compliance de producción para después.
+      </p>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">🧩</div>
+      <div>
+        <strong>Cuello de botella real:</strong> el plan original estima la Fase 4 en 3–5 días asumiendo que
+        entrenar el modelo de Vertex AI es trivial. No lo es si se depende de logs reales de usuarios —hoy
+        no existen. Mitigación: generar un <strong>dataset sintético de eventos de login etiquetados</strong>
+        (viaje imposible, fuera de turno, dispositivo nuevo, patrón normal) para entrenar un primer
+        clasificador (AutoML tabular de Vertex es suficiente) sin esperar semanas de datos orgánicos.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Plan de trabajo por semana</h3>
+      <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Semana 1 — Cuentas y esqueleto ejecutable.</strong> Auth0, AWS, GCP+Vertex, Datadog y Modal gestionados y verificados. Terraform instalado y desplegado. <em>Hecho en un solo día (Sesión #5), no una semana.</em></span></label>
+      <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Semana 1–2 (paralelo) — Ingesta real.</strong> Auth0 Universal Login + Action MFA probados en tenant real. <code>terraform apply</code> en AWS staging. Log Stream → webhook → Lambda → CloudWatch. <strong>Hito cumplido:</strong> login real → evento normalizado visible en CloudWatch, con geolocalización real.</span></label>
+      <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Semana 2 — Dataset sintético + entrenamiento.</strong> Dataset sintético generado (5000 filas). En vez de AutoML: modelo scikit-learn + contenedor propio en Vertex AI (más rápido y barato para este piloto). <code>_fetch_pending_logs()</code> implementado contra Datadog Logs API v2.</span></label>
+      <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled><span><strong>Semana 2–3 — Cerrar el lazo.</strong> <strong>Verificado con un usuario real:</strong> anomaly_score 0.984 → Auth0 Management API bloqueó la cuenta de verdad (revertida tras la prueba). Falta desplegar el job Modal en modo programado (hoy probado con <code>modal run</code> efímero) y el forwarder de Datadog.</span></label>
+      <label class="rdm-item"><input type="checkbox" class="rdm-check" disabled><span><strong>Semana 3 — Campaña de validación.</strong> Escenarios controlados en staging (login normal, viaje imposible, fuera de horario, dispositivo nuevo, fuerza bruta). Medir tasa de detección, falsos positivos y latencia del lazo completo. Documentar resultados como evidencia formal de TRL 5.</span></label>
+    </div>
+
+    <div class="card">
+      <h3>Explícitamente fuera de alcance (posterior a TRL 5)</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Ítem</th><th>Por qué se pospone</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Firma HMAC del webhook</td><td>Seguir con Bearer estático + Secrets Manager por ahora; se documenta como deuda</td></tr>
+          <tr><td>Auditoría IAM least-privilege, WAF, rate-limiting</td><td>Endurecimiento de producción (TRL 6–8), no bloquea la validación del concepto</td></tr>
+          <tr><td>Multi-tenancy, billing, onboarding de clientes</td><td>Requiere producto comercial, no solo tecnología validada</td></tr>
+          <tr><td>Cumplimiento formal Ley 20.393 (evidencia legal)</td><td>Exige sistema en operación real, no entorno de staging</td></tr>
+          <tr><td>Widget de Intercom</td><td>Soporte comercial; no aporta al lazo de detección de anomalías</td></tr>
+          <tr><td>Piloto con cliente real pagando</td><td>Corresponde a TRL 7–9</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">⏱️</div>
+      <div>
+        <strong>Estimación total:</strong> ~3 semanas de trabajo técnico enfocado, asumiendo que las cuentas
+        y accesos no se demoran. El mayor riesgo de cronograma son las aprobaciones/compras corporativas de
+        cuentas (Auth0 plan pago, AWS, Datadog), no el desarrollo técnico — conviene iniciarlas el día 1.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       SEGURIDAD Y COMPLIANCE
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="seguridad">
+    <div class="section-header">
+      <h2>Seguridad y compliance</h2>
+      <p>Controles de seguridad y trazabilidad para auditoría (Ley 20.393).</p>
+    </div>
+
+    <div class="card">
+      <h3>Controles previstos</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Control</th><th>Descripción</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>MFA adaptativo Zero-Trust</td><td>Auth0 Action fuerza MFA por señales de riesgo (score, país, horario, dispositivo, IP)</td><td><span class="badge badge-green">Snippet listo</span></td></tr>
+          <tr><td>Validación de webhook</td><td>Hoy Bearer estático; objetivo: firma HMAC + rotación de secret</td><td><span class="badge badge-amber">A endurecer</span></td></tr>
+          <tr><td>Least-privilege IAM</td><td>Rol de ejecución de Lambda acotado; auditar permisos antes de prod</td><td><span class="badge badge-amber">Pendiente</span></td></tr>
+          <tr><td>Trazabilidad de decisiones</td><td>Cada decisión MFA queda en <code>app_metadata</code> + logs → Datadog</td><td><span class="badge badge-green">Diseñado</span></td></tr>
+          <tr><td>Retención de logs</td><td>TTL y retención definidos para evidencia de auditoría</td><td><span class="badge badge-amber">Pendiente</span></td></tr>
+          <tr><td>Residencia de datos (Chile)</td><td>Evaluar región sa-east-1 y marco legal de datos personales</td><td><span class="badge badge-amber">Pendiente</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">⚖️</div>
+      <div>
+        <strong>Ley 20.393:</strong> el sistema está diseñado para entregar trazabilidad completa de los
+        eventos de acceso y de las decisiones de MFA/bloqueo, como evidencia de auditoría. El detalle de
+        retención, índices y reporte de compliance se cierra en la Fase 5.
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">🔑</div>
+      <div>
+        <strong>Gestión de secretos:</strong> ningún secreto debe vivir en el repositorio. El
+        <code>.gitignore</code> ya bloquea <code>.env</code> y credenciales; el objetivo es mover
+        <code>AUTH0_WEBHOOK_SECRET</code> a AWS Secrets Manager y las credenciales GCP a secrets de Modal.
+      </div>
+    </div>
+  </section>
+
+</main>
+</div>
+</body>
+</html>

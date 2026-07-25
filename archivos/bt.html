@@ -1,0 +1,2514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitácora — SCAN-SIGHT I.A. · Wayweb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset & base ──────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f0f4f8;
+    color: #1e293b;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ────────────────────────────────────────────────────── */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px; flex-shrink: 0;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    padding: 28px 0;
+  }
+  .main { flex: 1; max-width: 900px; padding: 40px 48px; }
+
+  /* ── Sidebar ───────────────────────────────────────────────────── */
+  .sidebar-logo {
+    padding: 0 24px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 20px;
+  }
+  .sidebar-logo h1 { font-size: 14px; font-weight: 700; color: #4f46e5; letter-spacing: -.3px; }
+  .sidebar-logo span { font-size: 11px; color: #94a3b8; font-weight: 400; }
+  .sidebar-nav { padding: 0 12px; }
+  .nav-section { margin-bottom: 24px; }
+  .nav-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .8px;
+    text-transform: uppercase; color: #94a3b8;
+    padding: 0 12px; margin-bottom: 6px;
+  }
+  .nav-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; border-radius: 6px;
+    color: #475569; text-decoration: none;
+    font-size: 13.5px; font-weight: 400;
+    transition: all .15s;
+  }
+  .nav-link:hover { background: #f1f5f9; color: #1e293b; }
+  .nav-link.active { background: #eef2ff; color: #4f46e5; font-weight: 500; }
+  .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    margin-top: 12px;
+  }
+  .pill-ok    { background: #d1fae5; color: #065f46; }
+  .pill-warn  { background: #fef3c7; color: #92400e; }
+  .pill-info  { background: #dbeafe; color: #1e40af; }
+  .pill-dot   { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ── Typography ─────────────────────────────────────────────────── */
+  h2 { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  h3 { font-size: 16px; font-weight: 600; color: #0f172a; margin-bottom: 12px; }
+  h4 { font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase;
+       letter-spacing: .5px; margin-bottom: 8px; }
+  p  { color: #475569; font-size: 14.5px; line-height: 1.7; margin-bottom: 10px; }
+
+  .section-header {
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 28px;
+  }
+  .section-header p { margin-bottom: 0; color: #64748b; font-size: 14px; }
+
+  /* ── Cards ──────────────────────────────────────────────────────── */
+  .card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .card-sm { padding: 14px 18px; }
+
+  /* ── Badges ─────────────────────────────────────────────────────── */
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; letter-spacing: .3px;
+  }
+  .badge-indigo  { background: #eef2ff; color: #4338ca; }
+  .badge-green   { background: #d1fae5; color: #065f46; }
+  .badge-amber   { background: #fef3c7; color: #92400e; }
+  .badge-red     { background: #fee2e2; color: #991b1b; }
+  .badge-slate   { background: #f1f5f9; color: #334155; }
+  .badge-purple  { background: #f3e8ff; color: #6b21a8; }
+  .badge-cyan    { background: #ecfeff; color: #155e75; }
+  .badge-pink    { background: #fdf2f8; color: #9d174d; }
+  .badge-emerald { background: #ecfdf5; color: #065f46; }
+
+  /* ── Code ───────────────────────────────────────────────────────── */
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 12.5px; background: #f1f5f9;
+    color: #c026d3; padding: 1px 5px; border-radius: 3px;
+  }
+  pre {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 16px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: #334155;
+    overflow-x: auto; margin: 12px 0;
+    line-height: 1.8;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+
+  /* ── Sections ───────────────────────────────────────────────────── */
+  .page-section { margin-bottom: 60px; }
+
+  /* ── Stats grid ─────────────────────────────────────────────────── */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-card {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 10px; padding: 16px 20px;
+    text-align: center;
+  }
+  .stat-value { font-size: 28px; font-weight: 700; color: #4f46e5; }
+  .stat-label { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+  .stat-sub { font-size: 11px; color: #64748b; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Tech stack ─────────────────────────────────────────────────── */
+  .stack-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .stack-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 12px 16px;
+  }
+  .stack-icon {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .stack-info { min-width: 0; }
+  .stack-name { font-size: 13px; font-weight: 600; color: #1e293b; }
+  .stack-desc { font-size: 12px; color: #64748b; margin-top: 1px; }
+
+  /* ── Flow diagram ───────────────────────────────────────────────── */
+  .flow {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: 0; background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 10px; padding: 20px 24px; margin: 16px 0;
+  }
+  .flow-node {
+    background: #f8fafc; border: 1.5px solid #cbd5e1;
+    border-radius: 8px; padding: 8px 14px;
+    font-size: 12.5px; font-weight: 500; color: #334155;
+    text-align: center; min-width: 90px;
+  }
+  .flow-node.primary { background: #eef2ff; border-color: #a5b4fc; color: #3730a3; }
+  .flow-node.success { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
+  .flow-node.warning { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
+  .flow-node.danger  { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+  .flow-arrow { color: #94a3b8; font-size: 16px; padding: 0 6px; flex-shrink: 0; }
+  .flow-split { display: flex; flex-direction: column; gap: 6px; }
+
+  /* ── File tree ──────────────────────────────────────────────────── */
+  .file-tree { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
+  .tree-row {
+    display: grid; grid-template-columns: 240px 1fr;
+    align-items: baseline; gap: 16px;
+    padding: 5px 0; border-bottom: 1px solid #f8fafc;
+  }
+  .tree-row:hover { background: #fafbfc; }
+  .tree-path { color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tree-path .folder-name { color: #4f46e5; font-weight: 500; }
+  .tree-path .file-name   { color: #0f172a; }
+  .tree-desc { color: #64748b; font-family: 'Inter', sans-serif; font-size: 12.5px; line-height: 1.5; }
+  .indent-1 { padding-left: 16px; }
+  .indent-2 { padding-left: 32px; }
+  .indent-3 { padding-left: 48px; }
+
+  /* ── Data table ─────────────────────────────────────────────────── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th {
+    background: #f1f5f9; padding: 9px 12px;
+    text-align: left; font-size: 11.5px; font-weight: 600;
+    color: #475569; text-transform: uppercase; letter-spacing: .5px;
+  }
+  .data-table td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #fafbfc; }
+
+  /* ── Completion bar ─────────────────────────────────────────────── */
+  .progress-row { margin-bottom: 10px; }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 12.5px; font-weight: 500; color: #334155;
+    margin-bottom: 4px;
+  }
+  .progress-bar-bg { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+  .fill-indigo { background: #4f46e5; }
+  .fill-green  { background: #059669; }
+  .fill-amber  { background: #d97706; }
+  .fill-red    { background: #dc2626; }
+
+  /* ── Callout ────────────────────────────────────────────────────── */
+  .callout {
+    display: flex; gap: 12px; padding: 12px 16px;
+    border-radius: 8px; border-left: 3px solid; margin: 12px 0;
+    font-size: 13.5px;
+  }
+  .callout-info    { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+  .callout-warn    { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+  .callout-success { background: #f0fdf4; border-color: #22c55e; color: #166534; }
+  .callout-icon    { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Roadmap checkboxes ─────────────────────────────────────────── */
+  .rdm-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 13.5px; color: #475569; line-height: 1.5;
+    transition: background .12s;
+    border: 1px solid transparent;
+    margin-bottom: 4px;
+  }
+  .rdm-item:hover { background: #f8fafc; border-color: #e2e8f0; }
+  .rdm-item.done  { background: #f0fdf4; border-color: #bbf7d0; color: #166534; text-decoration: line-through; }
+  .rdm-check {
+    width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px;
+    accent-color: #4f46e5; cursor: pointer;
+  }
+
+  /* ── Timeline / Bitácora ────────────────────────────────────────── */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 7px; top: 8px; bottom: 0;
+    width: 2px; background: #e2e8f0;
+  }
+  .entry { position: relative; margin-bottom: 40px; }
+  .entry::before {
+    content: ''; position: absolute;
+    left: -24px; top: 8px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: #4f46e5; border: 3px solid #fff;
+    box-shadow: 0 0 0 2px #c7d2fe;
+  }
+  .entry-meta {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+  .entry-date {
+    font-size: 12px; color: #94a3b8;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .entry-title { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+  .entry-summary { font-size: 14px; color: #475569; margin-bottom: 18px; }
+
+  .entry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .entry-block {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 14px 16px;
+  }
+  .entry-block.full { grid-column: 1 / -1; }
+
+  /* ── Files affected table ───────────────────────────────────────── */
+  .files-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+  .files-table th {
+    background: #f1f5f9; padding: 7px 10px;
+    text-align: left; font-weight: 600; color: #475569;
+    font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+  }
+  .files-table td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  .files-table tr:last-child td { border-bottom: none; }
+  .files-table td:first-child code { color: #0f172a; background: none; padding: 0; }
+  .change-created  { color: #059669; font-weight: 600; }
+  .change-modified { color: #d97706; font-weight: 600; }
+  .change-deleted  { color: #dc2626; font-weight: 600; }
+  .change-added    { color: #92400e; font-weight: 600; }
+
+  /* ── Responsive ─────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { padding: 24px 20px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .stack-grid { grid-template-columns: 1fr; }
+    .entry-grid { grid-template-columns: 1fr; }
+    .tree-row { grid-template-columns: 1fr; }
+    .tree-desc { display: none; }
+  }
+
+  /* ── Print ──────────────────────────────────────────────────────── */
+  @media print {
+    .sidebar { display: none; }
+    body { background: #fff; }
+    .main { max-width: 100%; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ══════════════════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>SCAN-SIGHT I.A.</h1>
+    <span>Plataforma EASM · Wayweb</span>
+    <div>
+      <span class="status-pill pill-warn"><span class="pill-dot"></span>TRL 6 · Live en GCP</span>
+    </div>
+    <div>
+      <span class="status-pill pill-info"><span class="pill-dot"></span>En desarrollo activo</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-label">Proyecto</div>
+      <a href="#overview"      class="nav-link active"><span class="nav-icon">📋</span>Resumen general</a>
+      <a href="#arquitectura"  class="nav-link"><span class="nav-icon">🏗️</span>Arquitectura técnica</a>
+      <a href="#modulos"       class="nav-link"><span class="nav-icon">📦</span>Módulos del sistema</a>
+      <a href="#fuentes"       class="nav-link"><span class="nav-icon">📡</span>Fuentes OSINT</a>
+      <a href="#casos-uso"     class="nav-link"><span class="nav-icon">🤖</span>Casos de uso IA</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Código</div>
+      <a href="#estructura"    class="nav-link"><span class="nav-icon">📁</span>Estructura de archivos</a>
+      <a href="#integraciones" class="nav-link"><span class="nav-icon">🔌</span>Integraciones externas</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Registro</div>
+      <a href="#bitacora"      class="nav-link"><span class="nav-icon">📝</span>Bitácora de cambios</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Estado</div>
+      <a href="#pendientes"    class="nav-link"><span class="nav-icon">⏳</span>Pendientes para go-live</a>
+      <a href="#roadmap"       class="nav-link"><span class="nav-icon">🗺️</span>Roadmap de despliegue</a>
+      <a href="#saas-roadmap"  class="nav-link"><span class="nav-icon">🚀</span>Roadmap SaaS</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Seguridad</div>
+      <a href="#seguridad"     class="nav-link"><span class="nav-icon">🔒</span>Seguridad y compliance</a>
+    </div>
+  </nav>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- ── HEADER ──────────────────────────────────────────────── -->
+  <div style="margin-bottom:40px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span class="badge badge-indigo">Wayweb · SaaS EASM</span>
+          <span class="badge badge-slate">GCP · Python · React · Vertex AI</span>
+          <span class="badge badge-green">Live en producción</span>
+        </div>
+        <h2 style="font-size:28px;margin-bottom:4px;">SCAN-SIGHT I.A.</h2>
+        <p style="font-size:15px;color:#475569;margin:0;">
+          Plataforma SaaS de Gestión Continua de la Superficie de Ataque Externa (EASM).<br>
+          Desarrollada por Wayweb · <strong>scan.wayweb.cl</strong> · GCP us-central1
+        </p>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">última actualización</div>
+        <div style="font-size:15px;font-weight:600;color:#334155;">2026-06-10</div>
+        <div style="font-size:12px;color:#64748b;">Sesión #9</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       RESUMEN GENERAL
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="overview">
+    <div class="section-header">
+      <h2>Resumen general</h2>
+      <p>Estado actual del proyecto y métricas clave.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">TRL 6</div>
+        <div class="stat-label">Nivel de madurez</div>
+        <div class="stat-sub">Live en GCP · scan.wayweb.cl</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">5</div>
+        <div class="stat-label">Cloud Functions GCP</div>
+        <div class="stat-sub">Orchestrator · Scanner · AI · API</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$15–$180</div>
+        <div class="stat-label">USD / mes según carga</div>
+        <div class="stat-sub">Marcha Blanca → Carga Alta</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Descripción del sistema</h3>
+      <p>
+        <strong>SCAN-SIGHT I.A.</strong> es una <strong>plataforma SaaS EASM (External Attack Surface Management)</strong>
+        desarrollada por Wayweb. Permite a cualquier empresa escanear dominios de clientes y prospectos,
+        descubriendo subdominios expuestos, puertos abiertos y certificados SSL problemáticos —
+        y entregando un reporte profesional de riesgo en minutos.
+      </p>
+      <p>
+        Los hallazgos técnicos son procesados por <strong>Google Gemini 2.5 Flash</strong>
+        (generativelanguage API · API Key) para traducirlos a riesgo de negocio comprensible: impacto operacional,
+        plazo de resolución recomendado (SLA) y resumen ejecutivo en español. La arquitectura es completamente serverless
+        sobre <strong>Google Cloud Functions + Firestore + Cloud Storage</strong>, con un frontend en
+        <strong>React + Vite</strong> servido desde <code>scan.wayweb.cl</code> (CloudPanel en GCP VM).
+      </p>
+      <p>
+        El modelo comercial opera en dos verticales (sector público y sector privado) con un catálogo de cuatro niveles:
+        <strong>Tier 0</strong> — informe de cortesía gratuito enviado por Wayweb al prospecto sin exponer la herramienta;
+        <strong>Tier 1</strong> — servicios puntuales one-shot (diagnóstico completo, plan de remediación, reporte normativo ISO 27001 / Ley 21.663, reporte ejecutivo para directorio);
+        <strong>Tier 2</strong> — monitoreo continuo por suscripción mensual (planes Starter, Business, Pro, Enterprise);
+        <strong>Tier 3</strong> — consultoría y proyectos de seguridad (talleres, políticas, acompañamiento de cierre de hallazgos, auditoría normativa);
+        <strong>Tier 4</strong> — white-label y acceso API para MSPs e integradores que quieran ofrecer EASM bajo su propia marca.
+        El ticket promedio proyectado por cliente en el primer año oscila entre <strong>$890.000 y $2.5M CLP</strong>.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Progreso por área</h3>
+      <div class="progress-row">
+        <div class="progress-label"><span>Módulo 1 — Scanner OSINT (Cloud Functions Python)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Módulo 2 — Gemini Analyzer (Gemini 2.5 Flash · API Key)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Migración AWS → GCP (5 Cloud Functions desplegadas)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Despliegue en producción (scan.wayweb.cl · GCP VM)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Dashboard React — responsive + datos reales</span><span>95%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:95%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Gestión de clientes SaaS (multi-cliente)</span><span>80%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-indigo" style="width:80%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Exportación PDF + CSV + Excel (jsPDF · xlsx)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Email automático con reporte al finalizar scan (Gmail SMTP)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Gemini 2.5 Flash activado (generativelanguage API · sin fallback)</span><span>100%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Motor de prospecting — base de clientes + envío de informes cortesía</span><span>15%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-amber" style="width:15%"></div></div>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">ℹ️</div>
+      <div>
+        <strong>Escaneo automático cada 6 horas:</strong> el <code>OrchestratorFunction</code> es
+        disparado por <strong>Cloud Scheduler</strong> en GCP (<code>0 */6 * * *</code>, zona America/Santiago).
+        En el flujo de prospecting, el scan también puede dispararse manualmente desde el dashboard interno.
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">🛡️</div>
+      <div>
+        <strong>Detección de deltas:</strong> el sistema usa <code>state_hash</code> (SHA-256)
+        para detectar cambios entre escaneos. Solo los hallazgos nuevos o modificados se envían
+        a Vertex AI para análisis, reduciendo costos de inferencia.
+      </div>
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-icon">🌐</div>
+      <div>
+        <strong>Servidor activo:</strong> CloudPanel instalado en <code>34.134.152.97:8443</code>.
+        Subdominio <code>scan.wayweb.cl</code> activo con SSL Let's Encrypt (expira 2026-09-05). Dashboard React en producción.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       ARQUITECTURA
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="arquitectura">
+    <div class="section-header">
+      <h2>Arquitectura técnica</h2>
+      <p>Stack, flujo de datos y decisiones de diseño.</p>
+    </div>
+
+    <div class="card">
+      <h3>Flujo de escaneo (happy path)</h3>
+      <div class="flow">
+        <div class="flow-node primary">Cloud Scheduler<br><small style="color:#94a3b8;">cada 6h · GCP</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node primary">Orchestrator<br><small>Cloud Function</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-split">
+          <div class="flow-node" style="font-size:11px;">Subdomain Scanner<br><small>crt.sh + DNS</small></div>
+          <div class="flow-node" style="font-size:11px;">Port Scanner<br><small>TCP + SSL</small></div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node primary">Gemini 2.5 Flash<br><small>API Key</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-split">
+          <div class="flow-node success" style="font-size:11px;">Firestore<br>Findings</div>
+          <div class="flow-node" style="font-size:11px;">Cloud Storage<br>Data Lake</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node success">Dashboard<br><small>React · scan.wayweb.cl</small></div>
+      </div>
+      <p style="font-size:12.5px;color:#64748b;margin-top:16px;">
+        El <code>OrchestratorFunction</code> coordina los scanners en paralelo y persiste resultados
+        en Firestore y Cloud Storage. Solo los <strong>delta_events</strong> (cambios detectados) se envían a
+        Gemini 2.5 Flash, optimizando costos de inferencia.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Stack tecnológico</h3>
+      <div class="stack-grid">
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#eef2ff;">☁️</div>
+          <div class="stack-info">
+            <div class="stack-name">AWS Lambda (Python 3.12, arm64)</div>
+            <div class="stack-desc">4 funciones serverless: orchestrator, subdomain_scanner, port_scanner, vertex_ai_analyzer. Timeout hasta 10 min.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#f0fdf4;">🗃️</div>
+          <div class="stack-info">
+            <div class="stack-name">Firestore NoSQL (GCP)</div>
+            <div class="stack-desc">Colecciones <code>cyber-sight-assets</code>, <code>cyber-sight-findings</code> y <code>cyber-sight-clients</code>. TTL 90 días en findings.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fff7ed;">🧠</div>
+          <div class="stack-info">
+            <div class="stack-name">Google Gemini 2.5 Flash (generativelanguage API)</div>
+            <div class="stack-desc">Análisis semántico de hallazgos técnicos → riesgo de negocio en español. Acceso vía API Key directa, sin SDK Vertex AI.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#f0f9ff;">📡</div>
+          <div class="stack-info">
+            <div class="stack-name">API Gateway + Lambda API</div>
+            <div class="stack-desc">REST API con API Key. 5 endpoints: summary, assets, findings, scans, trigger. Throttle 10 rps.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#ecfeff;">⚛️</div>
+          <div class="stack-info">
+            <div class="stack-name">React 18 + Vite + Tailwind + Recharts</div>
+            <div class="stack-desc">Dashboard con métricas, inventario de activos, tabla de hallazgos expandible y trigger de escaneo manual.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#f1f5f9;">⚙️</div>
+          <div class="stack-info">
+            <div class="stack-name">Cloud Scheduler + deploy.sh (IaC)</div>
+            <div class="stack-desc">Trigger automático cada 6h en GCP. Script <code>deploy.sh</code> para desplegar todas las Cloud Functions con un solo comando.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fef9c3;">🔒</div>
+          <div class="stack-info">
+            <div class="stack-name">Application Default Credentials + Variables de entorno GCP</div>
+            <div class="stack-desc">Las Cloud Functions usan ADC para acceder a Firestore y Cloud Storage sin Secrets Manager. API Key de Gemini inyectada como variable de entorno.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fdf2f8;">🌐</div>
+          <div class="stack-info">
+            <div class="stack-name">CloudPanel + Compute Engine VM (Frontend)</div>
+            <div class="stack-desc">Dashboard React servido desde VM GCP con CloudPanel y Let's Encrypt SSL. Dominio <code>scan.wayweb.cl</code>, certificado válido hasta 2026-09-05.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       MÓDULOS
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="modulos">
+    <div class="section-header">
+      <h2>Módulos del sistema</h2>
+      <p>Descripción funcional de cada Lambda y su responsabilidad.</p>
+    </div>
+
+    <div class="card">
+      <h3>Módulo 1 — Scanner OSINT</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Lambda</th><th>Función principal</th><th>Timeout</th><th>Concurrencia</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>cyber-sight-orchestrator</code></td>
+            <td>Coordina el ciclo completo de escaneo, invoca scanners en paralelo y envía deltas a Vertex AI</td>
+            <td><span class="badge badge-amber">10 min</span></td>
+            <td>Sin límite</td>
+          </tr>
+          <tr>
+            <td><code>cyber-sight-subdomain</code></td>
+            <td>crt.sh + DNS brute-force (80 prefijos) + validación SSL/TLS de cada subdominio</td>
+            <td><span class="badge badge-slate">5 min</span></td>
+            <td>Max 10</td>
+          </tr>
+          <tr>
+            <td><code>cyber-sight-port-scanner</code></td>
+            <td>TCP connect en 18 puertos + banner grabbing + detección de servicios expuestos</td>
+            <td><span class="badge badge-slate">5 min</span></td>
+            <td>Max 5</td>
+          </tr>
+          <tr>
+            <td><code>cyber-sight-vertex-analyzer</code></td>
+            <td>Recibe delta_events, llama a Gemini 2.5 Flash (generativelanguage API) y persiste hallazgos con business_impact y SLA</td>
+            <td><span class="badge badge-slate">2 min</span></td>
+            <td>Sin límite</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Módulo 2 — Gemini Analyzer (Gemini 2.5 Flash)</h3>
+      <p>Recibe hallazgos técnicos crudos y genera para cada uno:</p>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px;">
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;color:#4f46e5;margin-bottom:4px;">overall_risk_level</div>
+          <div style="font-size:12px;color:#64748b;">CRITICAL / HIGH / MEDIUM / LOW — nivel de riesgo global del scan</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;color:#4f46e5;margin-bottom:4px;">executive_summary</div>
+          <div style="font-size:12px;color:#64748b;">Resumen para el CISO en español, sin jerga técnica</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;color:#4f46e5;margin-bottom:4px;">business_impact</div>
+          <div style="font-size:12px;color:#64748b;">Impacto en términos de continuidad operacional y reputación</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;color:#4f46e5;margin-bottom:4px;">suggested_sla_hours</div>
+          <div style="font-size:12px;color:#64748b;">Plazo sugerido de resolución (horas) según severidad del hallazgo</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Módulo 3 — Dashboard API</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-green">GET</span></td>
+            <td><code>/dashboard/summary</code></td>
+            <td>Métricas globales: total activos, findings por severidad, último escaneo</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-green">GET</span></td>
+            <td><code>/assets</code></td>
+            <td>Inventario de subdominios y puertos con filtros por dominio y tipo</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-green">GET</span></td>
+            <td><code>/findings</code></td>
+            <td>Hallazgos con filtro por severidad, business_impact y recomendación AI</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-green">GET</span></td>
+            <td><code>/scans</code></td>
+            <td>Historial de escaneos con estado y cantidad de hallazgos por ciclo</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-indigo">POST</span></td>
+            <td><code>/scan/trigger</code></td>
+            <td>Escaneo manual inmediato — requiere API Key válida</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       FUENTES OSINT
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="fuentes">
+    <div class="section-header">
+      <h2>Fuentes OSINT y cobertura</h2>
+      <p>Orígenes de datos utilizados por el scanner y cobertura de detección.</p>
+    </div>
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr><th>Fuente</th><th>Tipo</th><th>Datos obtenidos</th><th>Cobertura</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>crt.sh</strong></td>
+            <td><span class="badge badge-indigo">Pasiva</span></td>
+            <td>Certificate Transparency logs → subdominios históricos</td>
+            <td><span class="badge badge-green">Alta</span></td>
+            <td><span class="badge badge-green">Activa</span></td>
+          </tr>
+          <tr>
+            <td><strong>DNS brute-force</strong></td>
+            <td><span class="badge badge-amber">Semi-activa</span></td>
+            <td>80 prefijos comunes (gov, mail, api, dev, staging…)</td>
+            <td><span class="badge badge-amber">Media</span></td>
+            <td><span class="badge badge-green">Activa</span></td>
+          </tr>
+          <tr>
+            <td><strong>SSL/TLS Verification</strong></td>
+            <td><span class="badge badge-indigo">Pasiva</span></td>
+            <td>Certs expirados, CN mismatch, cadenas inválidas</td>
+            <td><span class="badge badge-green">Alta</span></td>
+            <td><span class="badge badge-green">Activa</span></td>
+          </tr>
+          <tr>
+            <td><strong>TCP Port Scan</strong></td>
+            <td><span class="badge badge-amber">Activa</span></td>
+            <td>18 puertos estándar: 80, 443, 22, 21, 3306, 5432…</td>
+            <td><span class="badge badge-amber">Media</span></td>
+            <td><span class="badge badge-green">Activa</span></td>
+          </tr>
+          <tr>
+            <td><strong>Banner Grabbing</strong></td>
+            <td><span class="badge badge-amber">Activa</span></td>
+            <td>Versiones de servicios expuestos (nginx, apache, openssh)</td>
+            <td><span class="badge badge-amber">Media</span></td>
+            <td><span class="badge badge-green">Activa</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;margin-top:20px;">
+      <div class="stat-card">
+        <div class="stat-value" style="color:#4f46e5;">500</div>
+        <div class="stat-label">Máx. subdominios/scan</div>
+        <div class="stat-sub">configurable por env</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:#059669;">18</div>
+        <div class="stat-label">Puertos escaneados</div>
+        <div class="stat-sub">TCP connect + banner</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:#4f46e5;">90d</div>
+        <div class="stat-label">TTL hallazgos</div>
+        <div class="stat-sub">Auto-eliminación Firestore</div>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div>
+        <strong>Scope autorizado obligatorio:</strong> el scanner solo opera sobre dominios explícitamente
+        listados en <code>TARGET_DOMAINS</code>. No realiza explotación activa, fuzzing de autenticación
+        ni ataques de fuerza bruta. Los dominios deben estar autorizados por el cliente antes de activar
+        el escaneo automático en producción.
+      </div>
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-icon">💡</div>
+      <div>
+        <strong>Privacidad por diseño:</strong> SCAN-SIGHT I.A. no almacena contenido de páginas ni
+        credenciales. Solo registra metadatos técnicos (IPs, puertos, certs) con TTL de 90 días en
+        Firestore, minimizando la retención de datos sensibles.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       CASOS DE USO IA
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="casos-uso">
+    <div class="section-header">
+      <h2>Casos de uso IA</h2>
+      <p>Escenarios de análisis validados con Google Gemini 2.5 Flash (generativelanguage API).</p>
+    </div>
+
+    <div class="card">
+      <h3>Lógica de análisis de hallazgos</h3>
+      <p>El analyzer recibe delta_events y genera contexto de riesgo de negocio:</p>
+      <div style="background:#0f172a;border-radius:8px;padding:20px;margin:12px 0;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.8;color:#e2e8f0;overflow-x:auto;">
+        <span style="color:#94a3b8;"># Vertex AI Analyzer — Evaluación de riesgo</span><br>
+        <span style="color:#7dd3fc;">def</span> <span style="color:#fbbf24;">analyze_finding</span>(finding: <span style="color:#7dd3fc;">dict</span>) -><br>
+        &nbsp;&nbsp;prompt = build_risk_prompt(finding)<br>
+        &nbsp;&nbsp;response = gemini.<span style="color:#7dd3fc;">generate</span>(prompt)<br>
+        &nbsp;&nbsp;<span style="color:#7dd3fc;">if</span> response.risk_level == <span style="color:#86efac;">"CRITICAL"</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7dd3fc;">return</span> sla_hours=<span style="color:#86efac;">2</span>, alert=<span style="color:#86efac;">True</span><br>
+        &nbsp;&nbsp;<span style="color:#7dd3fc;">return</span> sla_hours=<span style="color:#86efac;">48</span>, alert=<span style="color:#86efac;">False</span>
+      </div>
+      <p style="font-size:13px;color:#64748b;margin:0;">Solo los hallazgos con <code>state_hash</code> diferente al escaneo anterior son enviados a Gemini, reduciendo el costo de inferencia en escaneos sin cambios.</p>
+    </div>
+
+    <div class="card">
+      <h3>Hallazgos típicos y severidad AI</h3>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px;">
+        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:20px;background:#fef2f2;">
+          <div style="font-size:14px;font-weight:700;color:#991b1b;margin-bottom:8px;">🔴 Puerto 22 (SSH) expuesto</div>
+          <p style="font-size:13px;color:#475569;margin-bottom:8px;">Acceso SSH sin restricción de IP de origen en subdominio gubernamental.</p>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#dc2626;font-weight:600;">Risk: CRITICAL | SLA sugerido: 2h</div>
+        </div>
+        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:20px;background:#fef2f2;">
+          <div style="font-size:14px;font-weight:700;color:#991b1b;margin-bottom:8px;">🔴 Certificado SSL expirado</div>
+          <p style="font-size:13px;color:#475569;margin-bottom:8px;">Cert caducado en dominio activo — usuarios ven advertencia de seguridad del navegador.</p>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#dc2626;font-weight:600;">Risk: CRITICAL | SLA sugerido: 4h</div>
+        </div>
+        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:20px;">
+          <div style="font-size:14px;font-weight:700;color:#92400e;margin-bottom:8px;">🟡 Subdominio staging expuesto</div>
+          <p style="font-size:13px;color:#475569;margin-bottom:8px;">Entorno de pruebas accesible desde internet sin autenticación.</p>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#d97706;font-weight:600;">Risk: HIGH | SLA sugerido: 24h</div>
+        </div>
+        <div style="border:1px solid #e2e8f0;border-radius:10px;padding:20px;">
+          <div style="font-size:14px;font-weight:700;color:#065f46;margin-bottom:8px;">🟢 Nuevo subdominio detectado</div>
+          <p style="font-size:13px;color:#475569;margin-bottom:8px;">Subdominio previamente desconocido aparece en Certificate Transparency.</p>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#059669;font-weight:600;">Risk: INFO | SLA sugerido: 72h</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Diferenciadores vs. herramientas EASM tradicionales</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Factor</th><th>Herramienta tradicional</th><th>Cyber-Sight AI</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Análisis de hallazgos</strong></td>
+            <td>Scores genéricos CVSS sin contexto de negocio</td>
+            <td><span class="badge badge-indigo">Impacto en español para el CISO</span></td>
+          </tr>
+          <tr>
+            <td><strong>Costo de operación</strong></td>
+            <td>Licencias anuales $10K–$50K USD</td>
+            <td><span class="badge badge-green">~$35 USD/mes serverless</span></td>
+          </tr>
+          <tr>
+            <td><strong>Personalización</strong></td>
+            <td>Fija, sin acceso al código</td>
+            <td><span class="badge badge-indigo">Open · adaptable a cualquier cliente</span></td>
+          </tr>
+          <tr>
+            <td><strong>Integración</strong></td>
+            <td>Exportación manual de reportes</td>
+            <td><span class="badge badge-green">API REST + Dashboard en tiempo real</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚡</div>
+      <div>
+        <strong>Módulo de prospecting:</strong> la misma lógica de escaneo se usa en <code>prospecting/</code>
+        para generar informes comerciales personalizados a empresas objetivo. Un prospecto recibe un
+        informe con sus vulnerabilidades reales antes de la primera llamada de ventas.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       ESTRUCTURA DE ARCHIVOS
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="estructura">
+    <div class="section-header">
+      <h2>Estructura de archivos</h2>
+      <p>Descripción de cada carpeta y componente del proyecto.</p>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+        <code style="color:#334155;font-size:13px;">scanner-ia/</code>
+        <span style="font-size:12px;color:#94a3b8;margin-left:8px;">raíz del proyecto</span>
+      </div>
+      <div style="padding:8px 16px;">
+        <div class="file-tree">
+
+          <div class="tree-row">
+            <div class="tree-path"><span class="file-name">template.yaml</span></div>
+            <div class="tree-desc">IaC original AWS SAM — ya no se usa en producción. Mantenido como referencia histórica de la arquitectura inicial.</div>
+          </div>
+          <div class="tree-row">
+            <div class="tree-path"><span class="file-name">.env.example</span></div>
+            <div class="tree-desc">Variables de entorno requeridas: VITE_API_URL, VITE_API_KEY, GCP Project ID.</div>
+          </div>
+
+          <div class="tree-row" style="margin-top:8px;">
+            <div class="tree-path"><span class="folder-name">src/</span></div>
+            <div class="tree-desc">Código fuente de todas las funciones Lambda.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="folder-name">layers/osint_layer/</span></div>
+            <div class="tree-desc">Lambda Layer con dependencias Python: requests, dnspython, google-cloud-aiplatform.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="folder-name">common/</span></div>
+            <div class="tree-desc">Módulos compartidos entre funciones.</div>
+          </div>
+          <div class="tree-row indent-2">
+            <div class="tree-path"><span class="file-name">config.py</span></div>
+            <div class="tree-desc">Configuración centralizada + lectura de secretos desde Secrets Manager.</div>
+          </div>
+          <div class="tree-row indent-2">
+            <div class="tree-path"><span class="file-name">logger.py</span></div>
+            <div class="tree-desc">Logger JSON estructurado para CloudWatch.</div>
+          </div>
+          <div class="tree-row indent-2">
+            <div class="tree-path"><span class="file-name">storage.py</span></div>
+            <div class="tree-desc">Abstracción de Cloud Storage + Firestore con detección de Delta (state_hash SHA-256) y gestión de clientes SaaS.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="folder-name">orchestrator/</span></div>
+            <div class="tree-desc"><code>handler.py</code> — coordina el ciclo completo, invoca scanners en paralelo.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="folder-name">subdomain_scanner/</span></div>
+            <div class="tree-desc"><code>handler.py</code> — consulta crt.sh, brute-force DNS, verifica SSL de cada subdominio.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="folder-name">port_scanner/</span></div>
+            <div class="tree-desc"><code>handler.py</code> — TCP connect en 18 puertos, banner grabbing, 50 scans concurrentes.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="folder-name">vertex_ai_analyzer/</span></div>
+            <div class="tree-desc"><code>handler.py</code> + <code>prompts.py</code> — integración Gemini 2.5 Flash vía API Key, análisis de riesgo en español, fallback heurístico por tipo de hallazgo.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="folder-name">api/</span></div>
+            <div class="tree-desc"><code>handler.py</code> — backend REST del dashboard, 5 endpoints con API Key.</div>
+          </div>
+
+          <div class="tree-row" style="margin-top:8px;">
+            <div class="tree-path"><span class="folder-name">frontend/</span></div>
+            <div class="tree-desc">Dashboard React 18 + Vite + Tailwind CSS + Recharts.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="file-name">vite.config.js / tailwind.config.js</span></div>
+            <div class="tree-desc">Configuración del bundler y framework CSS.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="folder-name">src/components/</span></div>
+            <div class="tree-desc"><code>Dashboard.jsx</code> · <code>FindingsTable.jsx</code> · <code>AssetInventory.jsx</code> · <code>Sidebar.jsx</code></div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="file-name">src/api/client.js</span></div>
+            <div class="tree-desc">Cliente API con modo mock (<code>VITE_USE_MOCK=true</code>) para desarrollo sin backend.</div>
+          </div>
+
+          <div class="tree-row" style="margin-top:8px;">
+            <div class="tree-path"><span class="folder-name">prospecting/</span></div>
+            <div class="tree-desc">Módulo de prospección comercial autónoma.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="file-name">scan_prospect.py</span></div>
+            <div class="tree-desc">Escanea dominios de prospectos y genera hallazgos de superficie de ataque.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="file-name">generate_report.py</span></div>
+            <div class="tree-desc">Genera informe de seguridad personalizado para cada prospecto.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="file-name">send_report.py</span></div>
+            <div class="tree-desc">Envío automatizado del informe por email al prospecto.</div>
+          </div>
+          <div class="tree-row indent-1">
+            <div class="tree-path"><span class="file-name">dominios_prospectos.txt</span></div>
+            <div class="tree-desc">Lista de dominios a prospectar.</div>
+          </div>
+
+          <div class="tree-row" style="margin-top:8px;">
+            <div class="tree-path"><span class="folder-name">tests/unit/</span></div>
+            <div class="tree-desc">Tests unitarios con pytest. <code>test_subdomain_scanner.py</code> · <code>test_port_scanner.py</code></div>
+          </div>
+
+          <div class="tree-row" style="margin-top:8px;">
+            <div class="tree-path"><span class="folder-name">archivos/</span></div>
+            <div class="tree-desc">Documentación del proyecto: <code>bitacora.html</code> · <code>costos.html</code></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       INTEGRACIONES EXTERNAS
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="integraciones">
+    <div class="section-header">
+      <h2>Integraciones externas</h2>
+      <p>Servicios externos y variables de entorno requeridas.</p>
+    </div>
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr><th>Servicio</th><th>Uso</th><th>Credencial / Variable</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Google Gemini 2.5 Flash</strong></td>
+            <td>Análisis de hallazgos vía <code>generativelanguage.googleapis.com</code></td>
+            <td>Variable de entorno <code>GEMINI_API_KEY</code> en Cloud Function</td>
+            <td><span class="badge badge-green">Activo en producción</span></td>
+          </tr>
+          <tr>
+            <td><strong>crt.sh API</strong></td>
+            <td>Certificate Transparency logs para descubrir subdominios</td>
+            <td>Sin autenticación (API pública)</td>
+            <td><span class="badge badge-green">Activo</span></td>
+          </tr>
+          <tr>
+            <td><strong>Gmail SMTP (cPanel)</strong></td>
+            <td>Envío de alertas y reportes de cortesía. Servidor <code>s530.v2nets.com:465</code></td>
+            <td>Variable <code>GMAIL_USER</code> + <code>GMAIL_APP_PASSWORD</code> en Cloud Function <code>api</code></td>
+            <td><span class="badge badge-green">Activo en producción</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cloud Scheduler (GCP)</strong></td>
+            <td>Trigger automático de scans cada 6h</td>
+            <td>Job <code>0 */6 * * *</code> · zona America/Santiago</td>
+            <td><span class="badge badge-green">Activo</span></td>
+          </tr>
+          <tr>
+            <td><strong>CloudPanel + Compute Engine VM</strong></td>
+            <td>Servidor de producción para scan.wayweb.cl</td>
+            <td>IP: <code>34.134.152.97</code> · Panel: <code>:8443</code> · usuario: <code>mfadmin30</code></td>
+            <td><span class="badge badge-green">Operativo</span></td>
+          </tr>
+          <tr>
+            <td><strong>Firestore (GCP)</strong></td>
+            <td>Base de datos de assets, findings y clientes SaaS</td>
+            <td>Application Default Credentials (ADC) automático en Cloud Functions</td>
+            <td><span class="badge badge-green">Activo</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">🔑</div>
+      <div>
+        <strong>Credenciales en GCP:</strong> las Cloud Functions usan <strong>Application Default Credentials (ADC)</strong>
+        automáticamente para acceder a Firestore y Cloud Storage, sin necesidad de Secrets Manager.
+        La API Key de Gemini y las credenciales SMTP se inyectan como variables de entorno directamente en la
+        configuración de cada Cloud Function.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       BITÁCORA DE CAMBIOS
+  ══════════════════════════════════════════════════════
+
+  INSTRUCCIONES PARA AGREGAR NUEVAS ENTRADAS:
+  1. Copia el bloque <article class="entry"> ... </article> más reciente.
+  2. Pégalo justo debajo de la apertura de <div class="timeline">.
+  3. Cambia el ID (ej: id="sesion-2").
+  4. Actualiza la fecha, los badges, el título y el resumen.
+  5. Completa los bloques "Qué se hizo", "Por qué" y "Cómo".
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="bitacora">
+    <div class="section-header">
+      <h2>Bitácora de cambios</h2>
+      <p>Registro acumulativo de sesiones de trabajo. Más reciente primero.</p>
+    </div>
+
+    <div class="timeline">
+
+      <!-- ── ENTRADA #9 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-9">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-06-10</span>
+          <span class="badge badge-indigo">Sesión #9</span>
+          <span class="badge badge-purple">Email · UX móvil · Risk Score · Filtros · Clientes</span>
+        </div>
+
+        <div class="entry-title">Rediseño completo del email de reporte, corrección del Risk Score, filtros por cliente en Hallazgos e Inventario, y mejoras UX móvil</div>
+        <div class="entry-summary">
+          Sesión enfocada en múltiples correcciones y mejoras detectadas en pruebas reales de producción.
+          Se corrigió el Risk Score que siempre mostraba <code>—</code> tras el rescan (fallo en normalización de severidad a mayúsculas).
+          Se rediseñó completamente el email de reporte de cortesía: paleta navy/azul profesional,
+          hallazgos humanizados en español llano, cards apiladas para móvil en lugar de tabla de 3 columnas,
+          score+intro en columna única (compatible móvil), CTA WhatsApp Business, y footer de marca.
+          Se eliminó el email "Escaneo iniciado" (innecesario). Se agregó selector de cliente en
+          Hallazgos e Inventario para filtrar por empresa. Se ordenaron los clientes por Risk Score descendente.
+          Se corrigió el solapamiento de íconos en el formulario de edición de clientes.
+          Se normalizó el dominio de entrada en el subdomain_scanner.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>¿Qué se hizo?</h4>
+            <p><strong>Fix Risk Score mostrando <code>—</code>:</strong> <code>_compute_risk_score()</code> no normalizaba severidad a mayúsculas — Firestore guarda "medium"/"high" en minúsculas pero el código comparaba con "MEDIUM"/"HIGH". Fix: <code>.upper()</code> en severidad. Además se removió el return anticipado que dependía de que el cliente tuviera email, haciendo que el score siempre se guarde en Firestore. Se agregó peso para severidad LOW (×1) y topes por nivel: sin CRITICAL+HIGH → máx 49, sin CRITICAL → máx 74.</p>
+            <p><strong>Email rediseñado (cortesía):</strong> paleta navy/azul oscuro (fondo <code>#060f1a</code>, contenedor <code>#0b1929</code>). Encabezado con logo SCAN-SIGHT I.A. "Sitio Web:" en lugar de "Target:". Score+intro apilados verticalmente (score centrado arriba, texto abajo) — compatible con clientes de email y móvil. Hallazgos como cards individuales con nivel en español ("Crítico", "Alto", "Medio"), nombre del activo y descripción humanizada. CTA WhatsApp con número +56961982297 y mensaje pre-cargado. Footer: "Este reporte es confidencial. Generado por SCAN-SIGHT I.A, propiedad de Wayweb SPA."</p>
+            <p><strong>_humanize_finding():</strong> nueva función en <code>src/api/handler.py</code> que convierte hallazgos técnicos a español para no técnicos. Maneja puertos conocidos (FTP, SSH, Telnet, MySQL, RDP, Redis, MongoDB), SSL expirado, subdominios desconocidos, y fallback genérico. Retorna: nivel, color, activo, que_significa, accion.</p>
+            <p><strong>Eliminación del email "Escaneo iniciado":</strong> removido completamente el envío en <code>handle_trigger_scan_for_client()</code>. El cliente solo recibe el email de reporte final.</p>
+            <p><strong>Selector de cliente en Hallazgos:</strong> <code>FindingsTable.jsx</code> ahora tiene un dropdown con todos los clientes. Al seleccionar uno, filtra los hallazgos por dominio usando <code>?domain=</code> en la URL. Así al entrar desde el sidebar no se mezclan hallazgos de todas las empresas.</p>
+            <p><strong>Selector de cliente en Inventario:</strong> <code>AssetInventory.jsx</code> tiene el mismo dropdown. Filtra el inventario por empresa sin necesitar navegar desde la vista de clientes.</p>
+            <p><strong>Orden de clientes por Risk Score:</strong> <code>ClientsView.jsx</code> ordena por defecto de mayor a menor score. Encabezado "Risk Score" clickable para alternar dirección. Los clientes sin score van al final.</p>
+            <p><strong>Fix íconos en formulario edición:</strong> eliminados los íconos (Globe, Mail, DollarSign, CalendarClock) de los inputs del formulario de clientes. El CSS <code>input-cs</code> con <code>padding: 8px 12px</code> hardcoded no permitía que el padding-left de Tailwind funcionara correctamente — los íconos solapaban el texto escrito.</p>
+            <p><strong>Normalización de dominio en subdomain_scanner:</strong> el <code>handler.py</code> del scanner ahora normaliza el dominio de entrada removiendo <code>https://</code>, <code>www.</code>, paths, queries y fragmentos antes de procesar.</p>
+            <p><strong>Fix filtro exact-match en handle_scan_notify:</strong> reemplazado el filtro de substring por <code>_matches_notify_domain()</code> — compara dominio exacto o subdominio directo usando <code>_clean_domain()</code>.</p>
+            <p><strong>Fix handle_get_assets:</strong> filtro de dominio cambiado de consulta Firestore (<code>where ==</code> solo match exacto) a filtrado Python en memoria, usando <code>_clean_domain()</code> para aceptar el dominio exacto o cualquier subdominio.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Errores corregidos</h4>
+            <table class="files-table">
+              <thead><tr><th>Error</th><th>Causa</th><th>Solución</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>Risk Score muestra <code>—</code> después de rescan</td>
+                  <td>Severidades en Firestore en minúsculas ("medium"), código comparaba con mayúsculas ("MEDIUM") → counts siempre 0 → score 0, sin guardar</td>
+                  <td><code>.upper()</code> en severidad. Removido return anticipado por falta de email.</td>
+                </tr>
+                <tr>
+                  <td>Hallazgos muestran todas las empresas</td>
+                  <td>Sin parámetro <code>?domain=</code> al acceder desde sidebar → API devuelve todo</td>
+                  <td>Selector dropdown de clientes en <code>FindingsTable.jsx</code></td>
+                </tr>
+                <tr>
+                  <td>Inventario sin filtro de empresa</td>
+                  <td>No había selector de cliente en <code>AssetInventory.jsx</code></td>
+                  <td>Mismo dropdown que en Hallazgos, con estado local <code>selectedDomain</code></td>
+                </tr>
+                <tr>
+                  <td>Email con layout roto en móvil (tabla 2 columnas)</td>
+                  <td>Score y texto intro en tabla 2-col → texto muy estrecho en pantallas pequeñas</td>
+                  <td>Convertido a bloques apilados verticalmente: score centrado, texto abajo</td>
+                </tr>
+                <tr>
+                  <td>Email con tabla de hallazgos no legible en móvil</td>
+                  <td>Tabla 3 columnas (NIVEL · ACTIVO · DETALLE) demasiado ancha</td>
+                  <td>Reemplazada por cards apiladas, una por hallazgo</td>
+                </tr>
+                <tr>
+                  <td>Íconos solapan texto en formulario de edición</td>
+                  <td>CSS <code>padding: 8px 12px</code> hardcoded en <code>input-cs</code> no sobreescribible con Tailwind <code>pl-8</code></td>
+                  <td>Eliminados los íconos del formulario</td>
+                </tr>
+                <tr>
+                  <td>handle_scan_notify filtraba con substring match</td>
+                  <td>Dominio "cauchoval.cl" matcheaba "cauchoval.cl.otrodominio.cl" erróneamente</td>
+                  <td>Nuevo <code>_matches_notify_domain()</code> con exact + subdomain check</td>
+                </tr>
+                <tr>
+                  <td>handle_get_assets no incluía subdominios</td>
+                  <td>Firestore <code>where("domain", "==", domain)</code> solo match exacto, no subdomains</td>
+                  <td>Fetch all + filtro Python con <code>_clean_domain()</code> y check endswith</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos modificados en esta sesión</h4>
+            <table class="files-table">
+              <thead>
+                <tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>src/api/handler.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Fix <code>_compute_risk_score()</code> con <code>.upper()</code> + caps por nivel. Nueva función <code>_humanize_finding()</code>. Rediseño completo <code>_build_cortesia_email()</code>: paleta navy, score+intro apilados, cards de hallazgos. CTA WhatsApp. Fix <code>_matches_notify_domain()</code>. Removido envío email "Escaneo iniciado". Fix <code>handle_get_assets()</code> con filtro Python en lugar de Firestore where. Fix <code>handle_get_clients()</code> enrich_score con exact+subdomain match. Fix <code>handle_trigger_scan_for_client()</code>: sin email de inicio.</td></tr>
+                <tr><td><code>src/subdomain_scanner/handler.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Normalización del dominio de entrada: remoción de <code>https://</code>, <code>www.</code>, paths, queries y fragmentos al inicio del handler.</td></tr>
+                <tr><td><code>frontend/src/components/FindingsTable.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Importado <code>useClients</code>. Selector dropdown de cliente con todos los clientes registrados. Filtra por <code>?domain=</code> en URL al seleccionar.</td></tr>
+                <tr><td><code>frontend/src/components/AssetInventory.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Importado <code>useClients</code>. Estado <code>selectedDomain</code>. Selector dropdown de cliente. <code>apiParams</code> incluye <code>domain</code> cuando está seleccionado.</td></tr>
+                <tr><td><code>frontend/src/components/ClientsView.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Ordenación por Risk Score descendente (defecto) con toggle clickando header. Eliminados íconos de inputs del formulario de edición. <code>ClientMobileCard</code> reescrito con sección expandida completa: botones INF-CORTESÍA, INF-COMPLETO, Enviar por Email. Modal de email via <code>createPortal</code>.</td></tr>
+                <tr><td><code>c:\Users\mfran\.claude\settings.json</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Agregados permisos automáticos para PowerShell: <code>Start-Job</code>, <code>Set-Location</code>, <code>cd</code>, <code>pscp.exe</code>, <code>plink.exe</code>, <code>gcloud compute ssh</code>, <code>Select-Object</code>.</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Esta entrada. Sesión #9 agregada. Header actualizado a 2026-06-10 / Sesión #9.</td></tr>
+                <tr><td><code>archivos/costos.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Sesión #9 registrada. Fecha de última actualización actualizada.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Operaciones en producción</h4>
+            <table class="files-table">
+              <thead><tr><th>Acción</th><th>Resultado</th></tr></thead>
+              <tbody>
+                <tr><td>Deploy <code>gcloud functions deploy api</code> (fix risk score + email rediseñado)</td><td><span class="change-created">OK · revisión api-00042-yad · ACTIVE</span></td></tr>
+                <tr><td>Build React frontend + upload pscp a scan.wayweb.cl</td><td><span class="change-created">OK · frontend actualizado en producción</span></td></tr>
+                <tr><td>Prueba scan cauchoval.cl — Risk Score corregido</td><td><span class="change-created">OK · Risk Score 49 (Medio) visible en dashboard</span></td></tr>
+                <tr><td>Prueba scan jacuzzi.cl — email de reporte recibido</td><td><span class="change-created">OK · email llegó a bandeja de entrada sin spam</span></td></tr>
+                <tr><td>Verificación layout móvil del email</td><td><span class="change-created">OK · cards apiladas, score centrado, legible en móvil</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Detalles técnicos del nuevo email de cortesía</h4>
+            <div class="callout callout-info">
+              <div class="callout-icon">📧</div>
+              <div>
+                <strong>Paleta de colores:</strong> fondo <code>#060f1a</code> · contenedor <code>#0b1929</code> · bordes <code>#1e3a5f</code> · texto principal <code>#f1f5f9</code> · texto secundario <code>#94a3b8</code>.<br>
+                <strong>Score:</strong> número grande centrado (52px) con color según nivel → badge de nivel debajo.<br>
+                <strong>Hallazgos:</strong> función <code>_humanize_finding()</code> traduce tipo técnico a descripción y acción en español simple. Hasta 5 hallazgos más graves.<br>
+                <strong>WhatsApp CTA:</strong> <code>https://wa.me/56961982297?text=...</code> con mensaje pre-cargado mencionando el dominio y el Risk Score.<br>
+                <strong>Footer:</strong> "Este reporte es confidencial. Generado por SCAN-SIGHT I.A, propiedad de Wayweb SPA."
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #9 ──────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #8 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-8">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-06-08</span>
+          <span class="badge badge-indigo">Sesión #8</span>
+          <span class="badge badge-purple">UX · PDF · Hallazgos · Sidebar · Firestore limpio</span>
+        </div>
+
+        <div class="entry-title">Mejoras UX: modal "Nuevo scanner" con tabs, PDF apto para impresión, orden de hallazgos y limpieza Firestore</div>
+        <div class="entry-summary">
+          Sesión enfocada en pulir la experiencia de usuario y corregir problemas detectados en producción.
+          Se renombró el modal a "Nuevo scanner" con sistema de tabs (Clientes registrados / Nuevo cliente)
+          en <code>Dashboard.jsx</code> y <code>ClientsView.jsx</code>. Se rediseñó el PDF de exportación
+          para impresión en blanco y negro (fondo blanco, tabla con filas claras, separadores de color).
+          Se corrigió el orden de hallazgos mostrando el más reciente primero (fix de ordenación por timestamp
+          en Firestore). Se mejoraron las descripciones fallback de Gemini reemplazando el genérico
+          "Requiere revisión manual" por textos específicos por tipo de hallazgo. Se eliminó el botón
+          "Iniciar escaneo" del sidebar (scheduler automático innecesario en el modelo de prospecting actual).
+          Se realizó limpieza total de Firestore (45 hallazgos + 42 activos eliminados) para partir de cero.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>¿Qué se hizo?</h4>
+            <p><strong>Modal "Nuevo scanner" con tabs:</strong> se renombró de "Nuevo escaneo" a "Nuevo scanner" en <code>Dashboard.jsx</code> (botón en header + título del modal) y en <code>ClientsView.jsx</code>. El modal ahora tiene dos tabs: "Clientes registrados" muestra la lista scrollable de clientes existentes para seleccionar y escanear; "Nuevo cliente" conserva el formulario original con los campos empresa/dominio/email.</p>
+            <p><strong>PDF para impresión:</strong> <code>export.js</code> rediseñado completamente con fondo blanco, cabecera oscura solo en la parte superior (único elemento negro), filas de tabla en blanco y gris claro alternadas, borde izquierdo de color como indicador de severidad en recomendaciones. Compatible con impresión en B&amp;N y color. Se corrigió el bug que generaba páginas en blanco (<code>didDrawPage</code> dibujaba un rect blanco sobre el contenido).</p>
+            <p><strong>Orden de hallazgos (más reciente primero):</strong> <code>get_all_findings</code> en <code>storage.py</code> obtiene <code>max(limit×3, 500)</code> documentos antes de ordenar, porque Firestore devuelve en orden de inserción y el <code>limit(100)</code> anterior podía excluir los más recientes. La key de ordenación maneja objetos datetime de Firestore con <code>hasattr(ts, "isoformat")</code>.</p>
+            <p><strong>Fallback Gemini mejorado:</strong> dos funciones helper <code>_fallback_business_impact(f)</code> y <code>_fallback_recommendation(f)</code> en <code>handler.py</code> reemplazan el genérico "Requiere revisión manual." con textos específicos según <code>finding_type</code> (OPEN_PORT, SSL_EXPIRY, SUBDOMAIN/ASSET).</p>
+            <p><strong>Sidebar limpio:</strong> eliminada la sección completa del scheduler en <code>Sidebar.jsx</code>: botón "Iniciar escaneo", barra de progreso, texto "Próximo escaneo ~3h 42m", footer "Monitoreo activo" con punto verde pulsante, y los imports <code>useTriggerScan</code>/<code>useState</code> + handlers <code>handleScan</code>, <code>scanning</code>, <code>result</code>.</p>
+            <p><strong>Limpieza Firestore:</strong> script Python local con <code>firebase-admin</code> + Application Default Credentials eliminó 45 hallazgos y 42 activos. Firestore quedó vacío, listo para nuevos escaneos con datos limpios.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Errores corregidos</h4>
+            <table class="files-table">
+              <thead><tr><th>Error</th><th>Causa</th><th>Solución</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>PDF con páginas en blanco</td>
+                  <td><code>didDrawPage</code> dibujaba <code>doc.rect(0,0,...)</code> blanco sobre todo el contenido de cada página nueva</td>
+                  <td>Eliminado el <code>setFillColor + rect</code> del callback. Solo queda <code>drawPageHeader()</code></td>
+                </tr>
+                <tr>
+                  <td>PDF con páginas oscuras en <code>addPage()</code></td>
+                  <td>Bloques <code>doc.addPage()</code> incluían <code>doc.rect()</code> con fondo oscuro</td>
+                  <td>Eliminados todos los <code>setFillColor + rect</code> de los bloques <code>addPage</code></td>
+                </tr>
+                <tr>
+                  <td>Hallazgos no ordenados (más antiguo primero)</td>
+                  <td>Firestore retorna en orden de inserción; <code>query.limit(100)</code> excluía los más recientes antes del sort Python</td>
+                  <td>Fetch <code>max(limit×3, 500)</code> docs → sort Python → slice <code>[:limit]</code></td>
+                </tr>
+                <tr>
+                  <td>Sort falla con timestamps datetime</td>
+                  <td>Timestamps en Firestore son objetos <code>datetime</code>, no strings; <code>str(ts)</code> ordena incorrectamente</td>
+                  <td><code>hasattr(ts, "isoformat")</code> → usa <code>ts.isoformat()</code>; fallback a <code>str(ts)</code></td>
+                </tr>
+                <tr>
+                  <td><code>_fallback_business_impact</code> not found</td>
+                  <td>Funciones helper referenciadas antes de su definición dentro de la clase</td>
+                  <td>Movidas a nivel de módulo, antes de la clase <code>GeminiAnalyzer</code></td>
+                </tr>
+                <tr>
+                  <td>Frontend no actualiza en servidor</td>
+                  <td>CloudPanel no sobreescribe archivos existentes; hash Vite cambia con cada build</td>
+                  <td>Eliminar archivos antiguos → subir nuevos → editar <code>index.html</code> directo en CloudPanel para actualizar hash JS/CSS</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos modificados en esta sesión</h4>
+            <table class="files-table">
+              <thead>
+                <tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>frontend/src/components/Dashboard.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Modal renombrado a "Nuevo scanner". Sistema de tabs: "Clientes registrados" (lista scrollable + selección + botón escanear) / "Nuevo cliente" (formulario original). Botón header actualizado.</td></tr>
+                <tr><td><code>frontend/src/components/ClientsView.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Modal de escaneo renombrado a "Nuevo scanner". Mismo sistema de tabs con prop <code>clients</code> y handler <code>onScanExisting</code>.</td></tr>
+                <tr><td><code>frontend/src/components/Sidebar.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Eliminados: botón "Iniciar escaneo", barra de progreso, "Próximo escaneo", footer "Monitoreo activo", imports <code>useTriggerScan</code>/<code>useState</code>, handlers de scan.</td></tr>
+                <tr><td><code>frontend/src/utils/export.js</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Rediseño completo PDF para impresión. Fondo blanco, solo header oscuro, filas alternas claras, borde izquierdo de color por severidad. Sin rects oscuros. Compatible B&amp;N y color.</td></tr>
+                <tr><td><code>src/api/common/storage.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td><code>get_all_findings</code>: fetch <code>max(limit×3, 500)</code> docs antes de ordenar. Key de sort maneja datetime objects con <code>hasattr(ts, "isoformat")</code>.</td></tr>
+                <tr><td><code>src/vertex_ai_analyzer/handler.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Funciones helper <code>_fallback_business_impact(f)</code> y <code>_fallback_recommendation(f)</code> a nivel de módulo. Descripciones específicas por tipo de hallazgo reemplazando "Requiere revisión manual."</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Esta entrada. Sesión #8 agregada. Header actualizado a 2026-06-08 / Sesión #8.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Operaciones en producción</h4>
+            <table class="files-table">
+              <thead><tr><th>Acción</th><th>Resultado</th></tr></thead>
+              <tbody>
+                <tr><td>Deploy <code>gcloud functions deploy vertex_ai_analyzer</code> (fix fallback)</td><td><span class="change-created">OK · nueva revisión activa</span></td></tr>
+                <tr><td>Deploy <code>gcloud functions deploy api</code> (fix ordering)</td><td><span class="change-created">OK · nueva revisión activa</span></td></tr>
+                <tr><td>Build React + upload CloudPanel (5 iteraciones por cambio de hash)</td><td><span class="change-created">OK · scan.wayweb.cl actualizado</span></td></tr>
+                <tr><td>Limpieza Firestore: 45 findings + 42 assets eliminados</td><td><span class="change-created">OK · Firestore vacío</span></td></tr>
+                <tr><td>Scan de prueba post-limpieza con cliente nuevo</td><td><span class="change-created">OK · email recibido · Risk Score 95</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Modelo de prospecting (contexto actualizado)</h4>
+            <div class="callout callout-info">
+              <div class="callout-icon">ℹ️</div>
+              <div>
+                <strong>Flujo operativo confirmado:</strong> Wayweb escanea manualmente dominios de prospectos seleccionados desde su base interna.
+                Revisa los hallazgos en el dashboard, decide si enviar el informe de cortesía, y solo entonces dispara el envío al cliente.
+                El scheduler automático (Cloud Scheduler cada 6h) sigue activo en GCP para clientes activos ya registrados,
+                pero el botón de "Iniciar escaneo" en la UI del sidebar fue eliminado por ser confuso y no necesario para este modelo.
+                La variable <code>INTERNAL_NOTIFY_EMAIL</code> en la Cloud Function <code>api</code> redirige todos los emails de notificación
+                a <code>pruebasdeenvio@wayweb.cl</code> internamente, evitando envíos accidentales a prospectos durante las pruebas.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #8 ──────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #7 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-7">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-06-08</span>
+          <span class="badge badge-indigo">Sesión #7</span>
+          <span class="badge badge-green">Gemini 2.5 Flash activado · Fase 3 al 100%</span>
+        </div>
+
+        <div class="entry-title">Activación completa de Gemini AI: migración de Vertex AI SDK a Generative Language API con API Key</div>
+        <div class="entry-summary">
+          Se completó la activación de Google Gemini AI para el módulo <code>vertex_ai_analyzer</code>.
+          Se detectó que todos los modelos Gemini nuevos (2.x, 2.5.x) ya no están disponibles vía
+          <code>aiplatform.googleapis.com</code> (Vertex AI OAuth) sino únicamente en
+          <code>generativelanguage.googleapis.com</code> con API Key. Se habilitó la API, se creó
+          una API Key para el proyecto <code>ia-eccoflusso</code>, se identificaron los modelos disponibles
+          y se reescribió completamente el <code>handler.py</code> para usar <code>requests</code> HTTP
+          directo sin el SDK de <code>vertexai</code>. El análisis con <code>gemini-2.5-flash</code>
+          fue verificado en producción: <code>overall_risk_level: HIGH</code>, <code>risk_score: 80</code>,
+          <code>alerts_count: 1</code>. La Fase 3 queda 100% completada.
+        </div>
+
+        <div class="entry-blocks">
+          <div class="entry-block full">
+            <h4>Cambios técnicos</h4>
+            <p><strong>Causa raíz del problema:</strong> los modelos Gemini 2.x y 2.5.x ya no se sirven vía Vertex AI (<code>aiplatform.googleapis.com</code>). La única ruta disponible es <code>generativelanguage.googleapis.com</code> con API Key. Modelos confirmados disponibles: <code>gemini-2.5-flash</code>, <code>gemini-2.5-pro</code>, <code>gemini-2.0-flash-001</code>, <code>gemini-2.0-flash-lite-001</code>.</p>
+            <p><strong>Reescritura del handler:</strong> se eliminó la dependencia de <code>vertexai</code> SDK. La clase <code>GeminiAnalyzer</code> ahora usa <code>requests.post()</code> directo al endpoint <code>https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}</code>. El <code>SYSTEM_PROMPT</code> se envía en el campo <code>system_instruction</code> del payload JSON.</p>
+            <p><strong>Variables de entorno nuevas:</strong> <code>GEMINI_API_KEY</code> y <code>GEMINI_MODEL=gemini-2.5-flash</code> configuradas en la Cloud Function. La variable legacy <code>VERTEX_AI_MODEL</code> quedó en la función pero ya no es usada por el nuevo código.</p>
+            <p><strong>Verificación en producción:</strong> llamada HTTP directa a la función desplegada con un hallazgo de prueba (<code>EXPOSED_PORT</code> puerto 22 SSH). Respuesta: <code>statusCode: 200</code>, <code>overall_risk_level: HIGH</code>, <code>risk_score: 80</code>, <code>gcs_key</code> creado en Cloud Storage.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Archivos modificados</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Cambio</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>src/vertex_ai_analyzer/handler.py</code></td><td><span class="change-modified">REESCRITO</span></td><td>Eliminado SDK <code>vertexai</code>. Nueva clase <code>GeminiAnalyzer</code> con <code>requests</code> HTTP a Generative Language API. Variables <code>GEMINI_API_KEY</code> y <code>GEMINI_MODEL</code>.</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">ACTUALIZADO</span></td><td>Sesión #7 agregada. Ítem "Activar Vertex AI" marcado como completado. Badge Fase 3 actualizado a "Completada ✓".</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block">
+            <h4>Deploy y verificación</h4>
+            <table class="files-table">
+              <thead><tr><th>Paso</th><th>Resultado</th></tr></thead>
+              <tbody>
+                <tr><td><code>gcloud functions deploy vertex_ai_analyzer</code></td><td><span class="change-created">OK · revisión vertex-ai-analyzer-00002-dop</span></td></tr>
+                <tr><td>API Key habilitada en <code>ia-eccoflusso</code></td><td><span class="change-created">generativelanguage.googleapis.com activa</span></td></tr>
+                <tr><td>Test en producción con hallazgo SSH puerto 22</td><td><span class="change-created">risk_score: 80 · overall_risk_level: HIGH</span></td></tr>
+                <tr><td>Fase 3 — todos los ítems del roadmap</td><td><span class="change-created">100% completada ✓</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </article>
+
+      <!-- ── ENTRADA #6 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-6">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-06-07</span>
+          <span class="badge badge-indigo">Sesión #6</span>
+          <span class="badge badge-green">Fase 3 completa · Email · Firestore · Primer scan comercial</span>
+        </div>
+
+        <div class="entry-title">Fase 3 completada: limpieza Firestore, email automático Gmail SMTP, inteligencia de puertos y primer escaneo comercial</div>
+        <div class="entry-summary">
+          Se completaron todos los ítems pendientes de la Fase 3. Se eliminaron 29 assets y 24 findings
+          de dominios incorrectos en Firestore. Se implementó el sistema de email automático con Gmail SMTP
+          (App Password) enviando dos emails por scan: inicio y reporte completo con Risk Score, estadísticas
+          y enlace al dashboard. Se enriqueció <code>_normalize_finding</code> con inteligencia heurística
+          para 17 puertos conocidos (impacto en negocio, recomendación, SLA sugerido). Se ejecutó el primer
+          escaneo comercial real contra <code>municipalidaddecodegua.cl</code>: 24 hallazgos detectados
+          (FTP en 7 subdominios, MySQL expuesto en 7 subdominios). La Fase 3 quedó 100% completada.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>¿Qué se hizo?</h4>
+            <p><strong>Limpieza Firestore:</strong> eliminados con script Python SDK todos los documentos de dominios fuera de scope — <code>hacienda.gob.cl</code> (9 assets + hallazgos), <code>tesoreria.cl</code> (6 assets), <code>municipalidaddecodegua.cl</code> (14 assets del scan anterior). 29 assets + 24 findings eliminados. Quedan 14 assets y 12 findings solo de <code>wayweb.cl</code>.</p>
+            <p><strong>Email automático Gmail SMTP:</strong> función <code>_send_email</code> con <code>smtplib.SMTP_SSL</code> + App Password de Gmail (<code>soporte@wayweb.cl</code>). Variables <code>GMAIL_USER</code> y <code>GMAIL_APP_PASSWORD</code> configuradas en Cloud Function <code>api</code>. Email verificado con <code>email_sent: true</code> en producción.</p>
+            <p><strong>Dos emails por scan:</strong> al disparar <code>POST /clients/scan</code> se envía email de inicio. Al finalizar el orchestrator llama <code>POST /clients/scan/notify</code> que calcula risk score, actualiza Firestore y envía email de reporte con Risk Score badge, cards CRITICAL/HIGH/MEDIUM y link al dashboard.</p>
+            <p><strong>Inteligencia de puertos (<code>_PORT_INTEL</code>):</strong> diccionario con 17 puertos conocidos (21, 22, 23, 25, 80, 110, 143, 443, 445, 3306, 3389, 5432, 6379, 8080, 8443, 27017). Cada entrada tiene: descripción, impacto en negocio, recomendación y SLA sugerido. Se aplica en tiempo real en <code>_normalize_finding</code> sin necesitar Gemini.</p>
+            <p><strong>Primer escaneo comercial:</strong> <code>municipalidaddecodegua.cl</code> — cliente actualizado con email real, scan disparado via <code>POST /clients/scan</code>. 24 hallazgos: FTP puerto 21 y MySQL puerto 3306 expuestos en 7 subdominios cada uno.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Resultados del primer scan comercial</h4>
+            <p><strong>Cliente:</strong> Municipalidad de Codegua (<code>municipalidaddecodegua.cl</code>)</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;">
+              <div style="text-align:center;background:#0f172a;border-radius:8px;padding:12px;">
+                <div style="font-size:22px;font-weight:800;color:#fb923c;">24</div>
+                <div style="font-size:11px;color:#64748b;">Hallazgos</div>
+              </div>
+              <div style="text-align:center;background:#0f172a;border-radius:8px;padding:12px;">
+                <div style="font-size:22px;font-weight:800;color:#f87171;">7</div>
+                <div style="font-size:11px;color:#64748b;">Subdominios afectados</div>
+              </div>
+            </div>
+            <p><strong>FTP puerto 21 expuesto</strong> en <code>cpanel</code>, <code>mail</code>, <code>webdisk</code>, <code>www</code>, <code>ftp</code>, <code>webmail</code>, <code>autodiscover</code> — transmisión de credenciales en texto plano. SLA: 4h.</p>
+            <p><strong>MySQL puerto 3306 expuesto</strong> en los mismos 7 subdominios — base de datos accesible desde internet. SLA: 2h.</p>
+            <p><strong>Email enviado</strong> a <code>soporte@wayweb.cl</code> con reporte completo al finalizar el scan.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Nuevos endpoints y funciones implementadas</h4>
+            <table class="files-table">
+              <thead><tr><th>Componente</th><th>Cambio</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>POST /clients/scan/notify</code></td><td><span class="change-created">NUEVO</span></td><td>Llamado por el orchestrator al finalizar un scan. Busca el cliente por dominio, calcula risk score, actualiza Firestore y envía email de reporte.</td></tr>
+                <tr><td><code>_send_email()</code></td><td><span class="change-created">NUEVO</span></td><td>Envío via Gmail SMTP_SSL + App Password. Sin dependencias externas (solo smtplib stdlib).</td></tr>
+                <tr><td><code>_build_scan_started_email()</code></td><td><span class="change-created">NUEVO</span></td><td>Template HTML oscuro con datos del dominio y scan_id. Enviado al disparar el scan.</td></tr>
+                <tr><td><code>_build_scan_complete_email()</code></td><td><span class="change-created">NUEVO</span></td><td>Template HTML con Risk Score badge, cards por severidad, alerta de hallazgos críticos/altos y link al dashboard.</td></tr>
+                <tr><td><code>_PORT_INTEL</code></td><td><span class="change-created">NUEVO</span></td><td>Diccionario con inteligencia heurística para 17 puertos: impacto, recomendación, SLA y severidad sugerida.</td></tr>
+                <tr><td><code>_normalize_finding()</code></td><td><span class="change-modified">MEJORADO</span></td><td>Ahora enriquece <code>business_impact</code>, <code>recommendation</code> y <code>suggested_sla_hours</code> usando <code>_PORT_INTEL</code> sin necesitar Gemini.</td></tr>
+                <tr><td>orchestrator <code>handler.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Variable <code>API_URL</code> nueva. Al finalizar cada dominio escaneado llama async a <code>/clients/scan/notify</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Variables de entorno configuradas en GCP</h4>
+            <table class="files-table">
+              <thead><tr><th>Variable</th><th>Función</th><th>Valor</th></tr></thead>
+              <tbody>
+                <tr><td><code>GMAIL_USER</code></td><td>api</td><td><code>soporte@wayweb.cl</code></td></tr>
+                <tr><td><code>GMAIL_APP_PASSWORD</code></td><td>api</td><td>App Password Gmail 16 chars (configurada en GCP Secret)</td></tr>
+                <tr><td><code>FROM_NAME</code></td><td>api</td><td><code>SCAN-SIGHT I.A. Wayweb</code></td></tr>
+                <tr><td><code>DASHBOARD_URL</code></td><td>api</td><td><code>https://scan.wayweb.cl</code></td></tr>
+                <tr><td><code>API_URL</code></td><td>orchestrator</td><td><code>https://us-central1-ia-eccoflusso.cloudfunctions.net/api</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #6 ──────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #5 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-5">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-06-07</span>
+          <span class="badge badge-indigo">Sesión #5</span>
+          <span class="badge badge-green">Deploy · GCP Cloud Functions · CloudPanel · Producción</span>
+        </div>
+
+        <div class="entry-title">Deploy Opción A: backend /clients en GCP y nuevo dist/ en scan.wayweb.cl — sistema en producción completo</div>
+        <div class="entry-summary">
+          Se desplegó el backend actualizado (Cloud Function <code>api</code>, revisión <code>api-00005-maw</code>)
+          con los 6 endpoints de gestión de clientes SaaS en GCP. Se recompiló el frontend React
+          (build limpio, 10 chunks, bundle principal 94 KB) y se publicó el nuevo <code>dist/</code>
+          en el servidor GCP via SCP. El sitio <code>scan.wayweb.cl</code> quedó operativo con
+          la vista <code>/clients</code>, exportación PDF/CSV/Excel y datos reales desde Firestore.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>¿Qué se hizo?</h4>
+            <p><strong>Preparación del deploy:</strong> se copió <code>src/common/</code> y <code>requirements.txt</code> al directorio <code>src/api/</code> (igual que hace <code>deploy.sh</code> paso 4) para que la Cloud Function tenga todos los módulos necesarios.</p>
+            <p><strong>Deploy Cloud Function <code>api</code>:</strong> <code>gcloud functions deploy api</code> con runtime Python 3.12, 256MB, timeout 30s. Se pasaron todas las variables de entorno incluyendo <code>ORCHESTRATOR_URL</code> obtenida dinámicamente. Resultado: <code>state: ACTIVE</code>, revisión <code>api-00005-maw</code>.</p>
+            <p><strong>Verificación del endpoint:</strong> petición <code>GET /clients</code> a la URL de producción devolvió <code>HTTP 200</code> con clientes reales de Firestore.</p>
+            <p><strong>Build del frontend:</strong> <code>npm run build</code> en <code>frontend/</code> generó 10 chunks en 3.57s. Bundle principal 94 KB. Code splitting con chunks separados para PDF (421 KB), Excel (282 KB), html2canvas (201 KB).</p>
+            <p><strong>Deploy en servidor:</strong> <code>dist.zip</code> (520 KB) subido vía SCP a <code>/tmp/</code>, descomprimido en docroot <code>/home/mfadmin/htdocs/scan.wayweb.cl</code>, permisos ajustados con <code>chmod o+x</code> en toda la cadena de directorios.</p>
+            <p><strong>Verificación final:</strong> <code>https://scan.wayweb.cl</code> responde <code>HTTP 200</code> con título correcto y todos los chunks referenciados en <code>index.html</code>.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Estado post-deploy</h4>
+            <p><strong>API GCP:</strong> <code>https://us-central1-ia-eccoflusso.cloudfunctions.net/api</code> — revisión 5, activa con endpoints de clientes SaaS respondiendo datos reales de Firestore colección <code>cyber-sight-clients</code>.</p>
+            <p><strong>Frontend:</strong> <code>scan.wayweb.cl</code> serviendo build actualizado con <code>ClientsView</code>, <code>ExportMenu</code>, <code>export.js</code> (PDF/CSV/Excel) y modal "Nuevo Escaneo" con 5 pasos animados.</p>
+            <p><strong>Hashes estables:</strong> Vite generó los mismos hashes que el build anterior porque el código fuente no cambió entre la compilación local y el re-build. Los archivos en el servidor estaban ya actualizados desde la Sesión #3.</p>
+            <p><strong>Nota:</strong> el <code>dist/</code> existente en el servidor correspondía ya al build correcto de la Sesión #3. El re-deploy confirmó la consistencia y actualizó los permisos.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Resumen del sistema en producción</h4>
+            <table class="files-table">
+              <thead><tr><th>Componente</th><th>Estado</th><th>Detalle</th></tr></thead>
+              <tbody>
+                <tr><td>Cloud Function <code>api</code></td><td><span class="change-created">ACTIVO ✅</span></td><td>Revisión <code>api-00005-maw</code> · Python 3.12 · 256MB · 12 endpoints (6 genéricos + 6 /clients)</td></tr>
+                <tr><td>Firestore <code>cyber-sight-clients</code></td><td><span class="change-created">OPERATIVO ✅</span></td><td>Colección con clientes reales. CRUD completo vía API.</td></tr>
+                <tr><td><code>scan.wayweb.cl</code> frontend</td><td><span class="change-created">ONLINE ✅</span></td><td>React SPA con ClientsView, ExportMenu, Dashboard con modal Nuevo Escaneo, FindingsTable con filtro por dominio.</td></tr>
+                <tr><td>Cloud Scheduler</td><td><span class="change-created">ACTIVO ✅</span></td><td>Escaneo automático cada 6h (<code>0 */6 * * *</code>, zona America/Santiago).</td></tr>
+                <tr><td>Let's Encrypt SSL</td><td><span class="change-created">VÁLIDO ✅</span></td><td>Certificado vigente hasta 2026-09-05. Renovación automática.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Acciones realizadas en esta sesión</h4>
+            <table class="files-table">
+              <thead><tr><th>Acción</th><th>Resultado</th></tr></thead>
+              <tbody>
+                <tr><td>Copia de <code>src/common/</code> y <code>requirements.txt</code> a <code>src/api/</code></td><td><span class="change-created">OK</span></td></tr>
+                <tr><td><code>gcloud functions deploy api</code> (revisión 5)</td><td><span class="change-created">ACTIVE · api-00005-maw</span></td></tr>
+                <tr><td><code>GET /clients</code> en producción</td><td><span class="change-created">HTTP 200 · Datos Firestore OK</span></td></tr>
+                <tr><td><code>npm run build</code> en frontend/</td><td><span class="change-created">OK · 10 chunks · 3.57s</span></td></tr>
+                <tr><td>SCP <code>dist.zip</code> (520 KB) → servidor <code>/tmp/</code></td><td><span class="change-created">OK</span></td></tr>
+                <tr><td>Unzip en docroot + permisos</td><td><span class="change-created">OK · 9 assets + index.html</span></td></tr>
+                <tr><td><code>GET https://scan.wayweb.cl</code></td><td><span class="change-created">HTTP 200 · SCAN-SIGHT I.A. | Wayweb</span></td></tr>
+                <tr><td>Roadmap Fase 3: marcados 2 ítems como completados</td><td><span class="change-modified">bitacora.html actualizada</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #5 ──────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #4 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-4">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-06-07</span>
+          <span class="badge badge-indigo">Sesión #4</span>
+          <span class="badge badge-green">Infraestructura · CloudPanel · SSL · Recuperación del servidor</span>
+        </div>
+
+        <div class="entry-title">Recuperación completa del servidor GCP: CloudPanel operativo, SSL Let's Encrypt activo y scan.wayweb.cl en verde</div>
+        <div class="entry-summary">
+          El servidor GCP (<code>34.134.152.97</code>) arrancó con todos los servicios de CloudPanel caídos
+          debido a conflictos de permisos y procesos del sistema compitiendo con los servicios propios del panel.
+          Se diagnosticó y reparó el stack completo: <code>clp-nginx</code>, <code>clp-php-fpm</code>,
+          <code>mysql</code> y el agente de CloudPanel. Se generó un certificado SSL Let's Encrypt válido
+          para <code>scan.wayweb.cl</code> y se configuró el vhost nginx para servir el frontend React.
+          Se reseteó la contraseña del usuario administrador <code>mfadmin30</code> de CloudPanel.
+          Toda la persistencia fue configurada para sobrevivir reinicios del servidor.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>¿Qué se hizo?</h4>
+            <p><strong>Diagnóstico inicial:</strong> se identificó que <code>clp-php-fpm</code> fallaba con <code>status=78</code> porque el directorio <code>/run/php/</code> no existía. <code>nginx</code> del sistema (no CloudPanel) ocupaba los puertos 80 y 443, y <code>php-fpm8.4</code> del sistema ocupaba el socket <code>9000</code>.</p>
+            <p><strong>Liberación de puertos:</strong> se detuvieron y deshabilitaron <code>nginx</code> y <code>php8.4-fpm</code> del sistema para ceder los puertos a los servicios de CloudPanel.</p>
+            <p><strong>Reparación clp-php-fpm:</strong> creado <code>/run/php/</code> manualmente. Configurado <code>/etc/tmpfiles.d/php-run.conf</code> para recrearlo en cada reinicio.</p>
+            <p><strong>Reparación MySQL:</strong> el servicio fallaba por <code>Permission denied</code> en <code>/var/log/mysql/error.log</code> y en <code>/home/mysql/</code>. Se corrigieron permisos con <code>chown mysql:mysql</code> en ambas rutas. Configurado <code>/etc/tmpfiles.d/mysql-log.conf</code> para persistencia.</p>
+            <p><strong>CloudPanel panel:</strong> se corrigieron permisos de <code>/home/clp/htdocs/</code> y de la base de datos SQLite (<code>/home/clp/htdocs/app/data/db.sq3</code>) para que el usuario <code>clp</code> pudiera escribir. Se reseteó la contraseña del admin <code>mfadmin30</code> con <code>clpctl user:reset:password</code>.</p>
+            <p><strong>Vhost nginx scan.wayweb.cl:</strong> creado <code>/home/clp/services/nginx/sites-enabled/scan.wayweb.cl.conf</code> con bloques HTTP (redirect 301) y HTTPS (SSL + <code>try_files</code> para SPA React).</p>
+            <p><strong>Certificado SSL Let's Encrypt:</strong> instalado <code>certbot</code>, generado certificado válido para <code>scan.wayweb.cl</code> con modo standalone (nginx detenido temporalmente). Certificado válido hasta 2026-09-05 con renovación automática configurada.</p>
+            <p><strong>Permisos del frontend:</strong> <code>chmod o+x</code> sobre <code>/home/mfadmin</code>, <code>/home/mfadmin/htdocs</code> y <code>/home/mfadmin/htdocs/scan.wayweb.cl</code> para que <code>clp-nginx</code> pudiera leer los archivos React compilados.</p>
+            <p><strong>Persistencia en reinicio:</strong> habilitados con <code>systemctl enable</code> los servicios <code>clp-nginx</code>, <code>clp-php-fpm</code>, <code>clp-agent</code> y <code>mysql</code>.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Causa raíz de los problemas</h4>
+            <p><strong>Conflicto nginx:</strong> el sistema tenía instalado <code>nginx</code> nativo (puerto 80/443) en paralelo con <code>clp-nginx</code> de CloudPanel (también puerto 80/443/8443). Al arrancar el servidor, el nginx del sistema levantaba primero bloqueando los puertos.</p>
+            <p><strong>Conflicto PHP-FPM:</strong> <code>php-fpm8.4</code> del sistema ocupaba el socket <code>9000</code> que necesitaba <code>clp-php-fpm</code> (PHP 8.1). El directorio <code>/run/php/</code> para el PID file tampoco existía.</p>
+            <p><strong>MySQL sin permisos:</strong> el directorio <code>/home/mysql/</code> (datadir) y el archivo <code>/var/log/mysql/error.log</code> tenían propietarios incorrectos, impidiendo que mysqld levantara.</p>
+            <p><strong>CloudPanel SQLite readonly:</strong> la base de datos <code>/home/clp/htdocs/app/data/db.sq3</code> tenía propietario <code>mfadmin:mfadmin</code> en lugar de <code>clp:clp</code>, impidiendo al proceso de CloudPanel escribir en ella.</p>
+            <p><strong>Frontend 500:</strong> <code>clp-nginx</code> corre como usuario <code>clp</code> pero el directorio <code>/home/mfadmin/</code> tenía permisos <code>drwxr-x---</code> (sin bit de ejecución para otros), bloqueando el acceso al docroot.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Estado final del servidor tras la sesión</h4>
+            <table class="files-table">
+              <thead><tr><th>Servicio / Componente</th><th>Estado</th><th>Detalle</th></tr></thead>
+              <tbody>
+                <tr><td><code>scan.wayweb.cl</code></td><td><span class="change-created">ONLINE ✅</span></td><td>Dashboard React cargando con candado SSL verde. Let's Encrypt válido hasta 2026-09-05.</td></tr>
+                <tr><td><code>clp-nginx</code></td><td><span class="change-created">RUNNING ✅</span></td><td>Servicio de CloudPanel corriendo y habilitado para arranque automático.</td></tr>
+                <tr><td><code>clp-php-fpm</code></td><td><span class="change-created">RUNNING ✅</span></td><td>PHP 8.1 FastCGI operativo. Directorio <code>/run/php/</code> persistido vía tmpfiles.d.</td></tr>
+                <tr><td><code>clp-agent</code></td><td><span class="change-created">RUNNING ✅</span></td><td>Agente de CloudPanel activo y habilitado.</td></tr>
+                <tr><td><code>mysql</code></td><td><span class="change-created">RUNNING ✅</span></td><td>MySQL 8.0 operativo. Permisos de datadir y log corregidos. Log persistido vía tmpfiles.d.</td></tr>
+                <tr><td>CloudPanel panel <code>:8443</code></td><td><span class="change-created">ACCESIBLE ✅</span></td><td>Login funcionando. Usuario <code>mfadmin30</code> con contraseña reseteada.</td></tr>
+                <tr><td>SSL Let's Encrypt</td><td><span class="change-created">VÁLIDO ✅</span></td><td>Certificado en <code>/etc/letsencrypt/live/scan.wayweb.cl/</code>. Renovación automática configurada por certbot.</td></tr>
+                <tr><td>Vhost nginx <code>scan.wayweb.cl</code></td><td><span class="change-created">CONFIGURADO ✅</span></td><td>Redirect HTTP→HTTPS + bloque HTTPS con certificado LE + <code>try_files</code> para SPA React.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Errores encontrados y soluciones aplicadas</h4>
+            <table class="files-table">
+              <thead><tr><th>Error</th><th>Causa</th><th>Solución</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>clp-php-fpm status=78</code></td>
+                  <td>Directorio <code>/run/php/</code> no existía; socket PID file no podía crearse</td>
+                  <td><code>sudo mkdir -p /run/php</code> + <code>/etc/tmpfiles.d/php-run.conf</code></td>
+                </tr>
+                <tr>
+                  <td><code>nginx: 404 Not Found en :8443</code></td>
+                  <td><code>nginx</code> del sistema corría en paralelo con <code>clp-nginx</code> tomando los puertos primero</td>
+                  <td><code>sudo systemctl stop nginx && systemctl disable nginx</code></td>
+                </tr>
+                <tr>
+                  <td><code>MySQL: Permission denied datadir</code></td>
+                  <td><code>/home/mysql/</code> tenía propietario incorrecto</td>
+                  <td><code>sudo chown -R mysql:mysql /home/mysql && chmod 750 /home/mysql</code></td>
+                </tr>
+                <tr>
+                  <td><code>MySQL: Permission denied error.log</code></td>
+                  <td><code>/var/log/mysql/error.log</code> no tenía propietario <code>mysql</code></td>
+                  <td><code>sudo chown -R mysql:mysql /var/log/mysql/</code> + <code>touch error.log</code></td>
+                </tr>
+                <tr>
+                  <td><code>CloudPanel: readonly database</code></td>
+                  <td>SQLite <code>db.sq3</code> tenía propietario <code>mfadmin</code> en lugar de <code>clp</code></td>
+                  <td><code>sudo chown clp:clp /home/clp/htdocs/app/data/db.sq3</code> + <code>chmod 664</code></td>
+                </tr>
+                <tr>
+                  <td><code>scan.wayweb.cl: 500 Internal Server Error</code></td>
+                  <td><code>clp-nginx</code> (usuario <code>clp</code>) no podía leer <code>/home/mfadmin/</code> (permisos <code>drwxr-x---</code>)</td>
+                  <td><code>sudo chmod o+x /home/mfadmin /home/mfadmin/htdocs /home/mfadmin/htdocs/scan.wayweb.cl</code></td>
+                </tr>
+                <tr>
+                  <td><code>certbot: port 80 in use</code></td>
+                  <td><code>clp-nginx</code> ocupaba el puerto 80 durante la generación del certificado</td>
+                  <td><code>sudo systemctl stop clp-nginx</code> → generar cert → <code>systemctl start clp-nginx</code></td>
+                </tr>
+                <tr>
+                  <td><code>CloudPanel login: regresa al mismo login</code></td>
+                  <td>Directorio de sesiones <code>/home/clp/htdocs/app/files/var/</code> sin permisos de escritura para <code>clp</code></td>
+                  <td><code>sudo chown -R clp:clp /home/clp/htdocs/app/files/var/ && chmod -R 775</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos de configuración creados/modificados en el servidor</h4>
+            <table class="files-table">
+              <thead>
+                <tr><th>Archivo en servidor</th><th>Tipo</th><th>Descripción</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/home/clp/services/nginx/sites-enabled/scan.wayweb.cl.conf</code></td><td><span class="change-created">CREADO</span></td><td>Vhost nginx para <code>scan.wayweb.cl</code>: redirect HTTP→HTTPS y bloque SSL con certificado Let's Encrypt y <code>try_files</code> para SPA.</td></tr>
+                <tr><td><code>/etc/tmpfiles.d/php-run.conf</code></td><td><span class="change-created">CREADO</span></td><td>Regla systemd-tmpfiles para recrear <code>/run/php/</code> en cada arranque del servidor.</td></tr>
+                <tr><td><code>/etc/tmpfiles.d/mysql-log.conf</code></td><td><span class="change-created">CREADO</span></td><td>Regla systemd-tmpfiles para recrear <code>/var/log/mysql/</code> y <code>error.log</code> con propietario <code>mysql</code> en cada arranque.</td></tr>
+                <tr><td><code>/etc/letsencrypt/live/scan.wayweb.cl/</code></td><td><span class="change-created">CREADO</span></td><td>Certificado Let's Encrypt válido: <code>fullchain.pem</code> y <code>privkey.pem</code>. Expira 2026-09-05.</td></tr>
+                <tr><td><code>archivos/costos.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Agregada sección "Modelo de negocios" en zona de Análisis con propuesta de valor, segmentos, fuentes de ingreso, plan go-to-market y KPIs año 1.</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Esta entrada. Sesión #4 agregada al inicio de la timeline.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #4 ──────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #3 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-3">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-06-07</span>
+          <span class="badge badge-indigo">Sesión #3</span>
+          <span class="badge badge-purple">SaaS — Clientes · Risk Score · Exportación PDF/CSV/Excel</span>
+        </div>
+
+        <div class="entry-title">Vista "Mis Clientes", Risk Score por cliente y exportación completa de reportes (PDF · CSV · Excel)</div>
+        <div class="entry-summary">
+          Se completaron los pasos 1–4 del MVP SaaS. Se implementó el modelo de datos de clientes
+          en Firestore (<code>cyber-sight-clients</code>), el modal "Nuevo Escaneo" con progreso
+          en tiempo real, la vista <code>/clients</code> con Risk Score por cliente, botones
+          "Re-escanear" y "Ver reporte", y un sistema completo de exportación en tres formatos:
+          PDF con branding Wayweb (portada, resumen ejecutivo, tabla de hallazgos, recomendaciones
+          prioritarias), Excel con 3 hojas y CSV universal.
+          También se añadió el filtro por dominio en la vista de hallazgos para navegar desde
+          un cliente directamente a su reporte en pantalla.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>¿Qué se hizo?</h4>
+            <p><strong>Paso 1 — Modelo de clientes:</strong> colección Firestore <code>cyber-sight-clients</code> con campos <code>client_id</code>, <code>name</code>, <code>domain</code>, <code>email</code>, <code>created_at</code>, <code>updated_at</code>, <code>active</code>, <code>last_risk_score</code> y <code>scan_history[]</code>. Métodos CRUD en <code>storage.py</code> + 6 endpoints REST en <code>handler.py</code>.</p>
+            <p><strong>Paso 2 — Modal "Nuevo Escaneo":</strong> formulario en el Dashboard con 3 campos (empresa, dominio, email), validación, animación de 5 pasos con barra de progreso y pantalla de éxito con <code>scan_id</code>. Usa <code>useRef</code> para evitar doble ejecución en StrictMode.</p>
+            <p><strong>Paso 3 — Vista /clients:</strong> tabla con columnas Cliente, Dominio, Risk Score, Último escaneo, Scans y Acciones. Stats bar: total, con escaneos, riesgo crítico/alto. Fila expandible con historial de scans y detalles. Botones "Re-escanear", "Ver reporte" y "PDF" directo por fila.</p>
+            <p><strong>Paso 4 — Exportación PDF/CSV/Excel:</strong> módulo <code>export.js</code> con 3 funciones. PDF con portada branding, risk score badge, tarjetas por severidad, tabla autoTable y página de recomendaciones detalladas. Excel con 3 hojas. CSV con BOM UTF-8.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Decisiones técnicas</h4>
+            <p><strong>Risk Score badge en /clients:</strong> campo <code>last_risk_score</code> persistido en Firestore tras cada scan. El backend también puede calcularlo on-the-fly desde findings existentes con <code>?enrich_score=true</code>. Colores: ≥70 crítico (rojo), ≥50 alto (naranja), ≥30 medio (amarillo), &lt;30 bajo (verde).</p>
+            <p><strong>Botón PDF directo en la fila:</strong> llama a la API de findings filtrando por dominio del cliente, genera y descarga el PDF sin salir de <code>/clients</code>. En modo demo usa <code>mockData.findings</code>.</p>
+            <p><strong>Code splitting vite.config.js:</strong> chunks separados para <code>pdf</code> (jsPDF + autotable, 421 KB) y <code>excel</code> (xlsx, 282 KB). El bundle principal bajó de 802 KB a 94 KB.</p>
+            <p><strong>Filtro por dominio en FindingsTable:</strong> <code>useSearchParams</code> lee <code>?domain=</code> del URL. Banner azul con el dominio activo y botón "← Clientes". El backend filtra findings por coincidencia de dominio en campos <code>host</code>, <code>subdomain</code> o <code>asset</code>.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Nuevos endpoints API añadidos (backend)</h4>
+            <table class="files-table">
+              <thead><tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><span class="badge badge-green">GET</span></td><td><code>/clients</code></td><td>Lista todos los clientes. Acepta <code>?enrich_score=true</code> para calcular risk score desde findings.</td></tr>
+                <tr><td><span class="badge badge-indigo">POST</span></td><td><code>/clients</code></td><td>Crea nuevo cliente — requiere <code>name</code> y <code>domain</code>. Devuelve 201.</td></tr>
+                <tr><td><span class="badge badge-green">GET</span></td><td><code>/clients/detail</code></td><td>Obtiene un cliente por <code>?client_id=</code>.</td></tr>
+                <tr><td><span class="badge badge-amber">PATCH</span></td><td><code>/clients</code></td><td>Actualiza campos permitidos: <code>name</code>, <code>domain</code>, <code>email</code>, <code>active</code>, <code>last_risk_score</code>.</td></tr>
+                <tr><td><span class="badge badge-red">DELETE</span></td><td><code>/clients</code></td><td>Elimina cliente por <code>client_id</code>.</td></tr>
+                <tr><td><span class="badge badge-indigo">POST</span></td><td><code>/clients/scan</code></td><td>Dispara escaneo para un cliente, registra en <code>scan_history[]</code> con ArrayUnion. Devuelve 202.</td></tr>
+                <tr><td><span class="badge badge-green">GET</span></td><td><code>/findings?domain=</code></td><td>Nuevo parámetro para filtrar hallazgos por dominio del cliente (fuzzy match en host/subdomain/asset).</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Estructura del reporte PDF exportado</h4>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px;">
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:18px;margin-bottom:6px;">📊</div>
+                <div style="font-size:11px;font-weight:700;color:#334155;">Portada</div>
+                <div style="font-size:10.5px;color:#64748b;margin-top:4px;">Header branding · Risk Score badge · Tarjetas por severidad</div>
+              </div>
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:18px;margin-bottom:6px;">📝</div>
+                <div style="font-size:11px;font-weight:700;color:#334155;">Resumen ejecutivo</div>
+                <div style="font-size:10.5px;color:#64748b;margin-top:4px;">4 bullets: total findings, críticos/altos, SLA urgente, risk label</div>
+              </div>
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:18px;margin-bottom:6px;">🔍</div>
+                <div style="font-size:11px;font-weight:700;color:#334155;">Tabla de hallazgos</div>
+                <div style="font-size:10.5px;color:#64748b;margin-top:4px;">jsPDF autoTable · colores por severidad · Severidad / Activo / Tipo / Detalle / SLA</div>
+              </div>
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;">
+                <div style="font-size:18px;margin-bottom:6px;">🛡️</div>
+                <div style="font-size:11px;font-weight:700;color:#334155;">Recomendaciones</div>
+                <div style="font-size:10.5px;color:#64748b;margin-top:4px;">Página extra · Críticos y altos · Box por hallazgo con SLA e impacto</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos creados y modificados en esta sesión</h4>
+            <table class="files-table">
+              <thead>
+                <tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>src/common/storage.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Colección <code>cyber-sight-clients</code>: métodos <code>create_client</code>, <code>get_client</code>, <code>get_all_clients</code>, <code>update_client</code>, <code>delete_client</code>, <code>append_scan_to_client</code> (ArrayUnion).</td></tr>
+                <tr><td><code>src/api/handler.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>6 nuevos handlers de clientes + <code>_compute_risk_score()</code> + filtro <code>domain</code> en <code>handle_get_findings</code> + CORS añade PATCH y DELETE.</td></tr>
+                <tr><td><code>frontend/src/api/client.js</code></td><td><span class="change-modified">MODIFICADO</span></td><td>6 métodos nuevos: <code>getClients</code>, <code>getClient</code>, <code>createClient</code>, <code>updateClient</code>, <code>deleteClient</code>, <code>triggerClientScan</code>.</td></tr>
+                <tr><td><code>frontend/src/hooks/useApi.js</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Hooks <code>useClients</code> y <code>useClientMutations</code>. Mock con 3 clientes de ejemplo con <code>last_risk_score</code>.</td></tr>
+                <tr><td><code>frontend/src/components/ClientsView.jsx</code></td><td><span class="change-created">CREADO</span></td><td>Vista completa <code>/clients</code>: tabla con Risk Score badge, Stats bar, botones Re-escanear / Ver / PDF, fila expandible con historial, modales CRUD, Toast, DeleteConfirm.</td></tr>
+                <tr><td><code>frontend/src/components/Dashboard.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Modal "Nuevo Escaneo": 3 campos + validación. <code>ScanProgressModal</code>: 5 pasos animados, barra de progreso, pantalla de éxito con scan_id. Anti-doble ejecución con <code>useRef</code>.</td></tr>
+                <tr><td><code>frontend/src/components/FindingsTable.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Soporte <code>?domain=</code> vía <code>useSearchParams</code>. Banner de filtro activo. Botón "← Clientes". Integración de <code>ExportMenu</code>.</td></tr>
+                <tr><td><code>frontend/src/components/ExportMenu.jsx</code></td><td><span class="change-created">CREADO</span></td><td>Dropdown reutilizable con 3 opciones (PDF, Excel, CSV), íconos por formato, estado loading/done/error, contador de hallazgos, cierre automático al click fuera.</td></tr>
+                <tr><td><code>frontend/src/utils/export.js</code></td><td><span class="change-created">CREADO</span></td><td>Módulo completo de exportación: <code>exportPDF</code> (jsPDF + autoTable, branding oscuro, múltiples páginas), <code>exportCSV</code> (BOM UTF-8), <code>exportExcel</code> (xlsx, 3 hojas: Resumen/Hallazgos/Prioritarios).</td></tr>
+                <tr><td><code>frontend/src/components/Sidebar.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Ícono <code>Users</code> y ruta <code>/clients</code> añadidos al menú de navegación.</td></tr>
+                <tr><td><code>frontend/src/App.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Ruta <code>/clients</code> añadida con <code>ClientsView</code>.</td></tr>
+                <tr><td><code>frontend/src/index.css</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Clase <code>.input-cs</code> para inputs de formularios modales (fondo oscuro, borde sutil, focus azul).</td></tr>
+                <tr><td><code>frontend/vite.config.js</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Manual chunks: <code>pdf</code> (jsPDF + autotable) y <code>excel</code> (xlsx). Bundle principal: 802 KB → 94 KB.</td></tr>
+                <tr><td><code>frontend/package.json</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Dependencias añadidas: <code>jspdf</code>, <code>jspdf-autotable</code>, <code>xlsx</code>.</td></tr>
+                <tr><td><code>archivos/costos.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Corrección de 4 errores: destinatario genérico, ref. cotización, firma aceptación y footer (Antigravity → Claude Code).</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Esta entrada. Progreso por área actualizado. Roadmap Fase 3 items marcados. Roadmap SaaS items 1–4 completados.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #3 ──────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #2 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-2">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-06-06 / 07</span>
+          <span class="badge badge-indigo">Sesión #2</span>
+          <span class="badge badge-green">Migración GCP · Deploy Producción · Frontend Live</span>
+        </div>
+
+        <div class="entry-title">Migración completa AWS → GCP, primer scan real y dashboard live en scan.wayweb.cl</div>
+        <div class="entry-summary">
+          Se abandonó el deploy en AWS SAM por bloqueo permanente del hook
+          <code>EarlyValidation::ResourceExistenceCheck</code> en la cuenta sandbox.
+          Se ejecutó migración completa a Google Cloud Platform: 5 Cloud Functions desplegadas,
+          Firestore y Cloud Storage configurados, Cloud Scheduler activo cada 6h.
+          Se realizó el primer escaneo real contra <code>wayweb.cl</code> con resultados concretos.
+          El frontend React fue compilado y publicado en <code>scan.wayweb.cl</code> mostrando
+          datos reales desde Firestore. Se corrigió branding (SCAN-SIGHT I.A. / WAYWEB) y
+          responsive móvil completo con sidebar drawer.
+        </div>
+
+        <div class="entry-grid">
+          <div class="entry-block">
+            <h4>¿Qué se hizo?</h4>
+            <p><strong>Migración AWS → GCP:</strong> Lambda→Cloud Functions, DynamoDB→Firestore, S3→Cloud Storage, Secrets Manager→GCP Secret Manager, EventBridge→Cloud Scheduler.</p>
+            <p><strong>5 Cloud Functions desplegadas:</strong> <code>orchestrator</code>, <code>subdomain_scanner</code>, <code>port_scanner</code>, <code>vertex_ai_analyzer</code>, <code>api</code>.</p>
+            <p><strong>Primer scan real:</strong> wayweb.cl — 7 subdominios, 40 puertos abiertos, 6 hallazgos HIGH (FTP puerto 21 expuesto en múltiples subdominios).</p>
+            <p><strong>Frontend live:</strong> build React subido a CloudPanel en GCP VM. Vhost Nginx configurado con <code>try_files</code> para SPA routing.</p>
+            <p><strong>Branding:</strong> "Cyber-Sight AI" → "SCAN-SIGHT I.A.", "Ministerio de Hacienda" → "WAYWEB".</p>
+            <p><strong>Responsive móvil:</strong> sidebar drawer con overlay, hamburger menu en topbar, grillas adaptativas.</p>
+            <p><strong>Normalización de hallazgos:</strong> API enriquece campos <code>asset</code> y <code>technical_detail</code> para hallazgos EXPOSED_PORT.</p>
+          </div>
+
+          <div class="entry-block">
+            <h4>¿Por qué se hizo?</h4>
+            <p>El hook <code>EarlyValidation::ResourceExistenceCheck</code> en la cuenta AWS sandbox bloqueó todos los intentos de deploy SAM tras múltiples sesiones de depuración. GCP fue elegido porque el proyecto <code>ia-eccoflusso</code> ya existía con Vertex AI habilitado y sin restricciones similares.</p>
+            <p>La migración completa a GCP unifica el stack: las Cloud Functions usan Application Default Credentials automáticamente, eliminando la dependencia de Secrets Manager para las credenciales GCP.</p>
+            <p>El branding fue actualizado porque el proyecto pasó de ser un prototipo para Gobierno Digital a una herramienta comercial SaaS de Wayweb para escanear clientes y prospectos.</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Resultados del primer scan (wayweb.cl · 2026-06-06 ~21:43)</h4>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px;">
+              <div style="text-align:center;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;">
+                <div style="font-size:22px;font-weight:800;color:#1e40af;">29</div>
+                <div style="font-size:11px;color:#64748b;">Activos monitoreados</div>
+              </div>
+              <div style="text-align:center;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:12px;">
+                <div style="font-size:22px;font-weight:800;color:#92400e;">12</div>
+                <div style="font-size:11px;color:#64748b;">Hallazgos encontrados</div>
+              </div>
+              <div style="text-align:center;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px;">
+                <div style="font-size:22px;font-weight:800;color:#c2410c;">60</div>
+                <div style="font-size:11px;color:#64748b;">Risk Score global</div>
+              </div>
+              <div style="text-align:center;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;">
+                <div style="font-size:22px;font-weight:800;color:#15803d;">~50s</div>
+                <div style="font-size:11px;color:#64748b;">Duración del scan</div>
+              </div>
+            </div>
+            <p style="font-size:13px;color:#64748b;margin:0;">Hallazgos destacados: Puerto 21 (FTP) expuesto en <code>cpanel</code>, <code>webdisk</code>, <code>webmail</code>, <code>mail</code>, <code>ftp</code>, <code>autodiscover</code>.wayweb.cl. Alertas IA usando fallback heurístico (Vertex AI/Gemini pendiente de activación de billing).</p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Errores encontrados y soluciones aplicadas</h4>
+            <table class="files-table">
+              <thead><tr><th>Error</th><th>Causa</th><th>Solución</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>EarlyValidation::ResourceExistenceCheck</code></td>
+                  <td>Hook de AWS Organizations en cuenta sandbox bloquea recursos que no existen aún</td>
+                  <td>Migración completa a GCP — abandono de AWS SAM</td>
+                </tr>
+                <tr>
+                  <td>Cloud Functions: falta <code>main.py</code></td>
+                  <td>Gen2 requiere <code>main.py</code> como entry point, no <code>handler.py</code></td>
+                  <td>Creado <code>main.py</code> en cada directorio de función con import del handler</td>
+                </tr>
+                <tr>
+                  <td>Healthcheck fallido en <code>vertex_ai_analyzer</code></td>
+                  <td>Import relativo <code>from .prompts import</code> falla en Cloud Functions</td>
+                  <td>Cambiado a import absoluto <code>from prompts import</code></td>
+                </tr>
+                <tr>
+                  <td>Hallazgos sin <code>asset</code> ni <code>technical_detail</code></td>
+                  <td>port_scanner guarda campos <code>host</code>/<code>port</code>, frontend espera <code>asset</code>/<code>technical_detail</code></td>
+                  <td>Función <code>_normalize_finding()</code> en API que mapea campos al vuelo</td>
+                </tr>
+                <tr>
+                  <td>Sidebar ocupa todo el ancho en móvil</td>
+                  <td><code>w-64</code> fijo sin breakpoints responsivos</td>
+                  <td>Sidebar como drawer con <code>fixed</code> + <code>translate-x</code> + overlay + hamburger</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="entry-block full" style="margin-top:0;">
+          <h4>Archivos modificados en esta sesión</h4>
+          <table class="files-table">
+            <thead>
+              <tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>src/common/config.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>AWS Secrets Manager → GCP Secret Manager. Variables de entorno GCP.</td></tr>
+              <tr><td><code>src/common/storage.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>S3+DynamoDB → GCSStorage + FirestoreStorage con detección de delta.</td></tr>
+              <tr><td><code>src/common/logger.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Variables de entorno AWS Lambda → Cloud Run (K_SERVICE, K_REVISION).</td></tr>
+              <tr><td><code>src/orchestrator/handler.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Lambda invoke → HTTP calls entre Cloud Functions. Decorator @functions_framework.http.</td></tr>
+              <tr><td><code>src/subdomain_scanner/handler.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Migración a Cloud Function con @functions_framework.http.</td></tr>
+              <tr><td><code>src/port_scanner/handler.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Migración a Cloud Function con @functions_framework.http.</td></tr>
+              <tr><td><code>src/vertex_ai_analyzer/handler.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>ADC automático (sin Secrets Manager). Import absoluto de prompts.</td></tr>
+              <tr><td><code>src/vertex_ai_analyzer/prompts.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Eliminadas referencias específicas a Ministerio de Hacienda. Genérico.</td></tr>
+              <tr><td><code>src/api/handler.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>API Gateway Lambda → Cloud Function HTTP. Agregado _normalize_finding().</td></tr>
+              <tr><td><code>src/layers/osint_layer/requirements.txt</code></td><td><span class="change-modified">MODIFICADO</span></td><td>boto3/botocore → google-cloud-firestore, storage, secret-manager, aiplatform, functions-framework.</td></tr>
+              <tr><td><code>template.yaml</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Reemplazado con comentario de migración AWS→GCP (ya no se usa).</td></tr>
+              <tr><td><code>deploy.sh</code></td><td><span class="change-created">CREADO</span></td><td>Script bash de deploy completo en GCP (7 bloques: APIs, bucket, Firestore, functions, scheduler).</td></tr>
+              <tr><td><code>src/*/main.py</code></td><td><span class="change-created">CREADO</span></td><td>Entry point requerido por Cloud Functions Gen2 en cada directorio de función.</td></tr>
+              <tr><td><code>frontend/.env.local</code></td><td><span class="change-modified">MODIFICADO</span></td><td>VITE_API_URL apunta a Cloud Function real. VITE_USE_MOCK=false.</td></tr>
+              <tr><td><code>frontend/src/App.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Layout responsive: sidebar drawer móvil, topbar hamburger, overlay.</td></tr>
+              <tr><td><code>frontend/src/components/Sidebar.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Drawer móvil con props open/onClose. Branding SCAN-SIGHT I.A. / WAYWEB.</td></tr>
+              <tr><td><code>frontend/src/components/Dashboard.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Subtítulo actualizado a WAYWEB. Padding responsivo p-4/p-6.</td></tr>
+              <tr><td><code>frontend/src/components/FindingsTable.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>overflow-x-auto en tabla. Padding responsivo.</td></tr>
+              <tr><td><code>frontend/src/components/AssetInventory.jsx</code></td><td><span class="change-modified">MODIFICADO</span></td><td>overflow-x-auto en tabla. Padding responsivo.</td></tr>
+              <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Actualización de branding, descripción, progreso y esta entrada de bitácora.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </article>
+      <!-- ── FIN ENTRADA #2 ──────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #1 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-1">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-06-06</span>
+          <span class="badge badge-indigo">Sesión #1</span>
+          <span class="badge badge-slate">Arquitectura · IaC · Scanner · Vertex AI · Frontend</span>
+        </div>
+
+        <div class="entry-title">Arquitectura base, módulos OSINT y motor de análisis con Gemini</div>
+        <div class="entry-summary">
+          Construcción completa del stack inicial de Cyber-Sight AI. Se definió la arquitectura serverless
+          en AWS (Lambda + DynamoDB + S3 + API Gateway + CloudFront) mediante AWS SAM. Se implementaron
+          los tres módulos principales: scanner OSINT (subdominios y puertos), motor de análisis con
+          Vertex AI (Gemini 1.5 Pro) y el dashboard en React. Además se configuró el servidor GCP
+          con CloudPanel y se creó el subdominio <code>scan.wayweb.cl</code>.
+        </div>
+
+        <div class="entry-grid">
+          <!-- QUÉ -->
+          <div class="entry-block">
+            <h4>¿Qué se hizo?</h4>
+            <p><strong>IaC completo:</strong> <code>template.yaml</code> AWS SAM con todos los recursos (Lambda, DynamoDB, S3, EventBridge, API GW, CloudFront).</p>
+            <p><strong>Scanner OSINT:</strong> Orchestrator + Subdomain Scanner (crt.sh + DNS) + Port Scanner (TCP + banner grabbing).</p>
+            <p><strong>Motor AI:</strong> <code>vertex_ai_analyzer</code> con Gemini 1.5 Pro, prompts en español y detección de deltas.</p>
+            <p><strong>Dashboard:</strong> React 18 + Vite con componentes Dashboard, FindingsTable, AssetInventory y Sidebar.</p>
+            <p><strong>Infraestructura:</strong> Servidor GCP con CloudPanel, subdominio <code>scan.wayweb.cl</code> creado.</p>
+          </div>
+
+          <!-- POR QUÉ -->
+          <div class="entry-block">
+            <h4>¿Por qué se hizo?</h4>
+            <p>El Ministerio de Hacienda necesita visibilidad continua sobre la superficie de ataque externa de sus dominios gubernamentales (<code>hacienda.gob.cl</code>, <code>tesoreria.cl</code>). Los equipos de seguridad no tienen herramientas EASM propias: descubrir subdominios expuestos, puertos abiertos y certificados caducados requiere hoy procesos manuales que se ejecutan infrecuentemente.</p>
+          </div>
+
+          <!-- CÓMO -->
+          <div class="entry-block full">
+            <h4>¿Cómo se hizo?</h4>
+            <p>La arquitectura serverless con Lambda en ARM64 (Graviton2) permite escalar a cero entre escaneos, manteniendo el costo mensual bajo los $35 USD en producción. La detección de deltas mediante <code>state_hash</code> (SHA-256) evita re-analizar activos sin cambios, reduciendo los costos de inferencia de Vertex AI. El módulo de <code>prospecting/</code> permite usar la misma lógica de escaneo para generar informes comerciales automatizados a prospectos empresariales.</p>
+          </div>
+        </div>
+
+        <!-- Archivos creados/modificados -->
+        <div class="entry-block full" style="margin-top:0;">
+          <h4>Archivos creados en esta sesión</h4>
+          <table class="files-table">
+            <thead>
+              <tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>template.yaml</code></td>
+                <td><span class="change-created">CREADO</span></td>
+                <td>IaC completo AWS SAM — stack completo de infraestructura</td>
+              </tr>
+              <tr>
+                <td><code>src/orchestrator/handler.py</code></td>
+                <td><span class="change-created">CREADO</span></td>
+                <td>Coordinador del ciclo de escaneo, invocación paralela de scanners</td>
+              </tr>
+              <tr>
+                <td><code>src/subdomain_scanner/handler.py</code></td>
+                <td><span class="change-created">CREADO</span></td>
+                <td>crt.sh + DNS brute-force (80 prefijos) + validación SSL</td>
+              </tr>
+              <tr>
+                <td><code>src/port_scanner/handler.py</code></td>
+                <td><span class="change-created">CREADO</span></td>
+                <td>TCP connect en 18 puertos + banner grabbing (50 concurrent)</td>
+              </tr>
+              <tr>
+                <td><code>src/vertex_ai_analyzer/handler.py</code></td>
+                <td><span class="change-created">CREADO</span></td>
+                <td>Integración Gemini 1.5 Pro, análisis de riesgo de negocio</td>
+              </tr>
+              <tr>
+                <td><code>src/vertex_ai_analyzer/prompts.py</code></td>
+                <td><span class="change-created">CREADO</span></td>
+                <td>Plantillas de prompts en español para análisis de hallazgos</td>
+              </tr>
+              <tr>
+                <td><code>src/common/storage.py</code></td>
+                <td><span class="change-created">CREADO</span></td>
+                <td>Abstracción S3 + DynamoDB con detección de delta (state_hash)</td>
+              </tr>
+              <tr>
+                <td><code>src/api/handler.py</code></td>
+                <td><span class="change-created">CREADO</span></td>
+                <td>Backend REST del dashboard, 5 endpoints con API Key</td>
+              </tr>
+              <tr>
+                <td><code>frontend/src/components/</code></td>
+                <td><span class="change-created">CREADO</span></td>
+                <td>Dashboard.jsx · FindingsTable.jsx · AssetInventory.jsx · Sidebar.jsx</td>
+              </tr>
+              <tr>
+                <td><code>prospecting/</code></td>
+                <td><span class="change-created">CREADO</span></td>
+                <td>Módulo de prospección: scan_prospect.py · generate_report.py · send_report.py</td>
+              </tr>
+              <tr>
+                <td><code>archivos/bitacora.html</code></td>
+                <td><span class="change-created">CREADO</span></td>
+                <td>Este archivo — bitácora de cambios del proyecto</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </article>
+      <!-- ── FIN ENTRADA #1 ──────────────────────────────────────── -->
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       PENDIENTES PARA GO-LIVE
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="pendientes">
+    <div class="section-header">
+      <h2>Pendientes para go-live</h2>
+      <p>Lo que falta antes de desplegar en producción en <code>scan.wayweb.cl</code>.</p>
+    </div>
+
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr><th>#</th><th>Pendiente</th><th>Bloquea</th><th>Prioridad</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:12px;">P1</td>
+            <td><strong>Configurar sitio en CloudPanel</strong><br><small style="color:#64748b;">Crear el sitio <code>scan.wayweb.cl</code> en CloudPanel y apuntar el dominio al servidor GCP.</small></td>
+            <td><span class="badge badge-red">Producción</span></td>
+            <td><span class="badge badge-red">Alta</span></td>
+          </tr>
+          <tr>
+            <td style="color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:12px;">P2</td>
+            <td><strong>Despliegue AWS SAM en cuenta de producción</strong><br><small style="color:#64748b;"><code>sam build</code> + <code>sam deploy --guided</code> con parámetros de producción.</small></td>
+            <td><span class="badge badge-red">Producción</span></td>
+            <td><span class="badge badge-red">Alta</span></td>
+          </tr>
+          <tr>
+            <td style="color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:12px;">P3</td>
+            <td><strong>Crear secreto GCP en Secrets Manager</strong><br><small style="color:#64748b;">Subir el JSON del Service Account de GCP bajo la clave <code>cyber-sight/gcp-service-account</code>.</small></td>
+            <td><span class="badge badge-red">Vertex AI</span></td>
+            <td><span class="badge badge-red">Alta</span></td>
+          </tr>
+          <tr>
+            <td style="color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:12px;">P4</td>
+            <td><strong>Build y deploy del frontend en S3 + CloudFront</strong><br><small style="color:#64748b;"><code>npm run build</code> + <code>aws s3 sync dist/ s3://...</code>. Configurar <code>VITE_API_URL</code> con el endpoint real.</small></td>
+            <td><span class="badge badge-amber">Dashboard</span></td>
+            <td><span class="badge badge-amber">Media</span></td>
+          </tr>
+          <tr>
+            <td style="color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:12px;">P5</td>
+            <td><strong>Completar tests unitarios</strong><br><small style="color:#64748b;">Cobertura actual ~40%. Faltan tests para <code>orchestrator</code>, <code>vertex_ai_analyzer</code> y <code>api</code>.</small></td>
+            <td><span class="badge badge-slate">Calidad</span></td>
+            <td><span class="badge badge-slate">Normal</span></td>
+          </tr>
+          <tr>
+            <td style="color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:12px;">P6</td>
+            <td><strong>Validar dominios en scope con el cliente</strong><br><small style="color:#64748b;">Confirmar lista definitiva de dominios para <code>TargetDomains</code> con Gobierno Digital.</small></td>
+            <td><span class="badge badge-slate">Legal/Scope</span></td>
+            <td><span class="badge badge-slate">Normal</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       ROADMAP
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="roadmap">
+    <div class="section-header">
+      <h2>Roadmap de despliegue</h2>
+      <p>Etapas para avanzar del estado actual al sistema operando en producción.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="margin:0;">Progreso global</h3>
+        <span id="rdm-pct" style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#4f46e5;">—</span>
+      </div>
+      <div style="background:#e2e8f0;border-radius:999px;height:10px;overflow:hidden;">
+        <div id="rdm-bar" style="background:linear-gradient(90deg,#4f46e5,#7c3aed);height:100%;width:0%;border-radius:999px;transition:width .4s ease;"></div>
+      </div>
+      <div id="rdm-summary" style="font-size:12px;color:#94a3b8;margin-top:8px;">calculando...</div>
+    </div>
+
+    <!-- FASE 1 -->
+    <div class="card" style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;">Fase 1 — Completada</span>
+        <h3 style="margin:0;">Desarrollo de módulos core</h3>
+      </div>
+      <div class="rdm-group" data-sprint="1">
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> IaC completo en AWS SAM (template.yaml)</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Scanner OSINT: subdomain_scanner + port_scanner</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Motor AI: vertex_ai_analyzer con Gemini 2.5 Flash (generativelanguage API)</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Dashboard React con mock data y API client</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Módulo de prospecting comercial automatizado</label>
+      </div>
+    </div>
+
+    <!-- FASE 2 -->
+    <div class="card" style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;">Fase 2 — Completada</span>
+        <h3 style="margin:0;">Migración GCP y despliegue en producción</h3>
+      </div>
+      <div class="rdm-group" data-sprint="2">
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Servidor GCP aprovisionado (34.134.152.97)</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> CloudPanel instalado (puerto 8443)</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Subdominio scan.wayweb.cl creado y configurado</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Migración completa AWS → GCP (5 Cloud Functions)</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Firestore + Cloud Storage + Cloud Scheduler configurados</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Primer scan real de wayweb.cl (29 activos · 12 hallazgos · Risk Score 60)</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Frontend React compilado y publicado en scan.wayweb.cl</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Dashboard responsive móvil con sidebar drawer</label>
+      </div>
+    </div>
+
+    <!-- FASE 3 -->
+    <div class="card" style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span style="background:#dcfce7;color:#166534;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;">Fase 3 — Completada ✓</span>
+        <h3 style="margin:0;">Funcionalidades SaaS y operación comercial</h3>
+      </div>
+      <div class="rdm-group" data-sprint="3">
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Activar Gemini 2.5 Flash (generativelanguage API Key · sin fallback heurístico)</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Gestión de clientes — modal "Nuevo Escaneo" con nombre, dominio, email y progreso en tiempo real</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Vista "Mis Clientes" (/clients) — risk score por cliente, botón Re-escanear, Ver reporte</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Exportar reporte PDF + CSV + Excel desde el dashboard (jsPDF · xlsx · branding Wayweb)</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Email automático al cliente con reporte al finalizar el scan (Gmail SMTP + App Password)</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Limpiar datos de Firestore de dominios incorrectos (hacienda.gob.cl · tesoreria.cl)</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Desplegar backend actualizado (nuevos endpoints /clients) en GCP Cloud Functions</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Subir nuevo dist/ a CloudPanel (scan.wayweb.cl)</label>
+        <label class="rdm-item done"><input type="checkbox" class="rdm-check" checked disabled> Primer escaneo comercial a cliente/prospecto real de Wayweb</label>
+        <label class="rdm-item"><input type="checkbox" class="rdm-check"> Motor de prospecting — consolidar base Excel de prospectos y enviar informe de cortesía sin exponer la herramienta</label>
+        <label class="rdm-item"><input type="checkbox" class="rdm-check"> Alertas proactivas — email inmediato cuando se detecta hallazgo CRITICAL en cliente monitorizado</label>
+        <label class="rdm-item"><input type="checkbox" class="rdm-check"> Multi-tenancy — login por cliente, cada uno ve solo sus datos (roles: admin Wayweb / cliente viewer)</label>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="card">
+      <h3>Timeline</h3>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:12px 0;">
+        <div style="text-align:center;padding:12px 6px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px 0 0 8px;">
+          <div style="font-size:10px;font-weight:700;color:#065f46;text-transform:uppercase;">Fase 1+2</div>
+          <div style="font-size:11px;color:#065f46;margin-top:2px;">✅ Completadas</div>
+          <div style="font-size:10px;color:#64748b;margin-top:4px;">Core + Deploy GCP</div>
+        </div>
+        <div style="text-align:center;padding:12px 6px;background:#fef3c7;border:1px solid #fcd34d;border-left:none;">
+          <div style="font-size:10px;font-weight:700;color:#166534;text-transform:uppercase;">Fase 3</div>
+          <div style="font-size:11px;color:#166534;margin-top:2px;">Completada ✓</div>
+          <div style="font-size:10px;color:#64748b;margin-top:4px;">Clientes + PDF + Email + Gemini</div>
+        </div>
+        <div style="text-align:center;padding:12px 6px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:0 8px 8px 0;border-left:none;">
+          <div style="font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;">Fase 4</div>
+          <div style="font-size:11px;color:#1e40af;margin-top:2px;">jul 2026</div>
+          <div style="font-size:10px;color:#64748b;margin-top:4px;">Prospecting + SaaS</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px;">
+        <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
+          <div style="font-size:18px;font-weight:800;color:#059669;font-family:'JetBrains Mono',monospace;">✅ LIVE</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">scan.wayweb.cl operativo</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
+          <div style="font-size:18px;font-weight:800;color:#059669;font-family:'JetBrains Mono',monospace;">~$35</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">USD/mes GCP serverless</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:#eff6ff;border-radius:8px;border:1px solid #bfdbfe;">
+          <div style="font-size:18px;font-weight:800;color:#1e40af;font-family:'JetBrains Mono',monospace;">jul 2026</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">Meta SaaS multi-cliente</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       ROADMAP SAAS
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="saas-roadmap">
+    <div class="section-header">
+      <h2>Roadmap SaaS — Evolución a producto comercial</h2>
+      <p>Plan de desarrollo para convertir SCAN-SIGHT I.A. en una plataforma SaaS multi-cliente lista para venta.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div>
+        <strong>Visión comercial:</strong> Wayweb escanea dominios de clientes y prospectos, entrega reportes de vulnerabilidades como herramienta de venta y de valor continuo. La plataforma evoluciona de un scanner interno a un SaaS donde cada cliente tiene su propio espacio, historial y reportes.
+      </div>
+    </div>
+
+    <!-- MVP SaaS -->
+    <div class="card" style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;">Items 1–4 completados · Item 5 pendiente</span>
+        <h3 style="margin:0;">MVP SaaS — Gestión de clientes + Reportes</h3>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+
+        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:16px;position:relative;">
+          <div style="position:absolute;top:10px;right:12px;font-size:16px;">✅</div>
+          <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:8px;">1. Modelo de datos: Clientes</div>
+          <p style="font-size:12px;color:#475569;margin-bottom:6px;">Colección Firestore <code>cyber-sight-clients</code> con CRUD completo:</p>
+          <pre style="margin:0;font-size:11px;background:#ecfdf5;border-color:#a7f3d0;">client_id, name, domain, email
+created_at, updated_at, active
+last_risk_score, scan_history[]</pre>
+          <p style="font-size:11.5px;color:#64748b;margin:6px 0 0;">6 endpoints REST + hooks <code>useClients</code> y <code>useClientMutations</code>.</p>
+        </div>
+
+        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:16px;position:relative;">
+          <div style="position:absolute;top:10px;right:12px;font-size:16px;">✅</div>
+          <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:8px;">2. Modal "Nuevo Escaneo"</div>
+          <p style="font-size:12px;color:#475569;margin-bottom:6px;">Dashboard: formulario + 5 pasos animados con barra de progreso:</p>
+          <ul style="font-size:12px;color:#475569;padding-left:16px;margin:0;">
+            <li>Nombre de la empresa · Dominio · Email</li>
+            <li>Animación: registrar → subdominios → puertos → IA → guardar</li>
+            <li>Pantalla de éxito con <code>scan_id</code></li>
+            <li>Anti-doble ejecución con <code>useRef</code></li>
+          </ul>
+        </div>
+
+        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:16px;position:relative;">
+          <div style="position:absolute;top:10px;right:12px;font-size:16px;">✅</div>
+          <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:8px;">3. Vista "Mis Clientes" (/clients)</div>
+          <ul style="font-size:12px;color:#475569;padding-left:16px;margin:0;">
+            <li>Tabla con Risk Score badge por cliente (color según nivel)</li>
+            <li>Stats bar: total / con escaneos / crítico / alto</li>
+            <li>Botón "Re-escanear" con spinner por fila</li>
+            <li>Botón "Ver" (hallazgos filtrados) + "PDF" directo</li>
+            <li>Fila expandible con historial de scans y detalles</li>
+          </ul>
+        </div>
+
+        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:16px;position:relative;">
+          <div style="position:absolute;top:10px;right:12px;font-size:16px;">✅</div>
+          <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:8px;">4. Exportación PDF · CSV · Excel</div>
+          <ul style="font-size:12px;color:#475569;padding-left:16px;margin:0;">
+            <li><strong>PDF:</strong> portada con branding oscuro + risk score badge + resumen ejecutivo + tabla autoTable + página de recomendaciones detalladas</li>
+            <li><strong>Excel:</strong> 3 hojas (Resumen · Hallazgos · Prioritarios)</li>
+            <li><strong>CSV:</strong> BOM UTF-8, compatible con Excel/Sheets</li>
+            <li>Componente <code>ExportMenu</code> dropdown reutilizable</li>
+            <li>Code splitting: bundle principal 802 KB → 94 KB</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:16px;">
+        <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:8px;">5. Email automático al finalizar el scan <span style="font-size:11px;font-weight:500;color:#3b82f6;">— Pendiente</span></div>
+        <p style="font-size:12.5px;color:#1e40af;margin:0;">
+          Cloud Function envía reporte PDF por email al cliente al terminar el scan.
+          Proveedor: <strong>SendGrid</strong> (recomendado) o Gmail API.
+          Incluye: resumen de hallazgos, risk score, link al dashboard y llamado a la acción.
+        </p>
+      </div>
+    </div>
+
+    <!-- Fase avanzada -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span style="background:#eff6ff;color:#1e40af;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;">Fase 4 · jul 2026+</span>
+        <h3 style="margin:0;">Prospecting, monetización y SaaS completo</h3>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Funcionalidad</th><th>Descripción</th><th>Prioridad</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Motor de prospecting</strong></td>
+            <td>Panel interno para seleccionar prospectos desde base Excel consolidada, disparar scan y aprobar envío de informe de cortesía por email. El cliente nunca accede a la herramienta.</td>
+            <td><span class="badge badge-red">Alta</span></td>
+          </tr>
+          <tr>
+            <td><strong>Informe de cortesía (freemium)</strong></td>
+            <td>PDF profesional con 3 hallazgos reales, Risk Score y CTA "solicitar diagnóstico completo". Se envía desde wayweb.cl sin exponer el dashboard.</td>
+            <td><span class="badge badge-red">Alta</span></td>
+          </tr>
+          <tr>
+            <td><strong>Multi-tenancy / autenticación</strong></td>
+            <td>Login por cliente para que cada uno vea solo sus propios datos. Roles: admin Wayweb / cliente viewer. Convierte la plataforma en SaaS real.</td>
+            <td><span class="badge badge-red">Alta</span></td>
+          </tr>
+          <tr>
+            <td><strong>Alertas proactivas</strong></td>
+            <td>Notificación inmediata por email cuando se detecta hallazgo CRITICAL en cliente monitorizado, sin esperar el reporte completo.</td>
+            <td><span class="badge badge-amber">Media</span></td>
+          </tr>
+          <tr>
+            <td><strong>Scanner avanzado de puertos</strong></td>
+            <td>Ampliar de 18 a 65.535 puertos (modo full scan configurable). Detección de CVEs por versión de servicio.</td>
+            <td><span class="badge badge-amber">Media</span></td>
+          </tr>
+          <tr>
+            <td><strong>Análisis de headers HTTP</strong></td>
+            <td>Detección de headers de seguridad faltantes (HSTS, CSP, X-Frame-Options). Puntuación tipo securityheaders.com.</td>
+            <td><span class="badge badge-amber">Media</span></td>
+          </tr>
+          <tr>
+            <td><strong>Detección de tecnologías</strong></td>
+            <td>Fingerprinting de CMS, frameworks y versiones (WordPress, Apache, nginx) para correlación con CVEs públicas.</td>
+            <td><span class="badge badge-amber">Media</span></td>
+          </tr>
+          <tr>
+            <td><strong>API pública para integraciones</strong></td>
+            <td>Permitir que clientes integren SCAN-SIGHT con sus SIEMs o dashboards existentes vía API key personal.</td>
+            <td><span class="badge badge-slate">Baja</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       SEGURIDAD Y COMPLIANCE
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="seguridad">
+    <div class="section-header">
+      <h2>Seguridad y compliance</h2>
+      <p>Controles de seguridad implementados en el stack serverless.</p>
+    </div>
+
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr><th>Control</th><th>Implementación técnica</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>IAM mínimo privilegio</strong></td>
+            <td>Cada Cloud Function usa Application Default Credentials con el Service Account del proyecto GCP. Solo accede a Firestore y Cloud Storage necesarios.</td>
+            <td><span class="badge badge-green">Implementado</span></td>
+          </tr>
+          <tr>
+            <td><strong>Secretos GCP</strong></td>
+            <td>Credenciales del Service Account en AWS Secrets Manager — nunca en env vars ni en código.</td>
+            <td><span class="badge badge-amber">Pendiente deploy</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cloud Storage — acceso privado</strong></td>
+            <td>Bucket de Data Lake accesible solo por las Cloud Functions vía ADC. Sin acceso público habilitado.</td>
+            <td><span class="badge badge-green">Configurado en GCP</span></td>
+          </tr>
+          <tr>
+            <td><strong>Firestore TTL y cifrado en reposo</strong></td>
+            <td>TTL de 90 días en findings para minimizar retención de datos sensibles. Firestore cifra los datos en reposo por defecto en GCP.</td>
+            <td><span class="badge badge-green">Activo</span></td>
+          </tr>
+          <tr>
+            <td><strong>API Key en todos los endpoints</strong></td>
+            <td>API Gateway con <code>ApiKeyRequired: true</code> y UsagePlan (10K req/mes, 10 rps).</td>
+            <td><span class="badge badge-green">Configurado en SAM</span></td>
+          </tr>
+          <tr>
+            <td><strong>HTTPS forzado</strong></td>
+            <td>CloudFront con <code>ViewerProtocolPolicy: redirect-to-https</code>. OAI para acceso privado al S3.</td>
+            <td><span class="badge badge-green">Configurado en SAM</span></td>
+          </tr>
+          <tr>
+            <td><strong>Firestore exports / backups</strong></td>
+            <td>Firestore soporta exports a Cloud Storage para recovery ante pérdida de datos. TTL de 90 días en findings limita la retención.</td>
+            <td><span class="badge badge-amber">Pendiente configurar</span></td>
+          </tr>
+          <tr>
+            <td><strong>S3 Lifecycle (GLACIER 90d)</strong></td>
+            <td>Resultados de escaneo se mueven a STANDARD_IA a los 30 días y a GLACIER a los 90 días.</td>
+            <td><span class="badge badge-green">Configurado en SAM</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div>
+        <strong>Scope autorizado:</strong> el scanner solo ejecuta reconocimiento pasivo (OSINT) —
+        consulta a <code>crt.sh</code>, resolución DNS y conexiones TCP en puertos estándar. No realiza
+        explotación, fuzzing activo ni autenticación brute-force. Los dominios en scope deben estar
+        explícitamente autorizados por el cliente antes de activar el escaneo automático en producción.
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div style="border-top:1px solid #e2e8f0;padding-top:24px;margin-top:20px;text-align:center;">
+    <p style="font-size:12px;color:#94a3b8;">
+      SCAN-SIGHT I.A. · Plataforma SaaS EASM · Desarrollada por <strong>Wayweb</strong><br>
+      Desarrollado con <strong>Claude Code</strong> · Bitácora actualizada 2026-06-08 · Sesión #7 · scan.wayweb.cl
+    </p>
+  </div>
+
+</main>
+</div><!-- /layout -->
+
+<script>
+  /* ── Intersection Observer para nav activa ────────────────────── */
+  const sections = document.querySelectorAll('section[id], article[id]');
+  const navLinks  = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => link.classList.remove('active'));
+        const active = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  /* ── Roadmap checkboxes ─────────────────────────────────────────── */
+  const STORAGE_KEY = 'cybersight_roadmap_v1';
+
+  function rdmSave() {
+    const state = {};
+    document.querySelectorAll('.rdm-check').forEach((cb, i) => { state[i] = cb.checked; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function rdmLoad() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
+  }
+
+  function rdmUpdate() {
+    const checks = document.querySelectorAll('.rdm-check');
+    const total  = checks.length;
+    const done   = [...checks].filter(c => c.checked).length;
+    const pct    = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById('rdm-bar').style.width = pct + '%';
+    document.getElementById('rdm-pct').textContent  = pct + '%';
+    document.getElementById('rdm-summary').textContent = `${done} de ${total} tareas completadas`;
+  }
+
+  /* Restaurar estado desde localStorage */
+  const saved = rdmLoad();
+  document.querySelectorAll('.rdm-check').forEach((cb, i) => {
+    if (!cb.disabled && saved[i]) {
+      cb.checked = true;
+      cb.closest('.rdm-item').classList.add('done');
+    }
+    if (!cb.disabled) {
+      cb.addEventListener('change', () => {
+        cb.closest('.rdm-item').classList.toggle('done', cb.checked);
+        rdmSave();
+        rdmUpdate();
+      });
+    }
+  });
+  rdmUpdate();
+</script>
+</body>
+</html>

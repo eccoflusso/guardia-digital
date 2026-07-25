@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyección de Costos — Guardia Digital Inteligente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset & base ──────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f0f4f8;
+    color: #1e293b;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ────────────────────────────────────────────────────── */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px; flex-shrink: 0;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    padding: 28px 0;
+  }
+  .main { flex: 1; max-width: 900px; padding: 40px 48px; }
+
+  /* ── Sidebar ───────────────────────────────────────────────────── */
+  .sidebar-logo {
+    padding: 0 24px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 20px;
+  }
+  .sidebar-logo h1 { font-size: 14px; font-weight: 700; color: #4f46e5; letter-spacing: -.3px; }
+  .sidebar-logo span { font-size: 11px; color: #94a3b8; font-weight: 400; }
+  .sidebar-nav { padding: 0 12px; }
+  .nav-section { margin-bottom: 24px; }
+  .nav-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .8px;
+    text-transform: uppercase; color: #94a3b8;
+    padding: 0 12px; margin-bottom: 6px;
+  }
+  .nav-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; border-radius: 6px;
+    color: #475569; text-decoration: none;
+    font-size: 13.5px; font-weight: 400;
+    transition: all .15s;
+  }
+  .nav-link:hover { background: #f1f5f9; color: #1e293b; }
+  .nav-link.active { background: #eef2ff; color: #4f46e5; font-weight: 500; }
+  .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    margin-top: 12px;
+  }
+  .pill-ok    { background: #d1fae5; color: #065f46; }
+  .pill-warn  { background: #fef3c7; color: #92400e; }
+  .pill-info  { background: #dbeafe; color: #1e40af; }
+  .pill-dot   { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ── Typography ─────────────────────────────────────────────────── */
+  h2 { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  h3 { font-size: 16px; font-weight: 600; color: #0f172a; margin-bottom: 12px; }
+  h4 { font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase;
+       letter-spacing: .5px; margin-bottom: 8px; }
+  p  { color: #475569; font-size: 14.5px; line-height: 1.7; margin-bottom: 10px; }
+
+  .section-header {
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 28px;
+  }
+  .section-header p { margin-bottom: 0; color: #64748b; font-size: 14px; }
+
+  /* ── Cards ──────────────────────────────────────────────────────── */
+  .card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .card-sm { padding: 14px 18px; }
+
+  /* ── Badges ─────────────────────────────────────────────────────── */
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; letter-spacing: .3px;
+  }
+  .badge-indigo  { background: #eef2ff; color: #4338ca; }
+  .badge-green   { background: #d1fae5; color: #065f46; }
+  .badge-amber   { background: #fef3c7; color: #92400e; }
+  .badge-red     { background: #fee2e2; color: #991b1b; }
+  .badge-slate   { background: #f1f5f9; color: #334155; }
+  .badge-purple  { background: #f3e8ff; color: #6b21a8; }
+  .badge-cyan    { background: #ecfeff; color: #155e75; }
+  .badge-emerald { background: #ecfdf5; color: #065f46; }
+
+  /* ── Code ───────────────────────────────────────────────────────── */
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 12.5px; background: #f1f5f9;
+    color: #c026d3; padding: 1px 5px; border-radius: 3px;
+  }
+
+  /* ── Sections ───────────────────────────────────────────────────── */
+  .page-section { margin-bottom: 60px; }
+
+  /* ── Stats grid ─────────────────────────────────────────────────── */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-card {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 10px; padding: 16px 20px;
+    text-align: center;
+  }
+  .stat-value { font-size: 28px; font-weight: 700; color: #4f46e5; }
+  .stat-label { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+  .stat-sub { font-size: 11px; color: #64748b; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Data table ─────────────────────────────────────────────────── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th {
+    background: #f1f5f9; padding: 9px 12px;
+    text-align: left; font-size: 11.5px; font-weight: 600;
+    color: #475569; text-transform: uppercase; letter-spacing: .5px;
+  }
+  .data-table td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #fafbfc; }
+  .data-table .total-row td { background: #f8fafc; font-weight: 600; color: #0f172a; border-top: 2px solid #e2e8f0; }
+  .data-table .free-row td { color: #059669; }
+  .cost-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; text-align: right; }
+
+  /* ── Phase cards ─────────────────────────────────────────────────── */
+  .phase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+  .phase-card {
+    border-radius: 10px; padding: 18px 20px;
+    border: 1px solid #e2e8f0;
+  }
+  .phase-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+  .phase-title { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+  .phase-cost { font-size: 22px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .phase-period { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .phase-items { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,.06); }
+  .phase-item { font-size: 12px; color: #64748b; display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .phase-item-cost { font-family: 'JetBrains Mono', monospace; color: #334155; font-weight: 500; }
+
+  /* ── Completion bar ─────────────────────────────────────────────── */
+  .progress-row { margin-bottom: 10px; }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 12.5px; font-weight: 500; color: #334155;
+    margin-bottom: 4px;
+  }
+  .progress-bar-bg { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+  .fill-indigo { background: #4f46e5; }
+  .fill-green  { background: #059669; }
+  .fill-amber  { background: #d97706; }
+  .fill-red    { background: #dc2626; }
+
+  /* ── Callout ────────────────────────────────────────────────────── */
+  .callout {
+    display: flex; gap: 12px; padding: 12px 16px;
+    border-radius: 8px; border-left: 3px solid; margin: 12px 0;
+    font-size: 13.5px;
+  }
+  .callout-info    { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+  .callout-warn    { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+  .callout-success { background: #f0fdf4; border-color: #22c55e; color: #166534; }
+  .callout-icon    { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Year projection ────────────────────────────────────────────── */
+  .year-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .year-month { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #94a3b8; width: 28px; flex-shrink: 0; }
+  .year-bar-wrap { flex: 1; }
+  .year-bar { height: 8px; border-radius: 4px; }
+  .year-cost { font-size: 11.5px; font-family: 'JetBrains Mono', monospace; color: #334155; font-weight: 600; width: 70px; text-align: right; flex-shrink: 0; }
+  .year-phase { font-size: 10px; color: #94a3b8; width: 70px; flex-shrink: 0; text-align: right; }
+
+  /* ── Responsive ─────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { padding: 24px 20px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .phase-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── Cotización embebida (.ctz-*) ───────────────────────────────── */
+  .ctz-outer { background:#f5f3ef; border-radius:12px; overflow:hidden; margin-bottom:20px; }
+  .ctz-topbar {
+    background:#1e2a38; padding:14px 36px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+  }
+  .ctz-logo { font-family:'Barlow Condensed',sans-serif; font-size:1.2rem; font-weight:800; letter-spacing:.14em; color:#fff; text-transform:uppercase; }
+  .ctz-logo .lw { color:#c9ad6a; }
+  .ctz-logo .ls { color:#94a3b8; font-weight:400; font-size:1rem; margin-left:3px; }
+  .ctz-btn-pdf {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 14px; background:rgba(201,173,106,.15);
+    border:1px solid rgba(201,173,106,.4); border-radius:7px;
+    color:#c9ad6a; font-size:.67rem; font-weight:700;
+    letter-spacing:.10em; text-transform:uppercase;
+    cursor:pointer; font-family:inherit; transition:background .2s;
+  }
+  .ctz-btn-pdf:hover { background:rgba(201,173,106,.28); }
+
+  .ctz-doc { background:#fff; border:1px solid #ddd8cc; border-top:none; position:relative; overflow:hidden; }
+  .ctz-doc::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,#8b6812,rgba(139,104,18,.3)); }
+
+  .ctz-doc-header {
+    padding:36px 48px 28px; border-bottom:1px solid #ddd8cc;
+    display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px;
+  }
+  .ctz-membrete-logo { font-family:'Barlow Condensed',sans-serif; font-size:1.8rem; font-weight:800; letter-spacing:.16em; color:#1e2a38; text-transform:uppercase; }
+  .ctz-membrete-logo .lw { color:#8b6812; }
+  .ctz-membrete-logo .ls { color:#8896a6; font-weight:400; font-size:1.4rem; margin-left:3px; }
+  .ctz-membrete-datos { font-size:.73rem; color:#5a6a7e; line-height:1.7; text-align:right; }
+  .ctz-membrete-datos strong { color:#2d3748; display:block; }
+
+  .ctz-num-bar {
+    background:#fdf8ee; border-bottom:1px solid #ddd8cc; padding:13px 48px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+  }
+  .ctz-num { font-family:'Barlow Condensed',sans-serif; font-size:1.15rem; font-weight:700; letter-spacing:.08em; color:#1e2a38; text-transform:uppercase; }
+  .ctz-badges { display:flex; gap:8px; flex-wrap:wrap; }
+  .ctz-badge { font-size:.63rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:4px 9px; border-radius:4px; }
+  .ctz-badge-gold  { background:#fdf8ee; color:#8b6812; border:1px solid rgba(139,104,18,.25); }
+  .ctz-badge-navy  { background:#eef1f5; color:#1e2a38; border:1px solid rgba(30,42,56,.2); }
+  .ctz-badge-green { background:#f0fdf4; color:#166534; border:1px solid rgba(22,101,52,.2); }
+
+  .ctz-body { padding:32px 48px; font-family:'DM Sans','Inter',sans-serif; font-size:.9rem; color:#2d3748; line-height:1.7; }
+
+  .ctz-dest-fecha { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:26px; flex-wrap:wrap; gap:16px; }
+  .ctz-dest h3 { font-family:'Barlow Condensed',sans-serif; font-size:.61rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#8b6812; margin-bottom:5px; }
+  .ctz-dest p  { font-size:.86rem; color:#2d3748; line-height:1.7; }
+  .ctz-dest p strong { font-weight:600; font-size:.92rem; display:block; color:#1e2a38; }
+  .ctz-fecha { text-align:right; }
+  .ctz-fecha .lbl { font-size:.61rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#8896a6; margin-bottom:2px; }
+  .ctz-fecha .val { font-size:.86rem; color:#2d3748; font-weight:500; }
+
+  .ctz-divider { height:1px; background:linear-gradient(90deg,#c9ad6a,rgba(201,173,106,.1)); margin:20px 0; }
+
+  .ctz-ref { background:#fdf8ee; border:1px solid rgba(139,104,18,.2); border-left:3px solid #8b6812; border-radius:0 6px 6px 0; padding:10px 16px; margin-bottom:22px; }
+  .ctz-ref .rlbl { font-size:.60rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#8b6812; margin-bottom:2px; }
+  .ctz-ref p { font-size:.86rem; color:#2d3748; line-height:1.6; }
+
+  .ctz-intro { font-size:.88rem; color:#5a6a7e; line-height:1.85; margin-bottom:26px; }
+
+  .ctz-sh { font-family:'Barlow Condensed',sans-serif; font-size:.66rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#8b6812; margin-bottom:11px; display:flex; align-items:center; gap:10px; }
+  .ctz-sh::after { content:''; flex:1; height:1px; background:rgba(139,104,18,.2); }
+
+  /* items table */
+  .ctz-table-wrap { border:1px solid #ddd8cc; border-radius:6px; overflow:hidden; margin-bottom:0; }
+  .ctz-items { width:100%; border-collapse:collapse; }
+  .ctz-items thead tr { background:#1e2a38; }
+  .ctz-items thead th { padding:10px 13px; font-family:'Barlow Condensed',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.10em; text-transform:uppercase; color:rgba(255,255,255,.85); text-align:left; }
+  .ctz-items thead th:nth-child(3), .ctz-items thead th:last-child { text-align:right; }
+  .ctz-items tbody tr { border-bottom:1px solid #ddd8cc; }
+  .ctz-items tbody tr:last-child { border-bottom:none; }
+  .ctz-items tbody tr:hover { background:#fafaf8; }
+  .ctz-items td { padding:13px; font-size:.83rem; color:#2d3748; vertical-align:top; }
+  .ctz-items td:nth-child(3), .ctz-items td:last-child { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; white-space:nowrap; }
+  .ctz-iname { font-weight:600; color:#1e2a38; margin-bottom:3px; }
+  .ctz-idesc { font-size:.76rem; color:#5a6a7e; line-height:1.5; }
+
+  /* totales */
+  .ctz-totales-wrap { display:flex; justify-content:flex-end; border-top:2px solid #ddd8cc; }
+  .ctz-totales-box { width:310px; padding:14px 13px; }
+  .ctz-trow { display:flex; justify-content:space-between; align-items:center; padding:5px 0; font-size:.82rem; color:#5a6a7e; border-bottom:1px solid #f0ebe0; }
+  .ctz-trow:last-child { border-bottom:none; }
+  .ctz-trow.sub  { color:#2d3748; }
+  .ctz-trow.fin  { margin-top:7px; padding-top:11px; border-top:2px solid #c9ad6a; border-bottom:none; }
+  .ctz-trow.fin .tlbl { font-family:'Barlow Condensed',sans-serif; font-size:.92rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#1e2a38; }
+  .ctz-trow.fin .tval { font-family:'Barlow Condensed',sans-serif; font-size:1.55rem; font-weight:800; color:#8b6812; letter-spacing:.02em; }
+  .ctz-equiv-nota { font-size:.68rem; color:#8896a6; text-align:right; margin-top:5px; line-height:1.5; }
+
+  /* hitos */
+  .ctz-hitos { width:100%; border-collapse:collapse; font-size:.82rem; margin-top:16px; }
+  .ctz-hitos thead th { background:#f8f4ec; padding:7px 11px; text-align:left; font-size:.71rem; font-weight:700; color:#5a6a7e; text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid #ddd8cc; }
+  .ctz-hitos tbody td { padding:8px 11px; border-bottom:1px solid #f0ebe0; color:#2d3748; }
+  .ctz-hitos tbody tr:last-child td { border-bottom:none; }
+  .ctz-hitos tbody tr:hover td { background:#fdf8ee; }
+  .ctz-hitos .hval { font-family:'Barlow Condensed',sans-serif; font-weight:700; color:#8b6812; text-align:right; white-space:nowrap; }
+
+  /* servicios */
+  .ctz-serv-ul { list-style:none; display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:10px; }
+  .ctz-serv-ul li { font-size:.80rem; color:#5a6a7e; padding-left:18px; position:relative; line-height:1.5; }
+  .ctz-serv-ul li::before { content:'✓'; position:absolute; left:0; color:#8b6812; font-weight:700; }
+
+  /* condiciones */
+  .ctz-conds { margin-top:28px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .ctz-ccard { background:#fdf8ee; border:1px solid rgba(139,104,18,.15); border-radius:8px; padding:13px 15px; }
+  .ctz-ccard h4 { font-family:'Barlow Condensed',sans-serif; font-size:.65rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#8b6812; margin-bottom:6px; }
+  .ctz-ccard p { font-size:.80rem; color:#5a6a7e; line-height:1.65; }
+  .ctz-ccard p strong { color:#2d3748; font-weight:600; }
+
+  /* firma */
+  .ctz-firma { margin-top:34px; padding-top:22px; border-top:1px solid #ddd8cc; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px; }
+  .ctz-firma-linea { width:200px; height:1px; background:#ddd8cc; margin-bottom:8px; }
+  .ctz-firma-nombre { font-family:'Barlow Condensed',sans-serif; font-size:.95rem; font-weight:700; color:#1e2a38; letter-spacing:.04em; }
+  .ctz-firma-cargo { font-size:.72rem; color:#5a6a7e; line-height:1.7; margin-top:2px; }
+  .ctz-firma-cargo strong { color:#2d3748; }
+  .ctz-acep { text-align:right; }
+  .ctz-acep .acep-lbl { font-size:.61rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#8896a6; margin-bottom:36px; }
+  .ctz-acep .acep-linea { width:200px; height:1px; background:#ddd8cc; margin:0 0 7px auto; }
+  .ctz-acep .acep-sub { font-size:.69rem; color:#8896a6; }
+
+  /* nota conf */
+  .ctz-nota-conf { margin:22px 48px 26px; padding:10px 15px; background:#fafaf8; border:1px dashed #ddd8cc; border-radius:6px; font-size:.68rem; color:#8896a6; line-height:1.65; text-align:center; font-style:italic; }
+
+  /* ── Barra de opciones PDF (estilo cotiz.html) ─────────────────── */
+  .ctz-pdf-opts { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ctz-opt-lbl  { font-size:.60rem; font-weight:600; letter-spacing:.10em; text-transform:uppercase; color:#64748b; white-space:nowrap; }
+  .ctz-opt-sel {
+    padding:5px 22px 5px 9px;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:6px;
+    color:#cbd5e1;
+    font-size:.68rem; font-family:inherit; font-weight:500;
+    cursor:pointer; appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 7px center;
+    transition:border-color .2s;
+  }
+  .ctz-opt-sel:hover { border-color:rgba(201,173,106,.4); }
+  .ctz-opt-sel option { background:#1e2a38; color:#e2e8f0; }
+  .ctz-vdivsr { width:1px; height:20px; background:rgba(255,255,255,.12); flex-shrink:0; }
+
+  @media (max-width:680px) {
+    .ctz-doc-header,.ctz-body { padding:20px; }
+    .ctz-num-bar { padding:12px 20px; }
+    .ctz-conds,.ctz-serv-ul { grid-template-columns:1fr; }
+    .ctz-firma { flex-direction:column; }
+    .ctz-nota-conf { margin:16px 20px 20px; }
+    .ctz-pdf-opts { gap:5px; }
+    .ctz-opt-lbl { display:none; }
+  }
+
+  /* ── Imprimir solo la sección cotización ────────────────────────── */
+  @media print {
+    body.print-cotizacion .sidebar                         { display:none!important; }
+    body.print-cotizacion .main                            { padding:0!important; max-width:100%!important; }
+    body.print-cotizacion .main > *:not(#cotizacion)       { display:none!important; }
+    body.print-cotizacion #cotizacion                      { margin-bottom:0!important; }
+    body.print-cotizacion #cotizacion .section-header      { display:none!important; }
+    body.print-cotizacion .ctz-topbar                      { display:none!important; }
+    body.print-cotizacion .ctz-outer                       { background:#f5f3ef!important; border-radius:0!important; padding:0!important; }
+    body.print-cotizacion .ctz-doc                         { box-shadow:none!important; border:1px solid #ddd8cc!important; border-radius:0!important; }
+    body.print-cotizacion .ctz-doc::before                 { display:none!important; }
+    *                                                      { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
+    .ctz-items thead tr                                    { background:#1e2a38!important; }
+    .ctz-items thead th                                    { color:rgba(255,255,255,.85)!important; }
+    .ctz-hitos thead th                                    { background:#f8f4ec!important; }
+    .ctz-ccard, .ctz-ref                                   { background:#fdf8ee!important; }
+    .ctz-num-bar                                           { background:#fdf8ee!important; }
+  }
+
+  /* ── Print ──────────────────────────────────────────────────────── */
+  @media print {
+    .sidebar { display: none; }
+    body { background: #fff; }
+    .main { max-width: 100%; padding: 20px; }
+  }
+
+  /* ── Margen: inputs ─────────────────────────────────────────────── */
+  .input-group { display: flex; flex-direction: column; gap: 5px; }
+  .input-group label { font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: .4px; }
+  .input-wrap { display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 7px; overflow: hidden; background: #fff; transition: border-color .15s; }
+  .input-wrap:focus-within { border-color: #4f46e5; box-shadow: 0 0 0 3px #eef2ff; }
+  .input-pfx, .input-sfx { padding: 8px 10px; background: #f8fafc; font-size: 12px; font-weight: 600; color: #94a3b8; font-family: 'JetBrains Mono', monospace; white-space: nowrap; flex-shrink: 0; }
+  .input-pfx { border-right: 1px solid #e2e8f0; }
+  .input-sfx { border-left: 1px solid #e2e8f0; }
+  .calc-input { flex: 1; border: none; outline: none; padding: 8px 10px; font-size: 14px; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #1e293b; background: transparent; min-width: 0; }
+  .calc-select { width: 100%; border: 1px solid #e2e8f0; border-radius: 7px; padding: 9px 12px; font-size: 13.5px; color: #1e293b; background: #fff; outline: none; cursor: pointer; }
+  .calc-select:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px #eef2ff; }
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  /* ── Margen: result cards ───────────────────────────────────────── */
+  .margen-pos { color: #059669 !important; }
+  .margen-neg { color: #dc2626 !important; }
+  .equiv-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; text-align: center; }
+  .equiv-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .7px; color: #94a3b8; margin-bottom: 4px; }
+  .equiv-value { font-size: 20px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .equiv-sub   { font-size: 11px; color: #64748b; margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Margen: tabla mensual ──────────────────────────────────────── */
+  .mg-pos { color: #059669; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+  .mg-neg { color: #dc2626; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+  .mg-pct-bar-wrap { display: flex; align-items: center; gap: 6px; }
+  .mg-pct-bar-bg { flex: 1; height: 5px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+  .mg-pct-bar-fill { height: 100%; border-radius: 3px; transition: width .3s; }
+  .mg-pct-lbl { font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 600; width: 44px; text-align: right; flex-shrink: 0; }
+</style>
+<style id="ctz-print-style"></style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ══════════════════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>GUARDIA DIGITAL I.</h1>
+    <span>Proyección de Costos (FinOps)</span>
+    <div>
+      <span class="status-pill pill-ok"><span class="pill-dot"></span>~$115 USD/mes · Piloto</span>
+    </div>
+    <div>
+      <span class="status-pill pill-info"><span class="pill-dot"></span>~$356 USD/mes · Carga Media</span>
+    </div>
+    <div>
+      <span class="status-pill pill-warn"><span class="pill-dot"></span>~$950 USD/mes · Carga Alta</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-label">Resumen</div>
+      <a href="#overview"    class="nav-link active"><span class="nav-icon">📊</span>KPIs de costo</a>
+      <a href="#fases"       class="nav-link"><span class="nav-icon">📅</span>Costos por escenario</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Plataformas</div>
+      <a href="#plataformas" class="nav-link"><span class="nav-icon">🔐</span>SaaS (Auth0 · Datadog · Intercom)</a>
+      <a href="#infra"       class="nav-link"><span class="nav-icon">☁️</span>Infra AWS + IA (Lambda · Vertex)</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Alternativa</div>
+      <a href="#alternativa" class="nav-link"><span class="nav-icon">🔁</span>Escenario AWS Cognito</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Análisis</div>
+      <a href="#modelo"      class="nav-link"><span class="nav-icon">🏗️</span>Modelo de negocios</a>
+      <a href="#proyeccion"  class="nav-link"><span class="nav-icon">📈</span>Proyección año 1</a>
+      <a href="#caja"        class="nav-link"><span class="nav-icon">💰</span>Flujo de caja</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Catálogo</div>
+      <a href="#catalogo"    class="nav-link"><span class="nav-icon">🛒</span>Catálogo de servicios</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Rentabilidad</div>
+      <a href="#margen"      class="nav-link"><span class="nav-icon">📐</span>Margen y ganancia</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Documento</div>
+      <a href="#cotizacion" class="nav-link"><span class="nav-icon">📄</span>Presupuesto / Cotización</a>
+    </div>
+  </nav>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- ── HEADER ──────────────────────────────────────────────── -->
+  <div style="margin-bottom:40px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span class="badge badge-indigo">Guardia Digital Inteligente</span>
+          <span class="badge badge-slate">AWS · Auth0 · Vertex AI · Datadog</span>
+          <span class="badge badge-green">Alt. Cognito disponible</span>
+        </div>
+        <h2 style="font-size:28px;margin-bottom:4px;">Estudio de Costos Cloud</h2>
+        <p style="font-size:15px;color:#475569;margin:0;">
+          Análisis de infraestructura para los tres escenarios de carga de la plataforma IAM/IGA.<br>
+          Proyección de costos mensuales y flujo de caja para go-live.
+        </p>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">tipo de cambio referencia</div>
+        <div style="font-size:15px;font-weight:600;color:#334155;">$960 CLP / USD</div>
+        <div style="font-size:12px;color:#64748b;">Junio 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       KPIs DE COSTO
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="overview">
+    <div class="section-header">
+      <h2>KPIs de costo</h2>
+      <p>Resumen ejecutivo de la inversión en infraestructura y plataformas.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">$115</div>
+        <div class="stat-label">USD / mes · Piloto</div>
+        <div class="stat-sub">≈ $110.400 CLP</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$356</div>
+        <div class="stat-label">USD / mes · Carga Media</div>
+        <div class="stat-sub">≈ $341.760 CLP</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$950</div>
+        <div class="stat-label">USD / mes · Carga Alta</div>
+        <div class="stat-sub">≈ $912.000 CLP</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Descripción del modelo de costos</h3>
+      <p>
+        <strong>Guardia Digital Inteligente</strong> es una <strong>plataforma SaaS B2B de IAM/IGA</strong>
+        que combina <strong>plataformas de identidad gestionadas</strong> (Auth0) con
+        <strong>infraestructura serverless propia</strong> (AWS API Gateway + Lambda) e
+        <strong>inteligencia artificial de detección de anomalías</strong> (Modal → Google Vertex AI).
+        A diferencia de un producto puramente serverless, el principal driver de costo no es el cómputo
+        sino la <strong>licencia de identidad por usuario activo mensual (MAU)</strong> de Auth0, que crece
+        con la cantidad de identidades gestionadas por los tenants del mid-market.
+      </p>
+      <p>
+        El stack de costos se compone de seis líneas: <strong>Auth0</strong> (Universal Login + Adaptive MFA,
+        cobrado por MAU), <strong>Vertex AI</strong> (endpoint de inferencia de anomalías),
+        <strong>Datadog</strong> (SIEM, ingesta de logs y dashboard de compliance), <strong>Intercom</strong>
+        (bot de soporte embebido en el login), <strong>Modal</strong> (orquestación del batch de IA cada 15 min)
+        y la <strong>infraestructura serverless de AWS</strong> (API Gateway HTTP API + Lambda + CloudWatch),
+        que es prácticamente gratuita por volumen de eventos de login. La IaC se gestiona con
+        <strong>Terraform</strong> (open-source, sin costo de licencia).
+      </p>
+      <p style="margin-bottom:0;">
+        Los costos se modelan en <strong>tres escenarios de carga</strong> — Piloto / Marcha Blanca, Carga Media
+        y Carga Alta — que escalan según el número de <strong>tenants y MAU bajo gestión</strong>. La gran ventaja
+        de la arquitectura serverless es que el cómputo de captura y normalización (Lambda + API Gateway) cae
+        dentro del <strong>Free Tier de AWS</strong> aun en producción, dejando el costo concentrado en las
+        suscripciones SaaS de identidad y observabilidad. El escenario de Carga Alta ($950 USD/mes) soporta
+        <strong>5.000+ MAU con MFA adaptativo y detección de anomalías activa</strong> sobre varios tenants.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Distribución del gasto mensual (Carga Media — $356)</h3>
+      <div class="progress-row">
+        <div class="progress-label">
+          <span>Auth0 (Professional + Adaptive MFA · por MAU)</span>
+          <span style="font-family:'JetBrains Mono',monospace;">$180 USD · 51%</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-indigo" style="width:51%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label">
+          <span>Google Vertex AI (endpoint de anomalías)</span>
+          <span style="font-family:'JetBrains Mono',monospace;">$80 USD · 22%</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-amber" style="width:22%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label">
+          <span>Datadog (SIEM + ingesta de logs)</span>
+          <span style="font-family:'JetBrains Mono',monospace;">$40 USD · 11%</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:11%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label">
+          <span>Intercom (bot de soporte en login)</span>
+          <span style="font-family:'JetBrains Mono',monospace;">$39 USD · 11%</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-indigo" style="width:11%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label">
+          <span>Modal (batch IA cada 15 min)</span>
+          <span style="font-family:'JetBrains Mono',monospace;">$12 USD · 3%</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-amber" style="width:3%"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label">
+          <span>AWS serverless (API GW + Lambda + CloudWatch)</span>
+          <span style="font-family:'JetBrains Mono',monospace;">$5 USD · 1%</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:2%"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       COSTOS POR ESCENARIO
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="fases">
+    <div class="section-header">
+      <h2>Costos por escenario</h2>
+      <p>Desglose mensual según el número de tenants y MAU bajo gestión.</p>
+    </div>
+
+    <div class="phase-grid">
+      <!-- Escenario 1 -->
+      <div class="phase-card" style="background:#f0fdf4;border-color:#bbf7d0;">
+        <div class="phase-label" style="color:#065f46;">Escenario 1</div>
+        <div class="phase-title">Piloto / Marcha Blanca</div>
+        <div class="phase-cost" style="color:#059669;">$115 USD</div>
+        <div class="phase-period">~$110.400 CLP / mes · 1–3 tenants · ~250 MAU</div>
+        <div class="phase-items">
+          <div class="phase-item"><span>Auth0 (Essentials, baja MAU)</span><span class="phase-item-cost">$35</span></div>
+          <div class="phase-item"><span>Vertex AI (batch predictions)</span><span class="phase-item-cost">$20</span></div>
+          <div class="phase-item"><span>Datadog (Pro, 1 host)</span><span class="phase-item-cost">$15</span></div>
+          <div class="phase-item"><span>Intercom (Essential)</span><span class="phase-item-cost">$39</span></div>
+          <div class="phase-item"><span>Modal</span><span class="phase-item-cost">$5</span></div>
+          <div class="phase-item"><span>AWS serverless</span><span class="phase-item-cost">$1</span></div>
+        </div>
+      </div>
+
+      <!-- Escenario 2 -->
+      <div class="phase-card" style="background:#eff6ff;border-color:#bfdbfe;">
+        <div class="phase-label" style="color:#1e40af;">Escenario 2</div>
+        <div class="phase-title">Carga Media (Staging / early prod)</div>
+        <div class="phase-cost" style="color:#4f46e5;">$356 USD</div>
+        <div class="phase-period">~$341.760 CLP / mes · ~1.000 MAU</div>
+        <div class="phase-items">
+          <div class="phase-item"><span>Auth0 (Professional + MFA)</span><span class="phase-item-cost">$180</span></div>
+          <div class="phase-item"><span>Vertex AI (endpoint online)</span><span class="phase-item-cost">$80</span></div>
+          <div class="phase-item"><span>Datadog (logs + 2 hosts)</span><span class="phase-item-cost">$40</span></div>
+          <div class="phase-item"><span>Intercom (Advanced)</span><span class="phase-item-cost">$39</span></div>
+          <div class="phase-item"><span>Modal</span><span class="phase-item-cost">$12</span></div>
+          <div class="phase-item"><span>AWS serverless</span><span class="phase-item-cost">$5</span></div>
+        </div>
+      </div>
+
+      <!-- Escenario 3 -->
+      <div class="phase-card" style="background:#fff7ed;border-color:#fed7aa;">
+        <div class="phase-label" style="color:#c2410c;">Escenario 3</div>
+        <div class="phase-title">Carga Alta (Producción)</div>
+        <div class="phase-cost" style="color:#d97706;">$950 USD</div>
+        <div class="phase-period">~$912.000 CLP / mes · 5.000+ MAU · varios tenants</div>
+        <div class="phase-items">
+          <div class="phase-item"><span>Auth0 (Professional, alta MAU)</span><span class="phase-item-cost">$520</span></div>
+          <div class="phase-item"><span>Vertex AI (endpoint dedicado 24/7)</span><span class="phase-item-cost">$220</span></div>
+          <div class="phase-item"><span>Datadog (logs + 4 hosts + SIEM)</span><span class="phase-item-cost">$90</span></div>
+          <div class="phase-item"><span>Intercom (Advanced, varios asientos)</span><span class="phase-item-cost">$75</span></div>
+          <div class="phase-item"><span>Modal</span><span class="phase-item-cost">$25</span></div>
+          <div class="phase-item"><span>AWS serverless</span><span class="phase-item-cost">$20</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div>
+        <strong>Optimización por detección delta:</strong> el job de Modal solo envía a Vertex AI los eventos
+        de login <strong>nuevos o modificados</strong> respecto al ciclo anterior (no reprocesa logins ya
+        clasificados). Esto contiene de forma efectiva el costo de inferencia de IA, que en producción podría
+        dispararse si se evaluara cada evento de cada MAU en cada ciclo de 15 minutos.
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div>
+        <strong>Auth0 domina el costo:</strong> a diferencia de un producto serverless puro, aquí el costo crece
+        casi linealmente con el número de MAU por la licencia de Auth0 (Adaptive MFA requiere el plan Professional).
+        Los valores de Auth0 son <strong>estimaciones</strong> y deben validarse con una cotización oficial según
+        el volumen real de identidades — ver el <a href="#alternativa" style="color:#92400e;font-weight:600;">escenario alternativo con AWS Cognito</a>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       PLATAFORMAS SaaS
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="plataformas">
+    <div class="section-header">
+      <h2>Plataformas SaaS (suscripción)</h2>
+      <p>Identidad, observabilidad y soporte — cobradas por suscripción mensual.</p>
+    </div>
+
+    <div class="card">
+      <h3>Suscripciones de identidad, SIEM y soporte</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Plataforma</th>
+            <th>Rol</th>
+            <th>Detalle</th>
+            <th class="cost-value">USD / mes (Media)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Auth0</strong></td>
+            <td><span class="badge badge-indigo">Identidad</span></td>
+            <td>Universal Login + Adaptive MFA (plan Professional). Cobro por MAU (~1.000). Log Streams al webhook.</td>
+            <td class="cost-value">~$180.00</td>
+          </tr>
+          <tr>
+            <td><strong>Datadog</strong></td>
+            <td><span class="badge badge-purple">SIEM / Logs</span></td>
+            <td>Forwarder + pipelines + monitores + dashboard de compliance. Ingesta de logs + 2 hosts.</td>
+            <td class="cost-value">~$40.00</td>
+          </tr>
+          <tr>
+            <td><strong>Intercom</strong></td>
+            <td><span class="badge badge-cyan">Soporte</span></td>
+            <td>Bot de autoservicio embebido en Universal Login (desbloqueo de cuenta, setup de MFA). Plan Advanced.</td>
+            <td class="cost-value">~$39.00</td>
+          </tr>
+          <tr class="free-row">
+            <td><strong>Terraform</strong></td>
+            <td><span class="badge badge-slate">IaC</span></td>
+            <td>Open-source. Terraform Cloud en free tier para el estado remoto inicial.</td>
+            <td class="cost-value">$0.00</td>
+          </tr>
+          <tr style="background:#f8fafc;">
+            <td colspan="3" style="text-align:right; font-weight:600; color:#0f172a;">Subtotal Plataformas SaaS:</td>
+            <td class="cost-value" style="color:#4f46e5; font-weight:700;">$259.00</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:#64748b;margin-top:12px;margin-bottom:0;">
+        Los costos corresponden al escenario de <strong>Carga Media</strong>. En modo piloto, Auth0 baja a su plan
+        Essentials y Datadog/Intercom a sus planes básicos, reduciendo el subtotal a ~$89 USD.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       INFRA AWS + IA
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="infra">
+    <div class="section-header">
+      <h2>Infraestructura AWS + IA (consumo)</h2>
+      <p>Cómputo serverless de captura y motor de detección de anomalías — cobrados por consumo.</p>
+    </div>
+
+    <div class="card">
+      <h3>Captura serverless e inferencia de anomalías</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Servicio</th>
+            <th>Proveedor</th>
+            <th>Detalle</th>
+            <th class="cost-value">USD / mes (Media)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="free-row">
+            <td><strong>API Gateway (HTTP API)</strong></td>
+            <td><span class="badge badge-amber">AWS</span></td>
+            <td>Endpoint <code>POST /webhooks/auth0</code>. ~$1.00/M requests — volumen de logins bajo el umbral.</td>
+            <td class="cost-value">~$1.00</td>
+          </tr>
+          <tr class="free-row">
+            <td><strong>AWS Lambda (Node 20)</strong></td>
+            <td><span class="badge badge-amber">AWS</span></td>
+            <td>Handler 128 MB, timeout 10s. Normalización de eventos. Dentro del Free Tier por volumen.</td>
+            <td class="cost-value">~$1.00</td>
+          </tr>
+          <tr class="free-row">
+            <td><strong>CloudWatch Logs</strong></td>
+            <td><span class="badge badge-amber">AWS</span></td>
+            <td>Log group de la Lambda → Datadog Forwarder. Ingesta y retención mínima.</td>
+            <td class="cost-value">~$3.00</td>
+          </tr>
+          <tr>
+            <td><strong>Modal</strong></td>
+            <td><span class="badge badge-purple">Modal</span></td>
+            <td>Job <code>guardia-anomaly-detector</code> cada 15 min. Compute por segundo de ejecución del batch.</td>
+            <td class="cost-value">~$12.00</td>
+          </tr>
+          <tr class="total-row">
+            <td><strong>Vertex AI (endpoint anomalías)</strong></td>
+            <td><span class="badge badge-purple">GCP</span></td>
+            <td>Online prediction de accesos anómalos (umbral <code>anomaly_score ≥ 0.8</code>).</td>
+            <td class="cost-value">~$80.00</td>
+          </tr>
+          <tr style="background:#f8fafc;">
+            <td colspan="3" style="text-align:right; font-weight:600; color:#0f172a;">Subtotal Infra AWS + IA:</td>
+            <td class="cost-value" style="color:#4f46e5; font-weight:700;">$97.00</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:#64748b;margin-top:12px;margin-bottom:0;">
+        La captura serverless (API GW + Lambda + CloudWatch ≈ $5) es marginal frente a Vertex AI. El costo de IA
+        depende del modo de inferencia: <strong>batch predictions</strong> (más barato, latencia mayor) en piloto,
+        vs. <strong>endpoint online dedicado</strong> (nodo 24/7) en producción.
+      </p>
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-icon">✅</div>
+      <div>
+        <strong>Total infraestructura Carga Media:</strong> Plataformas SaaS ($259) + Infra AWS + IA ($97) =
+        <strong>$356 USD/mes</strong> ≈ $341.760 CLP.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       ESCENARIO ALTERNATIVO — COGNITO
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="alternativa">
+    <div class="section-header">
+      <h2>Escenario alternativo — Reducir la dependencia de Auth0</h2>
+      <p>Equivalencia Auth0 → AWS Cognito para contener el costo por MAU en escala.</p>
+    </div>
+
+    <div class="card">
+      <h3>Tabla de equivalencias de identidad</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Componente Auth0</th>
+            <th>Detalle original</th>
+            <th class="cost-value">USD/mes</th>
+            <th>Equivalente AWS</th>
+            <th class="cost-value">USD/mes</th>
+            <th>Impacto y viabilidad de migración</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Auth0 Universal Login</strong></td>
+            <td>Login gestionado + sesiones (~1.000 MAU)</td>
+            <td style="font-family:'JetBrains Mono',monospace;text-align:right;">$120.00</td>
+            <td><strong>Cognito User Pools</strong></td>
+            <td style="font-family:'JetBrains Mono',monospace;text-align:right;color:#059669;">~$0.00</td>
+            <td style="font-size:12px;color:#64748b;">Cognito incluye 50.000 MAU gratis en su capa Essentials. A 1.000 MAU el login básico es prácticamente sin costo, pero pierdes el ecosistema de Universal Login y conexiones gestionadas de Auth0.</td>
+          </tr>
+          <tr>
+            <td><strong>Auth0 Adaptive MFA</strong></td>
+            <td>MFA por señales de riesgo (plan Professional)</td>
+            <td style="font-family:'JetBrains Mono',monospace;text-align:right;">$60.00</td>
+            <td><strong>Cognito Advanced Security</strong></td>
+            <td style="font-family:'JetBrains Mono',monospace;text-align:right;color:#d97706;">~$50.00</td>
+            <td style="font-size:12px;color:#64748b;">Cognito Advanced Security ofrece autenticación adaptativa (~$0.05/MAU). Hay que <strong>reescribir la Action post-login</strong> como un Lambda trigger de Cognito — el código de señales de riesgo se traslada, no el SDK de Auth0.</td>
+          </tr>
+          <tr>
+            <td><strong>Auth0 Log Streams</strong></td>
+            <td>Webhook HTTP de eventos de login</td>
+            <td style="font-family:'JetBrains Mono',monospace;text-align:right;">$0.00</td>
+            <td><strong>Cognito + EventBridge</strong></td>
+            <td style="font-family:'JetBrains Mono',monospace;text-align:right;color:#059669;">~$0.00</td>
+            <td style="font-size:12px;color:#64748b;">Los eventos de Cognito se emiten vía CloudTrail/EventBridge directo a la Lambda existente, eliminando la dependencia del Log Stream HTTP y simplificando la captura.</td>
+          </tr>
+          <tr style="background:#f0fdf4;">
+            <td colspan="2" style="font-weight:700;color:#0f172a;">Total identidad (Auth0)</td>
+            <td style="font-family:'JetBrains Mono',monospace;text-align:right;font-weight:700;color:#dc2626;">$180.00</td>
+            <td style="font-weight:700;color:#059669;">Total Cognito (estimado)</td>
+            <td style="font-family:'JetBrains Mono',monospace;text-align:right;font-weight:700;font-size:15px;color:#059669;">~$50.00</td>
+            <td><span class="badge badge-green">−$130/mes · ≈ −72%</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:#64748b;margin-top:12px;margin-bottom:0;">
+        Cognito resulta <strong>mucho más económico por MAU</strong>, especialmente al crecer (en Carga Alta el ahorro
+        de Auth0 → Cognito supera los <strong>$400 USD/mes</strong>). El trade-off es <strong>esfuerzo de ingeniería</strong>:
+        se pierde el ecosistema de Actions/conexiones de Auth0 y hay que reconstruir el MFA adaptativo como Lambda triggers.
+      </p>
+    </div>
+
+    <!-- Plan de migración (pasos) -->
+    <div class="card" style="margin-top:20px;">
+      <h3>Pasos de la alternativa a AWS Cognito</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>#</th><th>Acción</th><th>Esfuerzo</th><th>Ahorro / Impacto directo</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family:'JetBrains Mono',monospace;color:#94a3b8;font-size:12px;">C1</td>
+            <td><strong>Crear Cognito User Pool + hosted UI</strong><br><small style="color:#64748b;">Sustituir Universal Login por el hosted UI de Cognito con dominio propio. Migrar usuarios con import job o flujo just-in-time. 50k MAU gratis en Essentials.</small></td>
+            <td><span class="badge badge-amber">5–8 h</span></td>
+            <td style="color:#059669;font-family:'JetBrains Mono',monospace;font-weight:700;">−$120/mes</td>
+          </tr>
+          <tr>
+            <td style="font-family:'JetBrains Mono',monospace;color:#94a3b8;font-size:12px;">C2</td>
+            <td><strong>Reescribir la Action MFA como Lambda trigger</strong><br><small style="color:#64748b;">Portar la lógica de señales de riesgo (país, horario CLT, dispositivo nuevo, IP) del <code>post-login</code> de Auth0 a un trigger <code>PreAuthentication</code>/<code>PostAuthentication</code> de Cognito.</small></td>
+            <td><span class="badge badge-amber">6–10 h</span></td>
+            <td style="color:#d97706;font-family:'JetBrains Mono',monospace;">−$10/mes</td>
+          </tr>
+          <tr>
+            <td style="font-family:'JetBrains Mono',monospace;color:#94a3b8;font-size:12px;">C3</td>
+            <td><strong>Sustituir Log Stream por EventBridge</strong><br><small style="color:#64748b;">Conectar los eventos de Cognito a la Lambda <code>guardia-auth0-webhook</code> vía EventBridge, eliminando el webhook HTTP y la validación por Bearer.</small></td>
+            <td><span class="badge badge-green">3–4 h</span></td>
+            <td style="color:#059669;font-family:'JetBrains Mono',monospace;">$0/mes</td>
+          </tr>
+          <tr>
+            <td style="font-family:'JetBrains Mono',monospace;color:#94a3b8;font-size:12px;">C4</td>
+            <td><strong>Habilitar Cognito Advanced Security</strong><br><small style="color:#64748b;">Activar autenticación adaptativa nativa de Cognito (~$0.05/MAU) para cubrir el caso de uso de MFA por riesgo sin licencia Professional de Auth0.</small></td>
+            <td><span class="badge badge-green">2–3 h</span></td>
+            <td style="color:#d97706;font-family:'JetBrains Mono',monospace;">+$50/mes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Advertencia -->
+    <div class="callout callout-info" style="margin-top:20px;">
+      <div class="callout-icon">🔒</div>
+      <div>
+        <strong>Decisión:</strong> para el <strong>piloto y mid-market temprano</strong> conviene mantener Auth0 por
+        velocidad de implementación (Actions y MFA adaptativo listos sin reescritura). La migración a Cognito se
+        justifica financieramente <strong>al superar ~3.000–5.000 MAU</strong>, cuando el costo por MAU de Auth0
+        supera el esfuerzo único de reingeniería. Mantener la abstracción de identidad desacoplada facilita ese cambio.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       MODELO DE NEGOCIOS
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="modelo">
+    <div class="section-header">
+      <h2>Modelo de negocios</h2>
+      <p>Estrategia comercial, fuentes de ingreso y plan de monetización de Guardia Digital Inteligente.</p>
+    </div>
+
+    <!-- Propuesta de valor -->
+    <div class="card">
+      <h3>Propuesta de valor</h3>
+      <p>
+        <strong>Guardia Digital Inteligente</strong> es una plataforma de <strong>Gestión de Identidades y Accesos
+        (IAM/IGA)</strong> con enfoque Zero-Trust, diseñada para el <strong>mid-market chileno</strong>: empresas con
+        equipos de TI pero sin un área de identidad dedicada. El sistema combina MFA adaptativo, captura y
+        normalización de eventos de login, detección de accesos anómalos con IA y trazabilidad completa para
+        auditoría — entregando seguridad de identidad de nivel enterprise sin su complejidad ni su costo.
+      </p>
+      <p style="margin-top:10px;">
+        La plataforma opera en dos verticales: <strong>sector público</strong> (municipios, servicios del Estado) y
+        <strong>sector privado</strong> (PYMEs y empresas medianas). El motor de reglas y los reportes de compliance
+        se adaptan al lenguaje y normativa de cada segmento (<strong>Ley 20.393</strong>).
+      </p>
+      <div class="callout callout-info" style="margin-top:12px;">
+        <div class="callout-icon">🎯</div>
+        <div>
+          <strong>Diferenciador clave:</strong> a diferencia de un IAM enterprise (caro y complejo de implementar),
+          Guardia Digital se despliega sobre la identidad existente del cliente, agrega MFA adaptativo y detección de
+          anomalías en días, y entrega <strong>evidencia de auditoría lista para la Ley 20.393</strong>. El valor se
+          demuestra con un diagnóstico de postura de identidad antes de cobrar.
+        </div>
+      </div>
+    </div>
+
+    <!-- Modelo de adquisición -->
+    <div class="card">
+      <h3>Modelo de adquisición — Diagnóstico de postura de identidad</h3>
+      <p style="margin-bottom:14px;">La estrategia de adquisición demuestra valor antes de cobrar, usando la postura de identidad real del prospecto.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:18px 20px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#065f46;margin-bottom:6px;">Paso 1 — Diagnóstico de cortesía</div>
+          <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:8px;">Evaluación de postura de identidad</div>
+          <p style="font-size:13px;color:#475569;margin-bottom:0;">
+            Wayweb evalúa la postura de identidad del prospecto: cobertura de MFA, políticas de contraseña,
+            cuentas privilegiadas, accesos de contratistas y brechas frente a la Ley 20.393. Se entrega un informe
+            ejecutivo con hallazgos y un risk score — sin que el prospecto despliegue nada.
+          </p>
+        </div>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:18px 20px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#1e40af;margin-bottom:6px;">Paso 2 — Implementación</div>
+          <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:8px;">Onboarding IAM + suscripción (cobrado)</div>
+          <p style="font-size:13px;color:#475569;margin-bottom:0;">
+            Si el prospecto responde al diagnóstico, se ofrece la implementación: Auth0 + MFA adaptativo,
+            captura de logs, detección de anomalías y dashboard de compliance, más el monitoreo mensual
+            recurrente. Precio según número de identidades gestionadas.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Segmentos y plan de ventas -->
+    <div class="card">
+      <h3>Segmentos objetivo y plan de ventas</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Segmento</th>
+            <th>Perfil</th>
+            <th>Modalidad</th>
+            <th class="cost-value">Ticket estimado / mes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>PYME con TI básica</strong></td>
+            <td>50–150 empleados, identidades en AD/Google Workspace, sin área de seguridad</td>
+            <td><span class="badge badge-indigo">SaaS gestionado</span></td>
+            <td class="cost-value">$390.000 CLP</td>
+          </tr>
+          <tr>
+            <td><strong>Empresas medianas</strong></td>
+            <td>150–500 empleados, contratistas y sucursales, necesidad de compliance</td>
+            <td><span class="badge badge-cyan">SaaS + Consultoría</span></td>
+            <td class="cost-value">$890.000 CLP</td>
+          </tr>
+          <tr>
+            <td><strong>Sector público / Gobierno</strong></td>
+            <td>Municipios y servicios del Estado con obligación normativa</td>
+            <td><span class="badge badge-purple">Licencia + auditoría</span></td>
+            <td class="cost-value">$1.900.000+ CLP</td>
+          </tr>
+          <tr>
+            <td><strong>MSPs / Integradores</strong></td>
+            <td>Proveedores de servicios gestionados de TI y ciberseguridad</td>
+            <td><span class="badge badge-amber">White-label / API</span></td>
+            <td class="cost-value">A convenir</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Fuentes de ingresos -->
+    <div class="card">
+      <h3>Fuentes de ingreso</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:18px 20px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#065f46;margin-bottom:6px;">Fuente 1</div>
+          <div style="font-size:15px;font-weight:700;color:#0f172a;margin-bottom:8px;">Suscripción SaaS mensual</div>
+          <p style="font-size:13px;color:#475569;margin-bottom:0;">
+            Acceso recurrente a MFA adaptativo, captura de logs, detección de anomalías y dashboard de
+            compliance. Escalado por número de identidades gestionadas. Facturación mensual o anual con descuento.
+          </p>
+        </div>
+
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:18px 20px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#1e40af;margin-bottom:6px;">Fuente 2</div>
+          <div style="font-size:15px;font-weight:700;color:#0f172a;margin-bottom:8px;">Implementación / onboarding</div>
+          <p style="font-size:13px;color:#475569;margin-bottom:0;">
+            Setup inicial one-shot: configuración de Auth0, MFA adaptativo, captura de logs, dashboard de
+            compliance y migración de identidades. Ingreso de cierre rápido sobre el diagnóstico.
+          </p>
+        </div>
+
+        <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:18px 20px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#c2410c;margin-bottom:6px;">Fuente 3</div>
+          <div style="font-size:15px;font-weight:700;color:#0f172a;margin-bottom:8px;">Consultoría y compliance</div>
+          <p style="font-size:13px;color:#475569;margin-bottom:0;">
+            Auditoría de cumplimiento Ley 20.393, políticas de identidad, gobierno de accesos (IGA) y
+            acompañamiento. Alto margen porque el costo marginal es trabajo humano, no infraestructura.
+          </p>
+        </div>
+
+        <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:10px;padding:18px 20px;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#6b21a8;margin-bottom:6px;">Fuente 4</div>
+          <div style="font-size:15px;font-weight:700;color:#0f172a;margin-bottom:8px;">API / White-label para MSPs</div>
+          <p style="font-size:13px;color:#475569;margin-bottom:0;">
+            Acceso a la plataforma IAM bajo la marca del integrador. MSPs que quieran ofrecer Zero-Trust e
+            IGA gestionado a su cartera sin construir la infraestructura. Revenue-share o licencia fija.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Estrategia de go-to-market -->
+    <div class="card">
+      <h3>Plan de go-to-market — Fases</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Fase</th><th>Período</th><th>Acciones clave</th><th>Meta comercial</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-green">Fase 1 · Diagnóstico</span></td>
+            <td style="white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12px;">M1 – M2</td>
+            <td style="font-size:13px;color:#475569;">
+              Wayweb selecciona prospectos del mid-market, ejecuta diagnósticos de postura de identidad y entrega
+              informes ejecutivos con hallazgos y risk score. Objetivo: generar conversaciones comerciales con
+              evidencia concreta de brechas de identidad.
+            </td>
+            <td><span class="badge badge-slate">10–25 diagnósticos</span></td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-indigo">Fase 2 · Conversión</span></td>
+            <td style="white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12px;">M3 – M4</td>
+            <td style="font-size:13px;color:#475569;">
+              Implementación cobrada a prospectos que respondieron al diagnóstico. Activación del monitoreo mensual
+              recurrente. Caso de éxito documentado por vertical (municipio y/o PYME). Primeras suscripciones SaaS.
+            </td>
+            <td><span class="badge badge-indigo">3–5 clientes pagados</span></td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-amber">Fase 3 · Escala</span></td>
+            <td style="white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12px;">M5 – M12</td>
+            <td style="font-size:13px;color:#475569;">
+              Multi-tenancy consolidado. Migración de Auth0 a Cognito para contener costo por MAU en escala.
+              Ingreso al segmento gubernamental (ChileCompra) con foco en compliance Ley 20.393. Onboarding de
+              MSPs bajo white-label.
+            </td>
+            <td><span class="badge badge-amber">15+ clientes / MRR estable</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- KPIs objetivo -->
+    <div class="card">
+      <h3>KPIs objetivo — Año 1</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" style="font-size:22px;color:#059669;">15+</div>
+          <div class="stat-label">Clientes activos al M12</div>
+          <div class="stat-sub">entre SaaS y consultoría</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="font-size:22px;color:#4f46e5;">$4.5M</div>
+          <div class="stat-label">MRR objetivo CLP / mes</div>
+          <div class="stat-sub">≈ $4.690 USD / mes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="font-size:22px;color:#d97706;">70%+</div>
+          <div class="stat-label">Margen bruto estimado</div>
+          <div class="stat-sub">sobre costo de plataformas</div>
+        </div>
+      </div>
+      <div class="callout callout-success" style="margin-top:8px;">
+        <div class="callout-icon">✅</div>
+        <div>
+          Con un ticket promedio de <strong>$890.000 CLP/mes</strong> y 12 clientes activos se alcanza un
+          <strong>MRR de ~$10.7M CLP</strong> frente a un OPEX de plataformas de <strong>~$912.000 CLP</strong>
+          (Carga Alta), resultando en un margen de operación cercano al <strong>91%</strong> sobre costos cloud.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       PROYECCIÓN AÑO 1
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="proyeccion">
+    <div class="section-header">
+      <h2>Proyección año 1</h2>
+      <p>Estimación de costos mensuales acumulados bajo escalamiento de identidades gestionadas.</p>
+    </div>
+
+    <div class="card">
+      <h3>Cronograma de costos — 12 meses</h3>
+
+      <div style="margin-bottom:20px;">
+        <!-- Mes 1 -->
+        <div class="year-row"><div class="year-month">M1</div><div class="year-bar-wrap"><div class="year-bar" style="width:12%;background:#059669;"></div></div><div class="year-cost">$115</div><div class="year-phase" style="color:#059669;">Piloto</div></div>
+        <div class="year-row"><div class="year-month">M2</div><div class="year-bar-wrap"><div class="year-bar" style="width:12%;background:#059669;"></div></div><div class="year-cost">$115</div><div class="year-phase" style="color:#059669;">Piloto</div></div>
+
+        <div class="year-row"><div class="year-month">M3</div><div class="year-bar-wrap"><div class="year-bar" style="width:37%;background:#4f46e5;"></div></div><div class="year-cost">$356</div><div class="year-phase" style="color:#4f46e5;">Media</div></div>
+        <div class="year-row"><div class="year-month">M4</div><div class="year-bar-wrap"><div class="year-bar" style="width:37%;background:#4f46e5;"></div></div><div class="year-cost">$356</div><div class="year-phase" style="color:#4f46e5;">Media</div></div>
+
+        <div class="year-row"><div class="year-month">M5</div><div class="year-bar-wrap"><div class="year-bar" style="width:100%;background:#d97706;"></div></div><div class="year-cost">$950</div><div class="year-phase" style="color:#d97706;">Alta</div></div>
+        <div class="year-row"><div class="year-month">M6</div><div class="year-bar-wrap"><div class="year-bar" style="width:100%;background:#d97706;"></div></div><div class="year-cost">$950</div><div class="year-phase" style="color:#d97706;">Alta</div></div>
+        <div class="year-row"><div class="year-month">M7</div><div class="year-bar-wrap"><div class="year-bar" style="width:100%;background:#d97706;"></div></div><div class="year-cost">$950</div><div class="year-phase" style="color:#d97706;">Alta</div></div>
+        <div class="year-row"><div class="year-month">M8</div><div class="year-bar-wrap"><div class="year-bar" style="width:100%;background:#d97706;"></div></div><div class="year-cost">$950</div><div class="year-phase" style="color:#d97706;">Alta</div></div>
+        <div class="year-row"><div class="year-month">M9</div><div class="year-bar-wrap"><div class="year-bar" style="width:100%;background:#d97706;"></div></div><div class="year-cost">$950</div><div class="year-phase" style="color:#d97706;">Alta</div></div>
+        <div class="year-row"><div class="year-month">M10</div><div class="year-bar-wrap"><div class="year-bar" style="width:100%;background:#d97706;"></div></div><div class="year-cost">$950</div><div class="year-phase" style="color:#d97706;">Alta</div></div>
+        <div class="year-row"><div class="year-month">M11</div><div class="year-bar-wrap"><div class="year-bar" style="width:100%;background:#d97706;"></div></div><div class="year-cost">$950</div><div class="year-phase" style="color:#d97706;">Alta</div></div>
+        <div class="year-row"><div class="year-month">M12</div><div class="year-bar-wrap"><div class="year-bar" style="width:100%;background:#d97706;"></div></div><div class="year-cost">$950</div><div class="year-phase" style="color:#d97706;">Alta</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;padding-top:16px;border-top:2px solid #e2e8f0;">
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Piloto (M1–M2)</div>
+          <div style="font-size:20px;font-weight:700;color:#059669;font-family:'JetBrains Mono',monospace;">$230 USD</div>
+          <div style="font-size:11px;color:#64748b;">≈ $220.800 CLP</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Carga Media (M3–M4)</div>
+          <div style="font-size:20px;font-weight:700;color:#4f46e5;font-family:'JetBrains Mono',monospace;">$712 USD</div>
+          <div style="font-size:11px;color:#64748b;">≈ $683.520 CLP</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Carga Alta (M5–M12)</div>
+          <div style="font-size:20px;font-weight:700;color:#d97706;font-family:'JetBrains Mono',monospace;">$7.600 USD</div>
+          <div style="font-size:11px;color:#64748b;">≈ $7.296.000 CLP</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding:14px 16px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;">Costo OPEX año 1</div>
+          <div style="font-size:13px;color:#64748b;margin-top:2px;">Plataformas + infraestructura consolidadas</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:26px;font-weight:700;color:#4f46e5;font-family:'JetBrains Mono',monospace;">$8.542 USD</div>
+          <div style="font-size:12px;color:#64748b;">≈ $8.200.320 CLP</div>
+        </div>
+      </div>
+
+      <div class="callout callout-info" style="margin-top:16px;">
+        <div class="callout-icon">📉</div>
+        <div>
+          <strong>Palanca de optimización:</strong> migrar Auth0 → Cognito en Carga Alta reduciría el OPEX mensual
+          de ~$950 a ~$550 USD (ahorro de ~$400/mes), bajando el OPEX año 1 proyectado en varios miles de dólares.
+          Se evalúa al superar ~3.000 MAU.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       FLUJO DE CAJA
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="caja">
+    <div class="section-header">
+      <h2>Flujo de caja</h2>
+      <p>Capital inicial requerido para sostener la operación de Guardia Digital Inteligente antes del retorno comercial.</p>
+    </div>
+
+    <div class="card">
+      <h3>Análisis de sostenibilidad</h3>
+      <p>
+        El modelo comercial apunta a la implementación IAM y al licenciamiento SaaS recurrente. Dado que los ciclos
+        de venta corporativos y gubernamentales pueden tardar entre 30 y 90 días, Wayweb SpA asume el financiamiento
+        de las plataformas durante el piloto y la fase inicial.
+      </p>
+      <p>
+        A diferencia de un producto serverless puro, aquí el costo base no es cero: las suscripciones de Auth0,
+        Datadog e Intercom son costos fijos mensuales desde el primer mes. El piloto se diseña con los planes más
+        bajos de cada plataforma para mantener el OPEX inicial acotado (~$110.400 CLP/mes) mientras se valida el
+        producto con los primeros tenants.
+      </p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:8px;">
+        <div>
+          <h4>Costo OPEX (Mes 1 · Piloto)</h4>
+          <table class="data-table" style="margin-top:8px;">
+            <thead><tr><th>Plataforma</th><th class="cost-value">CLP / mes</th></tr></thead>
+            <tbody>
+              <tr><td>Auth0 (Essentials)</td><td class="cost-value">$33.600</td></tr>
+              <tr><td>Intercom (Essential)</td><td class="cost-value">$37.440</td></tr>
+              <tr><td>Vertex AI (batch)</td><td class="cost-value">$19.200</td></tr>
+              <tr><td>Datadog (Pro)</td><td class="cost-value">$14.400</td></tr>
+              <tr><td>Modal</td><td class="cost-value">$4.800</td></tr>
+              <tr><td>AWS serverless (Free Tier)</td><td class="cost-value">$960</td></tr>
+              <tr class="total-row">
+                <td>Total OPEX mes 1</td>
+                <td class="cost-value">~$110.400</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <h4>Consideraciones de caja</h4>
+          <div class="callout callout-warn" style="margin-top:8px;">
+            <div class="callout-icon">💸</div>
+            <div>
+              A diferencia de un serverless puro, las suscripciones SaaS implican <strong>costo fijo desde el mes 1</strong>.
+              Para los primeros 6 meses (piloto + media) el capital de trabajo requerido es de ~<strong>$2.6M CLP</strong>
+              acumulado en OPEX, recuperable con 2–3 clientes pagados.
+            </div>
+          </div>
+          <div class="callout callout-success" style="margin-top:8px;">
+            <div class="callout-icon">✅</div>
+            <div>
+              Un solo cliente del segmento medio (<strong>$890.000 CLP/mes</strong>) cubre el OPEX completo de
+              Carga Alta y deja margen positivo desde el primer mes de producción.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       CATÁLOGO DE SERVICIOS Y MONETIZACIÓN
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="catalogo">
+    <div class="section-header">
+      <h2>Catálogo de servicios y monetización</h2>
+      <p>Todos los servicios que Wayweb puede ofrecer a partir del diagnóstico de identidad — con precios referenciales en CLP.</p>
+    </div>
+
+    <!-- Callout contexto -->
+    <div class="callout callout-info">
+      <div class="callout-icon">🎯</div>
+      <div>
+        <strong>Punto de partida:</strong> el diagnóstico de postura de identidad es la puerta de entrada. Cada brecha
+        detectada (MFA incompleto, cuentas privilegiadas sin control, accesos de contratistas) abre la posibilidad de
+        vender uno o varios de los servicios listados. Precios referenciales netos sin IVA — ajustables por segmento y volumen.
+      </div>
+    </div>
+
+    <!-- TIER 0: Cortesía -->
+    <div class="card" style="margin-top:20px;">
+      <h3 style="display:flex;align-items:center;gap:10px;">
+        <span style="background:#d1fae5;color:#065f46;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;">TIER 0</span>
+        Diagnóstico de postura de identidad — Puerta de entrada (gratuito)
+      </h3>
+      <p style="margin-bottom:14px;">
+        Evaluación de la madurez de identidad del prospecto con un informe ejecutivo: cobertura de MFA, cuentas
+        privilegiadas, accesos de contratistas, brechas frente a la Ley 20.393 y un risk score.
+        <strong>Costo para Wayweb: ~$0 USD</strong> (entrevista + checklist, sin despliegue).
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Entregable</th><th>Contenido</th><th class="cost-value">Precio</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Informe de postura de identidad (PDF)</strong></td>
+            <td>Risk score · cobertura MFA · cuentas privilegiadas · brechas Ley 20.393 · top 3 recomendaciones</td>
+            <td class="cost-value" style="color:#059669;font-weight:700;">$0 — Cortesía</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TIER 1: One-shot -->
+    <div class="card">
+      <h3 style="display:flex;align-items:center;gap:10px;">
+        <span style="background:#dbeafe;color:#1e40af;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;">TIER 1</span>
+        Servicios puntuales — Sin suscripción
+      </h3>
+      <p style="margin-bottom:14px;">
+        Para prospectos que responden al diagnóstico pero aún no se suscriben. Generan ingreso inmediato con bajo esfuerzo de cierre.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Servicio</th><th>Descripción</th><th>SLA entrega</th><th class="cost-value">Precio neto</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Implementación IAM base</strong></td>
+            <td>Configuración de Auth0, Universal Login, MFA adaptativo, captura de logs (Lambda + API GW) y dashboard de compliance para 1 tenant. Incluye call de revisión.</td>
+            <td>2 semanas</td>
+            <td class="cost-value">$1.490.000</td>
+          </tr>
+          <tr>
+            <td><strong>Reporte de cumplimiento Ley 20.393</strong></td>
+            <td>Mapa de la postura de identidad contra los controles exigibles por la Ley 20.393 y controles aplicables de ISO 27001. Indica brechas y plan de cierre.</td>
+            <td>5 días hábiles</td>
+            <td class="cost-value">$590.000</td>
+          </tr>
+          <tr>
+            <td><strong>Plan de remediación de identidad (90 días)</strong></td>
+            <td>Hoja de ruta priorizada: habilitar MFA, depurar cuentas privilegiadas, segregar accesos de contratistas. Estimación de esfuerzo por tarea. Excel + PDF.</td>
+            <td>5 días hábiles</td>
+            <td class="cost-value">$490.000</td>
+          </tr>
+          <tr>
+            <td><strong>Configuración de MFA adaptativo</strong></td>
+            <td>Despliegue de la Action post-login con reglas de riesgo (país, horario CLT, dispositivo nuevo, IP) afinadas al perfil del cliente. Incluye pruebas.</td>
+            <td>3–5 días hábiles</td>
+            <td class="cost-value">$390.000</td>
+          </tr>
+          <tr>
+            <td><strong>Reporte ejecutivo para directorio</strong></td>
+            <td>Versión del diagnóstico redactada para junta directiva, gerencia o alcaldía: sin tecnicismos, orientada a riesgo de negocio y costo de no actuar.</td>
+            <td>48 horas</td>
+            <td class="cost-value">$290.000</td>
+          </tr>
+          <tr>
+            <td><strong>Revisión post-implementación</strong></td>
+            <td>Auditoría 30–60 días después del despliegue para verificar cobertura de MFA, anomalías detectadas y cierre de brechas. Certificado de mejora de postura.</td>
+            <td>48 horas</td>
+            <td class="cost-value">$250.000</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TIER 2: Suscripción -->
+    <div class="card">
+      <h3 style="display:flex;align-items:center;gap:10px;">
+        <span style="background:#f3e8ff;color:#6b21a8;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;">TIER 2</span>
+        Monitoreo continuo — Suscripción mensual
+      </h3>
+      <p style="margin-bottom:14px;">
+        La fuente de ingresos recurrentes (MRR). El cliente paga mensualmente por mantener su identidad bajo gestión
+        Zero-Trust con MFA adaptativo, detección de anomalías y compliance. Escala por número de identidades gestionadas.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Plan</th><th>Identidades</th><th>Incluye</th><th class="cost-value">Precio neto / mes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Starter</strong></td>
+            <td>Hasta 100</td>
+            <td>MFA adaptativo · captura de logs · dashboard · alertas email</td>
+            <td class="cost-value">$290.000</td>
+          </tr>
+          <tr>
+            <td><strong>Business</strong></td>
+            <td>Hasta 500</td>
+            <td>Todo Starter + detección de anomalías IA · reporte mensual de compliance · 1 call mensual</td>
+            <td class="cost-value">$590.000</td>
+          </tr>
+          <tr>
+            <td><strong>Pro</strong></td>
+            <td>Hasta 2.000</td>
+            <td>Todo Business + IGA (gobierno de accesos) · SIEM dedicado · SLA respuesta 4h · multi-tenant</td>
+            <td class="cost-value">$1.190.000</td>
+          </tr>
+          <tr>
+            <td><strong>Enterprise</strong></td>
+            <td>Ilimitadas</td>
+            <td>Todo Pro + API · white-label · gestor de cuenta dedicado · auditoría Ley 20.393 incluida</td>
+            <td class="cost-value">A convenir</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:#64748b;margin-top:10px;margin-bottom:0;">
+        Los planes anuales tienen un descuento del <strong>15%</strong> sobre el precio mensual. El primer mes del plan
+        Business se ofrece sin costo a prospectos que provienen del diagnóstico de postura de identidad.
+      </p>
+    </div>
+
+    <!-- TIER 3: Consultoría y proyectos -->
+    <div class="card">
+      <h3 style="display:flex;align-items:center;gap:10px;">
+        <span style="background:#fef3c7;color:#92400e;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;">TIER 3</span>
+        Consultoría y proyectos de identidad
+      </h3>
+      <p style="margin-bottom:14px;">
+        Servicios profesionales complementarios al monitoreo. Especialmente relevantes para municipios y empresas
+        con obligación normativa. Alto margen porque el costo marginal es trabajo humano, no infraestructura.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Servicio</th><th>Descripción</th><th>Formato</th><th class="cost-value">Precio referencial</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Taller de identidad y Zero-Trust</strong></td>
+            <td>Sesión de 2 horas para equipos directivos y TI sobre gestión de identidades, MFA, accesos privilegiados y qué significa cada hallazgo del diagnóstico.</td>
+            <td>Online / Presencial</td>
+            <td class="cost-value">$490.000</td>
+          </tr>
+          <tr>
+            <td><strong>Política de gestión de identidades</strong></td>
+            <td>Documento formal de política IAM/IGA: roles, segregación de funciones, ciclo de vida de cuentas, accesos privilegiados y criterios de aceptación de riesgo. Alineado a ISO 27001.</td>
+            <td>Documento Word + PDF</td>
+            <td class="cost-value">$690.000</td>
+          </tr>
+          <tr>
+            <td><strong>Acompañamiento de remediación de accesos</strong></td>
+            <td>Wayweb trabaja junto al equipo TI en la remediación: habilitar MFA, depurar cuentas inactivas, segregar contratistas, configurar reglas de riesgo. Por horas o paquete fijo.</td>
+            <td>Paquete 10h técnicas</td>
+            <td class="cost-value">$890.000</td>
+          </tr>
+          <tr>
+            <td><strong>Gobierno de accesos (IGA) integral</strong></td>
+            <td>Implementación de revisiones de acceso periódicas, certificación de cuentas privilegiadas, flujos de aprobación y reporte de segregación de funciones sobre la plataforma.</td>
+            <td>Proyecto 4–6 semanas</td>
+            <td class="cost-value">$1.190.000</td>
+          </tr>
+          <tr>
+            <td><strong>Auditoría de cumplimiento Ley 20.393</strong></td>
+            <td>Evaluación del estado de cumplimiento de la organización respecto a la <strong>Ley 20.393</strong> y controles aplicables de ISO 27001 en materia de identidad y accesos. Incluye brechas y plan de cierre.</td>
+            <td>Informe ejecutivo + técnico</td>
+            <td class="cost-value">$1.490.000</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TIER 4: White-label y API -->
+    <div class="card">
+      <h3 style="display:flex;align-items:center;gap:10px;">
+        <span style="background:#ecfeff;color:#155e75;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;">TIER 4</span>
+        White-label y acceso API — Canal MSP / Integradores
+      </h3>
+      <p style="margin-bottom:14px;">
+        Para MSPs, consultoras o integradores que quieran incorporar IAM/IGA Zero-Trust en su oferta sin desarrollar
+        la infraestructura. Wayweb opera como proveedor invisible.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Modalidad</th><th>Descripción</th><th class="cost-value">Precio neto</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Acceso API · hasta 5 tenants</strong></td>
+            <td>API para gestionar identidades, MFA y consultar anomalías de los clientes finales del integrador. Incluye documentación y soporte técnico básico.</td>
+            <td class="cost-value">$590.000 / mes</td>
+          </tr>
+          <tr>
+            <td><strong>White-label · Plan Starter</strong></td>
+            <td>Dashboard de Guardia Digital con logo y colores del integrador. Hasta 10 clientes finales. El integrador factura directamente bajo su marca.</td>
+            <td class="cost-value">$890.000 / mes</td>
+          </tr>
+          <tr>
+            <td><strong>White-label · Plan Ilimitado</strong></td>
+            <td>Igual al anterior sin límite de clientes finales, con panel multi-tenant, gestión de usuarios y acceso completo a la API de reporting y compliance.</td>
+            <td class="cost-value">A convenir</td>
+          </tr>
+          <tr>
+            <td><strong>Desarrollo a medida sobre la plataforma</strong></td>
+            <td>Funcionalidades adicionales: conectores a IdPs específicos, integraciones con SIEM del cliente, conectores a ticketing (Jira, ServiceNow) para flujos de acceso.</td>
+            <td class="cost-value">Proyecto / hora</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Matriz resumen -->
+    <div class="card">
+      <h3>Matriz de servicios vs. perfil de cliente</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Servicio</th>
+            <th style="text-align:center;">PYME</th>
+            <th style="text-align:center;">Municipio</th>
+            <th style="text-align:center;">Empresa mediana</th>
+            <th style="text-align:center;">MSP / Integrador</th>
+            <th class="cost-value">Ingreso pot. año 1</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Implementación IAM base (one-shot)</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">—</td>
+            <td class="cost-value">$1.49M – $4.5M</td>
+          </tr>
+          <tr>
+            <td>Monitoreo continuo (suscripción)</td>
+            <td style="text-align:center;">Starter</td>
+            <td style="text-align:center;">Business</td>
+            <td style="text-align:center;">Pro</td>
+            <td style="text-align:center;">—</td>
+            <td class="cost-value">$2.9M – $14M / mes</td>
+          </tr>
+          <tr>
+            <td>Plan de remediación de identidad</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">—</td>
+            <td class="cost-value">$490K – $890K</td>
+          </tr>
+          <tr>
+            <td>Auditoría Ley 20.393 / ISO</td>
+            <td style="text-align:center;">—</td>
+            <td style="text-align:center;">✅✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">—</td>
+            <td class="cost-value">$590K – $1.49M</td>
+          </tr>
+          <tr>
+            <td>Taller de identidad y Zero-Trust</td>
+            <td style="text-align:center;">—</td>
+            <td style="text-align:center;">✅✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">—</td>
+            <td class="cost-value">$490K / evento</td>
+          </tr>
+          <tr>
+            <td>Reporte ejecutivo para directorio</td>
+            <td style="text-align:center;">—</td>
+            <td style="text-align:center;">✅✅</td>
+            <td style="text-align:center;">✅✅</td>
+            <td style="text-align:center;">—</td>
+            <td class="cost-value">$290K / reporte</td>
+          </tr>
+          <tr>
+            <td>White-label / API para integradores</td>
+            <td style="text-align:center;">—</td>
+            <td style="text-align:center;">—</td>
+            <td style="text-align:center;">—</td>
+            <td style="text-align:center;">✅✅</td>
+            <td class="cost-value">$590K – $890K / mes</td>
+          </tr>
+          <tr style="background:#f8fafc;">
+            <td colspan="4" style="text-align:right;font-weight:700;color:#0f172a;font-size:13px;">Ticket promedio por cliente (primer año)</td>
+            <td colspan="2" class="cost-value" style="color:#4f46e5;font-size:15px;font-weight:700;">$1.2M – $3.2M CLP</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-success" style="margin-top:16px;">
+        <div class="callout-icon">💡</div>
+        <div>
+          <strong>Secuencia de venta recomendada:</strong> Diagnóstico de postura (Tier 0) →
+          Implementación IAM o reporte Ley 20.393 (Tier 1, ingreso rápido) →
+          Suscripción mensual (Tier 2, MRR) →
+          Auditoría y gobierno de accesos (Tier 3, proyectos) →
+          Recomendación a un MSP (Tier 4, escala sin esfuerzo lineal de venta).
+        </div>
+      </div>
+    </div>
+
+    <!-- Estimación MRR realista -->
+    <div class="card" style="background:#f8fafc;">
+      <h3>Estimación de ingresos — Escenario conservador (M6)</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Fuente</th><th>Cantidad</th><th>Precio unitario</th><th class="cost-value">Ingreso mensual</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Suscripción Plan Starter</td>
+            <td>4 clientes</td>
+            <td>$290.000 / mes</td>
+            <td class="cost-value">$1.160.000</td>
+          </tr>
+          <tr>
+            <td>Suscripción Plan Business</td>
+            <td>3 clientes</td>
+            <td>$590.000 / mes</td>
+            <td class="cost-value">$1.770.000</td>
+          </tr>
+          <tr>
+            <td>Implementaciones one-shot</td>
+            <td>1 / mes</td>
+            <td>$1.490.000 c/u</td>
+            <td class="cost-value">$1.490.000</td>
+          </tr>
+          <tr>
+            <td>Reportes Ley 20.393</td>
+            <td>1 / mes</td>
+            <td>$590.000 c/u</td>
+            <td class="cost-value">$590.000</td>
+          </tr>
+          <tr>
+            <td>Talleres y consultoría ad-hoc</td>
+            <td>1 / mes</td>
+            <td>$490.000</td>
+            <td class="cost-value">$490.000</td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="3" style="text-align:right;font-weight:700;">Total ingresos estimados (M6)</td>
+            <td class="cost-value" style="color:#059669;font-size:15px;">$5.500.000</td>
+          </tr>
+          <tr style="background:#f0fdf4;">
+            <td colspan="3" style="text-align:right;font-size:12px;color:#64748b;">OPEX plataformas (Carga Alta)</td>
+            <td class="cost-value" style="color:#dc2626;font-size:12px;">−$912.000</td>
+          </tr>
+          <tr style="background:#f0fdf4;">
+            <td colspan="3" style="text-align:right;font-weight:700;color:#059669;">Margen bruto sobre plataformas</td>
+            <td class="cost-value" style="color:#059669;font-size:15px;font-weight:700;">$4.588.000</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:#64748b;margin-top:10px;margin-bottom:0;">
+        Escenario conservador asumiendo un pipeline de solo 7 clientes en suscripción + servicios puntuales en el
+        sexto mes de operación comercial. No incluye ingresos por white-label ni contratos enterprise. El margen sobre
+        OPEX de plataformas supera el <strong>83%</strong>.
+      </p>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       MARGEN Y GANANCIA
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="margen">
+    <div class="section-header">
+      <h2>Margen y ganancia</h2>
+      <p>Modifica el valor neto cobrado a los clientes y el costo del equipo para calcular márgenes en CLP, USD y UF.</p>
+    </div>
+
+    <!-- Parámetros de cálculo -->
+    <div class="card">
+      <h3 style="margin-bottom:18px;">Parámetros de cálculo</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+
+        <div class="input-group">
+          <label>Ingresos mensuales totales (SaaS + Consultoría)</label>
+          <div class="input-wrap">
+            <span class="input-pfx">$</span>
+            <input class="calc-input" type="number" id="mg-ingresos" value="2500000" min="0" step="10000" oninput="calcularMargen()">
+            <span class="input-sfx">CLP / mes</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Costo de nómina y mantención mensual</label>
+          <div class="input-wrap">
+            <span class="input-pfx">$</span>
+            <input class="calc-input" type="number" id="mg-nomina" value="800000" min="0" step="10000" oninput="calcularMargen()">
+            <span class="input-sfx">CLP / mes</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Tipo de cambio</label>
+          <div class="input-wrap">
+            <span class="input-pfx">$</span>
+            <input class="calc-input" type="number" id="mg-usd" value="960" min="1" step="10" oninput="calcularMargen()">
+            <span class="input-sfx">CLP / USD</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Valor UF en CLP</label>
+          <div class="input-wrap">
+            <span class="input-pfx">$</span>
+            <input class="calc-input" type="number" id="mg-uf" value="38500" min="1" step="100" oninput="calcularMargen()">
+            <span class="input-sfx">CLP / UF</span>
+          </div>
+        </div>
+
+        <div class="input-group" style="grid-column:1/-1;">
+          <label>Escenario de consumo activo</label>
+          <select class="calc-select" id="mg-fase" onchange="calcularMargen()">
+            <option value="115">Piloto / Marcha Blanca — $115 USD / mes (~$110.400 CLP)</option>
+            <option value="356" selected>Carga Media — $356 USD / mes (~$341.760 CLP)</option>
+            <option value="950">Carga Alta — $950 USD / mes (~$912.000 CLP)</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Stats de margen -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="mg-st-mes" style="font-size:22px;">—</div>
+        <div class="stat-label">Margen neto / mes</div>
+        <div class="stat-sub" id="mg-st-mes-sub">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="mg-st-pct" style="font-size:28px;">—</div>
+        <div class="stat-label">Margen %</div>
+        <div class="stat-sub" id="mg-st-pct-sub">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="mg-st-anio" style="font-size:22px;">—</div>
+        <div class="stat-label">Margen neto / año</div>
+        <div class="stat-sub" id="mg-st-anio-sub">—</div>
+      </div>
+    </div>
+
+    <!-- Equivalencias CLP · USD · UF -->
+    <div class="card">
+      <h3 style="margin-bottom:16px;">Equivalencias mensuales y anuales</h3>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+        <div class="equiv-card">
+          <div class="equiv-label">USD / mes</div>
+          <div class="equiv-value" id="eq-usd-mes">—</div>
+          <div class="equiv-sub" id="eq-usd-mes-sub">margen neto</div>
+        </div>
+        <div class="equiv-card">
+          <div class="equiv-label">UF / mes</div>
+          <div class="equiv-value" id="eq-uf-mes">—</div>
+          <div class="equiv-sub" id="eq-uf-mes-sub">margen neto</div>
+        </div>
+        <div class="equiv-card">
+          <div class="equiv-label">USD / año</div>
+          <div class="equiv-value" id="eq-usd-anio">—</div>
+          <div class="equiv-sub" id="eq-usd-anio-sub">acumulado</div>
+        </div>
+        <div class="equiv-card">
+          <div class="equiv-label">UF / año</div>
+          <div class="equiv-value" id="eq-uf-anio">—</div>
+          <div class="equiv-sub" id="eq-uf-anio-sub">acumulado</div>
+        </div>
+      </div>
+
+      <div id="mg-callout" style="margin-top:14px;"></div>
+    </div>
+
+    <!-- Desglose 12 meses -->
+    <div class="card">
+      <h3 style="margin-bottom:16px;">Desglose mes a mes — Año 1</h3>
+      <p style="font-size:13px;color:#64748b;margin-bottom:14px;">
+        Los meses 1–2 usan costos de Piloto, 3–4 de Carga Media y 5–12 de Carga Alta.
+        Los ingresos y la nómina de soporte se aplican uniformes según los parámetros ingresados.
+      </p>
+      <div style="overflow-x:auto;">
+        <table class="data-table" id="mg-tabla">
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>Escenario</th>
+              <th class="cost-value">Infra (CLP)</th>
+              <th class="cost-value">Nómina (CLP)</th>
+              <th class="cost-value">Costo total</th>
+              <th class="cost-value">Ingresos</th>
+              <th class="cost-value">Margen neto</th>
+              <th>%</th>
+            </tr>
+          </thead>
+          <tbody id="mg-tbody"></tbody>
+          <tfoot id="mg-tfoot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Punto de equilibrio -->
+    <div class="card" style="background:#f8fafc;">
+      <h3 style="margin-bottom:12px;">Punto de equilibrio</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Break-even mensual (solo plataformas)</div>
+          <div style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#4f46e5;" id="pe-infra">—</div>
+          <div style="font-size:11px;color:#64748b;" id="pe-infra-usd">—</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Break-even mensual (plataformas + nómina)</div>
+          <div style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#d97706;" id="pe-total">—</div>
+          <div style="font-size:11px;color:#64748b;" id="pe-total-uf">—</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Margen sobre costo total</div>
+          <div style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;" id="pe-markup">—</div>
+          <div style="font-size:11px;color:#64748b;">markup sobre costos</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       PRESUPUESTO / COTIZACIÓN
+  ══════════════════════════════════════════════════════ -->
+  <section class="page-section" id="cotizacion">
+    <div class="section-header">
+      <h2>Presupuesto / Cotización</h2>
+      <p>Cotización formal de servicios para el proyecto Guardia Digital Inteligente — emitida por Wayweb SpA.</p>
+    </div>
+
+    <div class="ctz-outer">
+
+      <!-- Barra superior navy con opciones de impresión -->
+      <div class="ctz-topbar">
+        <div class="ctz-logo">WAY<span class="lw">WEB</span><span class="ls">SPA</span></div>
+
+        <div class="ctz-pdf-opts">
+
+          <span class="ctz-opt-lbl">Tamaño</span>
+          <select class="ctz-opt-sel" id="ctz-size" onchange="updateCtzPrint()">
+            <option value="letter" selected>Carta (Letter)</option>
+            <option value="A4">A4</option>
+            <option value="legal">Oficio (Legal)</option>
+          </select>
+
+          <div class="ctz-vdivsr"></div>
+
+          <span class="ctz-opt-lbl">Orientación</span>
+          <select class="ctz-opt-sel" id="ctz-orient" onchange="updateCtzPrint()">
+            <option value="portrait" selected>Vertical</option>
+            <option value="landscape">Horizontal</option>
+          </select>
+
+          <div class="ctz-vdivsr"></div>
+
+          <span class="ctz-opt-lbl">Márgenes</span>
+          <select class="ctz-opt-sel" id="ctz-margin" onchange="updateCtzPrint()">
+            <option value="15mm 12mm" selected>Normales</option>
+            <option value="20mm 16mm">Amplios</option>
+            <option value="10mm 8mm">Reducidos</option>
+            <option value="6mm">Mínimos</option>
+          </select>
+
+          <div class="ctz-vdivsr"></div>
+
+          <span class="ctz-opt-lbl">Fuente</span>
+          <select class="ctz-opt-sel" id="ctz-font" onchange="updateCtzPrint()">
+            <option value="9pt">Pequeña (9 pt)</option>
+            <option value="10.2pt" selected>Normal (10 pt)</option>
+            <option value="11.5pt">Grande (11 pt)</option>
+          </select>
+
+          <div class="ctz-vdivsr"></div>
+
+          <span class="ctz-opt-lbl">Escala</span>
+          <select class="ctz-opt-sel" id="ctz-scale" onchange="updateCtzPrint()">
+            <option value="1" selected>100%</option>
+            <option value="0.95">95%</option>
+            <option value="0.90">90%</option>
+            <option value="0.85">85%</option>
+            <option value="0.80">80%</option>
+            <option value="0.75">75%</option>
+          </select>
+
+          <div class="ctz-vdivsr"></div>
+
+          <button class="ctz-btn-pdf" onclick="imprimirCotizacion()">⬇ Descargar PDF</button>
+        </div>
+      </div>
+
+      <!-- Documento -->
+      <div class="ctz-doc">
+
+        <!-- Membrete -->
+        <div class="ctz-doc-header">
+          <div>
+            <div class="ctz-membrete-logo">WAY<span class="lw">WEB</span><span class="ls">SPA</span></div>
+            <div style="font-size:.72rem;color:#5a6a7e;margin-top:5px;line-height:1.7;">
+              RUT 77.972.452-2 · Santiago, Región Metropolitana<br>
+              ventas@wayweb.cl · contacto@wayweb.cl
+            </div>
+          </div>
+          <div class="ctz-membrete-datos">
+            <strong>Cotización N° COT-2026-004</strong>
+            Versión 1.0 · Junio 2026<br>
+            Clasificación: Confidencial
+          </div>
+        </div>
+
+        <!-- Número y badges -->
+        <div class="ctz-num-bar">
+          <div class="ctz-num">Cotización Formal de Servicios</div>
+          <div class="ctz-badges">
+            <span class="ctz-badge ctz-badge-gold">IAM/IGA · Zero-Trust</span>
+            <span class="ctz-badge ctz-badge-navy">Auth0 · AWS · Vertex AI</span>
+            <span class="ctz-badge ctz-badge-green">Vigente 90 días</span>
+          </div>
+        </div>
+
+        <!-- Cuerpo -->
+        <div class="ctz-body">
+
+          <!-- Destinatario y fecha -->
+          <div class="ctz-dest-fecha">
+            <div class="ctz-dest">
+              <h3>Dirigido a</h3>
+              <p>
+                <strong>[Nombre del Cliente]</strong>
+                Departamento de TI / Seguridad de la Información<br>
+                Región Metropolitana<br>
+                Chile
+              </p>
+            </div>
+            <div class="ctz-fecha">
+              <div class="lbl">Fecha de emisión</div>
+              <div class="val">11 de junio de 2026</div>
+              <div class="lbl" style="margin-top:9px;">Válida hasta</div>
+              <div class="val">09 de septiembre de 2026</div>
+            </div>
+          </div>
+
+          <!-- Referencia -->
+          <div class="ctz-ref">
+            <div class="rlbl">Ref.</div>
+            <p>Propuesta técnica y comercial — <strong>Guardia Digital Inteligente · Plataforma IAM/IGA B2B Zero-Trust con detección de anomalías por IA</strong> · Desarrollada por Wayweb SpA · Auth0 · AWS API Gateway + Lambda · Modal → Google Vertex AI · Datadog · Intercom</p>
+          </div>
+
+          <!-- Introducción -->
+          <p class="ctz-intro">
+            En respuesta a los requerimientos de modernización y aseguramiento de la gestión de identidades y accesos, Wayweb SpA presenta la siguiente cotización formal para el diseño, desarrollo, implementación y operación de la <strong>plataforma de Gestión de Identidades y Accesos (IAM/IGA) Guardia Digital Inteligente</strong>. La solución integra autenticación gestionada con MFA adaptativo Zero-Trust sobre <strong>Auth0</strong>, captura y normalización serverless de eventos de login (<strong>AWS API Gateway + Lambda</strong>), un motor de detección de accesos anómalos sobre <strong>Google Vertex AI</strong> orquestado en Modal, y un sistema de observabilidad y compliance sobre <strong>Datadog</strong> con dashboard de auditoría para la <strong>Ley 20.393</strong>. El sistema entrega trazabilidad completa de las decisiones de acceso y un canal de autoservicio embebido en el login.
+          </p>
+
+          <div class="ctz-divider"></div>
+
+          <!-- Tabla de ítems -->
+          <div>
+            <div class="ctz-sh">Detalle de Servicios</div>
+            <div class="ctz-table-wrap">
+              <table class="ctz-items">
+                <thead>
+                  <tr>
+                    <th style="width:47%;">Descripción</th>
+                    <th style="width:16%;">Período</th>
+                    <th style="width:12%;">Moneda</th>
+                    <th style="width:25%;">Valor Neto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="ctz-iname">Desarrollo Core — Identidad + Captura serverless</div>
+                      <div class="ctz-idesc">Arquitectura serverless sobre AWS (Terraform: API Gateway HTTP API + Lambda Node 20 + IAM least-privilege). Integración con Auth0: configuración de Universal Login, conexiones (AD de sucursales / contratistas), Log Streams y la Action post-login de MFA adaptativo Zero-Trust (señales de riesgo: país, horario CLT, dispositivo nuevo, IP no confiable). Handler de normalización de eventos de login y emisión estructurada a CloudWatch.</div>
+                    </td>
+                    <td>2 meses<br><span style="font-size:.72rem;color:#8896a6;">Pagos por hito</span></td>
+                    <td style="text-align:right;">UF</td>
+                    <td>160</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="ctz-iname">Motor de Detección de Anomalías (IA)</div>
+                      <div class="ctz-idesc">Entrenamiento y despliegue del modelo en Google Vertex AI para detección de accesos anómalos (viaje imposible, fuera de turno, dispositivo nuevo). Job batch en Modal (cada 15 min) con ingesta real de logs, umbral de anomalía configurable (anomaly_score ≥ 0.8) y cierre del lazo de respuesta hacia Auth0 Management API (re-MFA o bloqueo de sesión).</div>
+                    </td>
+                    <td>2 meses<br><span style="font-size:.72rem;color:#8896a6;">Pagos por hito</span></td>
+                    <td style="text-align:right;">UF</td>
+                    <td>110</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="ctz-iname">Observabilidad, Compliance y Soporte</div>
+                      <div class="ctz-idesc">Despliegue del Datadog Forwarder (CloudFormation) y suscripción del log group de la Lambda. Pipelines de enriquecimiento (geo-ip, categorización), monitores de fuerza bruta y de anomalías IA, y dashboard de auditoría/compliance orientado a la Ley 20.393. Integración del widget/bot de Intercom de autoservicio (desbloqueo de cuenta, setup de MFA) en la página de Universal Login.</div>
+                    </td>
+                    <td>1 mes<br><span style="font-size:.72rem;color:#8896a6;">Pagos por hito</span></td>
+                    <td style="text-align:right;">UF</td>
+                    <td>70</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="ctz-iname">Deploy, QA, Onboarding y Licencia SaaS Anual</div>
+                      <div class="ctz-idesc">Despliegue de staging y producción con backend remoto de estado Terraform (S3 + DynamoDB lock). Endurecimiento de seguridad (firma HMAC del webhook, rate-limit en API Gateway, secretos en Secrets Manager). Capacitación técnica de 12 horas. Licencia de uso e infraestructura gestionada (Auth0, AWS, Vertex AI, Datadog, Intercom) con soporte mensual de 8 horas y SLA de disponibilidad del 99.7%.</div>
+                    </td>
+                    <td>12 meses<br><span style="font-size:.72rem;color:#8896a6;">Renovable</span></td>
+                    <td style="text-align:right;">UF</td>
+                    <td>40 + 120 / año</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Totales -->
+              <div class="ctz-totales-wrap">
+                <div class="ctz-totales-box">
+                  <div class="ctz-trow sub">
+                    <span>Subtotal Desarrollo Core (Identidad + Captura)</span>
+                    <span>UF 160</span>
+                  </div>
+                  <div class="ctz-trow sub">
+                    <span>Subtotal Motor de Anomalías (IA)</span>
+                    <span>UF 110</span>
+                  </div>
+                  <div class="ctz-trow sub">
+                    <span>Subtotal Observabilidad + Compliance</span>
+                    <span>UF 70</span>
+                  </div>
+                  <div class="ctz-trow sub">
+                    <span>Deploy + Onboarding (al go-live)</span>
+                    <span>UF 40</span>
+                  </div>
+                  <div class="ctz-trow" style="color:#8896a6;">
+                    <span>Licencia SaaS (año 2 en adelante)</span>
+                    <span>UF 120 / año</span>
+                  </div>
+                  <div class="ctz-trow fin">
+                    <span class="tlbl">Total Desarrollo + Impl.</span>
+                    <span class="tval">UF 380</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ctz-equiv-nota">
+              Valores expresados en Unidades de Fomento (UF) netas, sin IVA.<br>
+              Al TC referencial: UF 38.500 CLP · USD 960 / CLP &nbsp;·&nbsp;
+              <strong>UF 380 ≈ $14.630.000 CLP + IVA &nbsp;·&nbsp; ≈ USD 15.240 + IVA</strong>
+            </div>
+          </div>
+
+          <div class="ctz-divider" style="margin-top:24px;"></div>
+
+          <!-- Calendario de hitos de pago -->
+          <div>
+            <div class="ctz-sh">Calendario de Hitos de Pago</div>
+            <div style="border:1px solid #ddd8cc;border-radius:6px;overflow:hidden;">
+              <table class="ctz-hitos">
+                <thead>
+                  <tr>
+                    <th>Hito</th>
+                    <th>Condición de pago</th>
+                    <th>Mes aprox.</th>
+                    <th style="text-align:right;">% del total</th>
+                    <th style="text-align:right;">Monto (UF)</th>
+                    <th style="text-align:right;">Ref. CLP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Hito 1</strong></td>
+                    <td>Firma de contrato y anticipo de inicio de obra</td>
+                    <td>Mes 1</td>
+                    <td style="text-align:right;">30%</td>
+                    <td class="hval">UF 114,00</td>
+                    <td class="hval" style="color:#5a6a7e;font-family:'JetBrains Mono',monospace;font-size:.78rem;">$4.389.000</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Hito 2</strong></td>
+                    <td>Identidad + captura serverless validadas en staging</td>
+                    <td>Mes 2</td>
+                    <td style="text-align:right;">30%</td>
+                    <td class="hval">UF 114,00</td>
+                    <td class="hval" style="color:#5a6a7e;font-family:'JetBrains Mono',monospace;font-size:.78rem;">$4.389.000</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Hito 3</strong></td>
+                    <td>Motor de anomalías IA + lazo de respuesta validados</td>
+                    <td>Mes 4</td>
+                    <td style="text-align:right;">25%</td>
+                    <td class="hval">UF 95,00</td>
+                    <td class="hval" style="color:#5a6a7e;font-family:'JetBrains Mono',monospace;font-size:.78rem;">$3.657.500</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Hito 4</strong></td>
+                    <td>Paso a producción (Go-live), compliance y capacitación</td>
+                    <td>Mes 5</td>
+                    <td style="text-align:right;">15%</td>
+                    <td class="hval">UF 57,00</td>
+                    <td class="hval" style="color:#5a6a7e;font-family:'JetBrains Mono',monospace;font-size:.78rem;">$2.194.500</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size:.70rem;color:#8896a6;margin-top:6px;text-align:right;line-height:1.5;">
+              Cada hito pagadero a <strong>30 días corridos</strong> desde la emisión de la factura con HES o aprobación técnica correspondiente. UF calculada al día de emisión.
+            </div>
+          </div>
+
+          <div class="ctz-divider" style="margin-top:24px;"></div>
+
+          <!-- Servicios incluidos -->
+          <div>
+            <div class="ctz-sh">Incluido en el proyecto</div>
+            <ul class="ctz-serv-ul">
+              <li>Configuración de Auth0 Universal Login y conexiones (AD / contratistas)</li>
+              <li>Action post-login de MFA adaptativo Zero-Trust por señales de riesgo</li>
+              <li>Infraestructura serverless en AWS vía Terraform (API Gateway + Lambda)</li>
+              <li>Handler de normalización de eventos de login (Node 20, sin deps externas)</li>
+              <li>Modelo de detección de anomalías en Google Vertex AI</li>
+              <li>Job batch de inferencia en Modal (cada 15 min) con detección delta</li>
+              <li>Cierre del lazo de respuesta: re-MFA / bloqueo vía Auth0 Management API</li>
+              <li>Datadog: Forwarder, pipelines geo-ip, monitores y dashboard de compliance</li>
+              <li>Dashboard de auditoría orientado a la Ley 20.393</li>
+              <li>Widget/bot de Intercom de autoservicio embebido en el login</li>
+              <li>Endurecimiento de seguridad (HMAC, rate-limit, Secrets Manager)</li>
+              <li>12 horas de capacitación técnica para administradores</li>
+              <li>Soporte preventivo mensual y SLA de disponibilidad de plataforma de 99.7%</li>
+            </ul>
+          </div>
+
+          <div class="ctz-divider" style="margin-top:24px;"></div>
+
+          <!-- Condiciones -->
+          <div class="ctz-conds">
+            <div class="ctz-ccard">
+              <h4>Condiciones de Pago</h4>
+              <p>Pagos por hito en <strong>4 cuotas</strong> (30 / 30 / 25 / 15%) a <strong>30 días corridos</strong> desde la emisión de la factura comercial con la respectiva HES o aprobación técnica del cliente.</p>
+            </div>
+            <div class="ctz-ccard">
+              <h4>Vigencia de la Oferta</h4>
+              <p>La presente cotización es válida por <strong>90 días corridos</strong> desde la fecha de emisión (hasta el <strong>09 de septiembre de 2026</strong>). Los valores en UF quedan fijos al momento de firmar el contrato.</p>
+            </div>
+            <div class="ctz-ccard">
+              <h4>Costos de Plataformas de Terceros</h4>
+              <p>El valor no incluye las suscripciones de <strong>Auth0, Datadog e Intercom</strong> ni el consumo de <strong>Vertex AI, Modal y AWS</strong>, que se facturan según consumo real (ver estudio de costos). Estimado: USD 115–950 / mes según carga.</p>
+            </div>
+            <div class="ctz-ccard">
+              <h4>Renovación Licencia SaaS</h4>
+              <p>La licencia SaaS (UF 120/año) es <strong>renovable anualmente</strong> con aviso de <strong>30 días de anticipación</strong>. Sin penalización por no renovación. Precio de renovación congelado por los primeros 12 meses de extensión.</p>
+            </div>
+          </div>
+
+          <!-- Firma -->
+          <div class="ctz-firma">
+            <div>
+              <div class="ctz-firma-linea"></div>
+              <div class="ctz-firma-nombre">Mario Franjola Bustos</div>
+              <div class="ctz-firma-cargo">
+                Representante Legal · <strong>WAYWEB SPA</strong><br>
+                RUT 77.972.452-2 · Santiago, Región Metropolitana<br>
+                ventas@wayweb.cl · Junio 2026
+              </div>
+            </div>
+            <div class="ctz-acep">
+              <div class="acep-lbl">Aceptación del cliente</div>
+              <div class="acep-linea"></div>
+              <div class="acep-sub">Firma y timbre · [Nombre del Cliente]</div>
+            </div>
+          </div>
+
+        </div><!-- /ctz-body -->
+
+        <!-- Nota confidencialidad -->
+        <div class="ctz-nota-conf">
+          Este documento tiene carácter confidencial. Su reproducción o distribución a terceros no autorizados está expresamente prohibida. Cotización N° COT-2026-004 · WAYWEB SPA · RUT 77.972.452-2.
+        </div>
+
+      </div><!-- /ctz-doc -->
+    </div><!-- /ctz-outer -->
+  </section>
+
+  <!-- Footer -->
+  <div style="border-top:1px solid #e2e8f0;padding-top:24px;margin-top:20px;text-align:center;">
+    <p style="font-size:12px;color:#94a3b8;">
+      Guardia Digital Inteligente · Wayweb SpA · Santiago, Chile<br>
+      Análisis de costos elaborado con <strong>Claude Code</strong> · Actualizado 2026-06-11 · Tipo de cambio: $960 CLP/USD
+    </p>
+  </div>
+
+</main>
+</div><!-- /layout -->
+
+<script>
+  /* ── Intersection Observer para nav activa ────────────────────── */
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks  = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => link.classList.remove('active'));
+        const active = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  /* ── Utilidades de formato ───────────────────────────────────── */
+  const fmtCLP = n => '$' + Math.round(n).toLocaleString('es-CL');
+  const fmtUSD = n => (n >= 0 ? '' : '–') + 'USD ' + Math.abs(n).toLocaleFixed(0);
+  const fmtUF  = n => (n >= 0 ? '' : '–') + Math.abs(n).toLocaleFixed(2) + ' UF';
+
+  Number.prototype.toLocaleFixed = function(d) {
+    return this.toLocaleString('es-CL', { minimumFractionDigits: d, maximumFractionDigits: d });
+  };
+
+  const FASES = [
+    { label: 'Piloto', color: '#059669', months: [1, 2],     usd: 115  },
+    { label: 'Media',  color: '#4f46e5', months: [3, 4],     usd: 356  },
+    { label: 'Alta',   color: '#d97706', months: [5,6,7,8,9,10,11,12], usd: 950 },
+  ];
+
+  function phaseForMonth(m) {
+    return FASES.find(f => f.months.includes(m));
+  }
+
+  function colorPct(pct) {
+    if (pct >= 30) return '#059669';
+    if (pct >= 10) return '#d97706';
+    return '#dc2626';
+  }
+
+  function setEl(id, val, cls) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val;
+    if (cls) { el.className = el.className.replace(/margen-\w+/g, '').trim() + ' ' + cls; }
+  }
+
+  /* ── Cálculo principal ───────────────────────────────────────── */
+  function calcularMargen() {
+    const ingresos = parseFloat(document.getElementById('mg-ingresos').value) || 0;
+    const nomina   = parseFloat(document.getElementById('mg-nomina').value)   || 0;
+    const faseUSD  = parseFloat(document.getElementById('mg-fase').value)     || 356;
+    const usdRate  = parseFloat(document.getElementById('mg-usd').value)      || 960;
+    const ufRate   = parseFloat(document.getElementById('mg-uf').value)       || 38500;
+
+    const infraCLP   = faseUSD * usdRate;
+    const costoTotal = infraCLP + nomina;
+    const margenNeto = ingresos - costoTotal;
+    const margenPct  = ingresos > 0 ? (margenNeto / ingresos) * 100 : 0;
+    const markup     = costoTotal > 0 ? (margenNeto / costoTotal) * 100 : 0;
+
+    const margenAnio = margenNeto * 12;
+    const mUSD_mes   = margenNeto / usdRate;
+    const mUF_mes    = margenNeto / ufRate;
+    const mUSD_anio  = mUSD_mes * 12;
+    const mUF_anio   = mUF_mes * 12;
+
+    const cls = margenNeto >= 0 ? 'margen-pos' : 'margen-neg';
+
+    /* Stats */
+    setEl('mg-st-mes',      fmtCLP(margenNeto), cls);
+    setEl('mg-st-mes-sub',  `${fmtUSD(mUSD_mes)} · ${fmtUF(mUF_mes)}`);
+    setEl('mg-st-pct',      margenPct.toLocaleFixed(1) + '%', cls);
+    setEl('mg-st-pct-sub',  `sobre ingresos ${fmtCLP(ingresos)}`);
+    setEl('mg-st-anio',     fmtCLP(margenAnio), cls);
+    setEl('mg-st-anio-sub', `${fmtUSD(mUSD_anio)} · ${fmtUF(mUF_anio)}`);
+
+    /* Equivalencias */
+    const eqCls = margenNeto >= 0 ? 'margen-pos' : 'margen-neg';
+    setEl('eq-usd-mes',      fmtUSD(mUSD_mes), eqCls);
+    setEl('eq-uf-mes',       fmtUF(mUF_mes),   eqCls);
+    setEl('eq-usd-anio',     fmtUSD(mUSD_anio), eqCls);
+    setEl('eq-uf-anio',      fmtUF(mUF_anio),   eqCls);
+
+    /* Callout contextual */
+    const callout = document.getElementById('mg-callout');
+    if (callout) {
+      if (margenNeto < 0) {
+        callout.innerHTML = `<div class="callout callout-warn"><div class="callout-icon">⚠️</div><div><strong>Margen negativo:</strong> el valor cobrado no cubre los costos operacionales. Necesitas cobrar al menos <strong>${fmtCLP(costoTotal)}</strong> para llegar a punto de equilibrio.</div></div>`;
+      } else if (margenPct < 15) {
+        callout.innerHTML = `<div class="callout callout-warn"><div class="callout-icon">💡</div><div><strong>Margen ajustado (${margenPct.toLocaleFixed(1)}%):</strong> considera que márgenes bajo 15% dejan poco colchón para imprevistos. El precio mínimo recomendado con 20% de margen es <strong>${fmtCLP(costoTotal / 0.8)}</strong>.</div></div>`;
+      } else {
+        callout.innerHTML = `<div class="callout callout-success"><div class="callout-icon">✅</div><div><strong>Margen saludable (${margenPct.toLocaleFixed(1)}%):</strong> al precio de <strong>${fmtCLP(ingresos)}</strong> el proyecto es rentable desde el primer mes de producción, generando <strong>${fmtCLP(margenNeto)}</strong> de utilidad mensual.</div></div>`;
+      }
+    }
+
+    /* Punto de equilibrio */
+    setEl('pe-infra',     fmtCLP(infraCLP));
+    setEl('pe-infra-usd', `USD ${(infraCLP / usdRate).toLocaleFixed(0)} · UF ${(infraCLP / ufRate).toLocaleFixed(2)}`);
+    setEl('pe-total',     fmtCLP(costoTotal));
+    setEl('pe-total-uf',  `USD ${(costoTotal / usdRate).toLocaleFixed(0)} · UF ${(costoTotal / ufRate).toLocaleFixed(2)}`);
+    const markupCls = markup >= 0 ? 'margen-pos' : 'margen-neg';
+    setEl('pe-markup', markup.toLocaleFixed(1) + '%', markupCls);
+
+    /* Tabla mensual */
+    const tbody = document.getElementById('mg-tbody');
+    const tfoot = document.getElementById('mg-tfoot');
+    if (!tbody) return;
+
+    let totalInfra = 0, totalNomina = 0, totalCosto = 0, totalIngresos = 0, totalMargen = 0;
+    let rows = '';
+
+    for (let m = 1; m <= 12; m++) {
+      const fase      = phaseForMonth(m);
+      const infraM    = fase.usd * usdRate;
+      const costoM    = infraM + nomina;
+      const margenM   = ingresos - costoM;
+      const pctM      = ingresos > 0 ? (margenM / ingresos) * 100 : 0;
+      const barW      = Math.max(0, Math.min(100, pctM));
+      const barColor  = colorPct(pctM);
+      const mgCls     = margenM >= 0 ? 'mg-pos' : 'mg-neg';
+      const pctLabel  = pctM.toLocaleFixed(1) + '%';
+
+      totalInfra    += infraM;
+      totalNomina   += nomina;
+      totalCosto    += costoM;
+      totalIngresos += ingresos;
+      totalMargen   += margenM;
+
+      rows += `<tr>
+        <td style="font-family:'JetBrains Mono',monospace;font-weight:500;color:#94a3b8;">M${m}</td>
+        <td><span class="badge" style="background:${fase.color}18;color:${fase.color};">${fase.label}</span></td>
+        <td class="cost-value" style="color:#475569;">${fmtCLP(infraM)}</td>
+        <td class="cost-value" style="color:#475569;">${nomina > 0 ? fmtCLP(nomina) : '<span style="color:#94a3b8;">—</span>'}</td>
+        <td class="cost-value" style="color:#334155;font-weight:600;">${fmtCLP(costoM)}</td>
+        <td class="cost-value" style="color:#1e293b;">${fmtCLP(ingresos)}</td>
+        <td class="cost-value"><span class="${mgCls}">${fmtCLP(margenM)}</span></td>
+        <td>
+          <div class="mg-pct-bar-wrap">
+            <div class="mg-pct-bar-bg"><div class="mg-pct-bar-fill" style="width:${barW}%;background:${barColor};"></div></div>
+            <span class="mg-pct-lbl" style="color:${barColor};">${pctLabel}</span>
+          </div>
+        </td>
+      </tr>`;
+    }
+
+    tbody.innerHTML = rows;
+
+    const totalPct = totalIngresos > 0 ? (totalMargen / totalIngresos) * 100 : 0;
+    const totCls   = totalMargen >= 0 ? 'mg-pos' : 'mg-neg';
+    tfoot.innerHTML = `<tr class="total-row">
+      <td colspan="2" style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;">Total año 1</td>
+      <td class="cost-value">${fmtCLP(totalInfra)}</td>
+      <td class="cost-value">${totalNomina > 0 ? fmtCLP(totalNomina) : '—'}</td>
+      <td class="cost-value">${fmtCLP(totalCosto)}</td>
+      <td class="cost-value">${fmtCLP(totalIngresos)}</td>
+      <td class="cost-value"><span class="${totCls}">${fmtCLP(totalMargen)}</span></td>
+      <td><span class="mg-pct-lbl" style="color:${colorPct(totalPct)};font-size:13px;">${totalPct.toLocaleFixed(1)}%</span></td>
+    </tr>
+    <tr style="background:#f8fafc;">
+      <td colspan="8" style="padding:8px 12px;font-size:12px;color:#64748b;">
+        Equivalencia anual del margen neto:
+        <strong style="font-family:'JetBrains Mono',monospace;">${fmtUSD(totalMargen / usdRate)}</strong> ·
+        <strong style="font-family:'JetBrains Mono',monospace;">${fmtUF(totalMargen / ufRate)}</strong>
+      </td>
+    </tr>`;
+  }
+
+  /* Ejecutar al cargar */
+  document.addEventListener('DOMContentLoaded', () => {
+    calcularMargen();
+    updateCtzPrint();
+  });
+
+  /* ── Opciones de impresión cotización ────────────────────────── */
+  function updateCtzPrint() {
+    const size   = document.getElementById('ctz-size')?.value   || 'letter';
+    const orient = document.getElementById('ctz-orient')?.value || 'portrait';
+    const margin = document.getElementById('ctz-margin')?.value || '15mm 12mm';
+    const font   = document.getElementById('ctz-font')?.value   || '10.2pt';
+    const scale  = document.getElementById('ctz-scale')?.value  || '1';
+    const tag    = document.getElementById('ctz-print-style');
+    if (!tag) return;
+    tag.textContent = `
+      @media print {
+        @page { size: ${size} ${orient}; margin: ${margin}; }
+        body.print-cotizacion .ctz-outer { zoom: ${scale}; }
+        body.print-cotizacion .ctz-body { font-size: ${font} !important; }
+        body.print-cotizacion .ctz-items td { font-size: calc(${font} - 0.8pt) !important; }
+        body.print-cotizacion .ctz-idesc   { font-size: calc(${font} - 1.5pt) !important; }
+        body.print-cotizacion .ctz-hitos td,
+        body.print-cotizacion .ctz-hitos th { font-size: calc(${font} - 1pt) !important; }
+      }
+    `;
+  }
+
+  function imprimirCotizacion() {
+    updateCtzPrint();
+    document.body.classList.add('print-cotizacion');
+    window.print();
+    window.addEventListener('afterprint', function handler() {
+      document.body.classList.remove('print-cotizacion');
+      window.removeEventListener('afterprint', handler);
+    });
+  }
+</script>
+</body>
+</html>

@@ -2,22 +2,42 @@
 Job batch en Modal — Detección de anomalías de acceso vía Vertex AI.
 Despliegue:  modal deploy anomaly_detector.py
 Ejecución:   modal run anomaly_detector.py
-Requiere secrets en Modal: gcp-credentials (JSON de service account),
-y variables GCP_PROJECT, VERTEX_REGION, VERTEX_ENDPOINT_ID.
+Requiere secrets en Modal:
+  - gcp-credentials: GCP_SERVICE_ACCOUNT_JSON (contenido completo del JSON de la
+    cuenta de servicio, como string), GCP_PROJECT, VERTEX_REGION, VERTEX_ENDPOINT_ID.
+    No basta con Application Default Credentials: un contenedor Modal no tiene
+    gcloud configurado ni metadata server, así que las credenciales se
+    construyen explícitamente desde el JSON (ver _vertex_credentials()).
+  - datadog-api: DD_API_KEY, DD_APP_KEY, DD_SITE (ingesta de logs pendientes).
+  - auth0-management: AUTH0_DOMAIN, AUTH0_M2M_CLIENT_ID, AUTH0_M2M_CLIENT_SECRET
+    (cierre del lazo de respuesta sobre el usuario anómalo).
 """
 import json
 import os
+from datetime import datetime, timedelta, timezone
 
 import modal
 
 app = modal.App("guardia-anomaly-detector")
 
-image = modal.Image.debian_slim().pip_install("google-cloud-aiplatform")
+image = modal.Image.debian_slim().pip_install("google-cloud-aiplatform", "requests")
+
+# Persiste el cursor de paginación de Datadog entre ejecuciones del batch
+# (evita reprocesar los mismos logs en cada ciclo de 15 min).
+cursor_store = modal.Dict.from_name("guardia-datadog-cursor", create_if_missing=True)
+
+ANOMALY_THRESHOLD = 0.8       # re-MFA (step-up)
+BLOCK_THRESHOLD = 0.95        # bloqueo directo — anomalía extrema
+FORCE_MFA_WINDOW_HOURS = 6    # cuánto tiempo queda "forzado" el re-MFA tras una anomalía
 
 
 @app.function(
     image=image,
-    secrets=[modal.Secret.from_name("gcp-credentials")],
+    secrets=[
+        modal.Secret.from_name("gcp-credentials"),
+        modal.Secret.from_name("datadog-api"),
+        modal.Secret.from_name("auth0-management"),
+    ],
     schedule=modal.Period(minutes=15),  # batch cada 15 min: balance costo/latencia
     timeout=600,
 )
@@ -25,7 +45,8 @@ def detect_anomalies(log_batch: list | None = None) -> list:
     """Toma un batch de logs de acceso y consulta el endpoint de Vertex AI.
 
     Cada log esperado: {user_id, ip, geo:{lat,lng,country}, timestamp, type}
-    Retorna la lista de eventos clasificados como anómalos.
+    Retorna la lista de eventos clasificados como anómalos, ya con la
+    respuesta (re-MFA/bloqueo) aplicada sobre Auth0.
     """
     from google.cloud import aiplatform
 
@@ -34,13 +55,13 @@ def detect_anomalies(log_batch: list | None = None) -> list:
     endpoint_id = os.environ["VERTEX_ENDPOINT_ID"]
 
     if log_batch is None:
-        log_batch = _fetch_pending_logs()  # stub: leer desde SQS/S3/Datadog API
+        log_batch = _fetch_pending_logs()
 
     if not log_batch:
         print("Sin logs pendientes en este ciclo.")
         return []
 
-    aiplatform.init(project=project, location=region)
+    aiplatform.init(project=project, location=region, credentials=_vertex_credentials())
     endpoint = aiplatform.Endpoint(endpoint_name=endpoint_id)
 
     instances = [
@@ -61,20 +82,187 @@ def detect_anomalies(log_batch: list | None = None) -> list:
     anomalies = []
     for log, score in zip(log_batch, prediction.predictions):
         anomaly_score = float(score.get("anomaly_score", score) if isinstance(score, dict) else score)
-        if anomaly_score >= 0.8:  # umbral: viajes imposibles / fuera de turno
+        if anomaly_score >= ANOMALY_THRESHOLD:
             anomalies.append({**log, "anomaly_score": anomaly_score})
 
     if anomalies:
         # stdout JSON -> Datadog (alertas tempranas SIEM)
         print(json.dumps({"service": "guardia-ia", "anomalies": anomalies}))
-        # TODO: webhook a Auth0 Management API para bloquear sesión/forzar re-MFA
+        for anomaly in anomalies:
+            _enforce_auth0_response(anomaly)
 
     return anomalies
 
 
+def _vertex_credentials():
+    """Construye credenciales de GCP explícitas desde el JSON de la cuenta de
+    servicio (secret `gcp-credentials`, variable GCP_SERVICE_ACCOUNT_JSON).
+
+    No se puede depender de Application Default Credentials: un contenedor
+    Modal no tiene gcloud configurado ni metadata server de GCP disponible.
+    """
+    from google.oauth2 import service_account
+
+    info = json.loads(os.environ["GCP_SERVICE_ACCOUNT_JSON"])
+    return service_account.Credentials.from_service_account_info(
+        info, scopes=["https://www.googleapis.com/auth/cloud-platform"]
+    )
+
+
 def _fetch_pending_logs() -> list:
-    """Stub de ingesta. Reemplazar por lectura real (SQS, S3, Datadog Logs API)."""
-    return []
+    """Ingesta real: consulta la Datadog Logs Search API por eventos de login
+    de Auth0 emitidos desde el último cursor guardado, y los devuelve en el
+    formato esperado por `detect_anomalies` (user_id, ip, geo, hour_local, type).
+
+    Requiere DD_API_KEY, DD_APP_KEY (Application Key, distinto del API Key —
+    la Logs Search API v2 exige ambos) y DD_SITE en el secret `datadog-api`.
+    """
+    import requests
+
+    api_key = os.environ.get("DD_API_KEY")
+    app_key = os.environ.get("DD_APP_KEY")
+    site = os.environ.get("DD_SITE", "datadoghq.com")
+
+    if not api_key or not app_key:
+        print("Datadog no configurado (DD_API_KEY/DD_APP_KEY ausentes) — sin ingesta este ciclo.")
+        return []
+
+    last_run_iso = cursor_store.get("last_run_at")
+    query_from = last_run_iso or (datetime.now(timezone.utc) - timedelta(minutes=20)).isoformat()
+    query_to = datetime.now(timezone.utc).isoformat()
+
+    url = f"https://api.{site}/api/v2/logs/events/search"
+    headers = {
+        "DD-API-KEY": api_key,
+        "DD-APPLICATION-KEY": app_key,
+        "Content-Type": "application/json",
+    }
+    body = {
+        "filter": {
+            "query": "service:guardia-iam @type:(s OR f OR fp)",
+            "from": query_from,
+            "to": query_to,
+        },
+        "sort": "timestamp",
+        "page": {"limit": 1000},
+    }
+
+    logs: list[dict] = []
+    cursor = None
+    try:
+        while True:
+            if cursor:
+                body["page"]["cursor"] = cursor
+            resp = requests.post(url, headers=headers, json=body, timeout=20)
+            resp.raise_for_status()
+            payload = resp.json()
+
+            for item in payload.get("data", []):
+                attrs = item.get("attributes", {}).get("attributes", {})
+                geo = attrs.get("geo") or {}
+                ts = attrs.get("timestamp") or item.get("attributes", {}).get("timestamp")
+                logs.append({
+                    "user_id": attrs.get("user_id"),
+                    "ip": attrs.get("ip"),
+                    "geo": {
+                        "latitude": geo.get("latitude"),
+                        "longitude": geo.get("longitude"),
+                        "country_code": geo.get("country_code") or attrs.get("geo", {}).get("country_code"),
+                    },
+                    "hour_local": _hour_local_santiago(ts),
+                    "type": attrs.get("type"),
+                    "auth0_log_id": attrs.get("auth0_log_id"),
+                })
+
+            cursor = payload.get("meta", {}).get("page", {}).get("after")
+            if not cursor:
+                break
+    except requests.RequestException as e:
+        print(json.dumps({"service": "guardia-ia", "datadog_fetch_error": str(e)}))
+        return []
+
+    cursor_store["last_run_at"] = query_to
+    print(f"Ingesta Datadog: {len(logs)} logs entre {query_from} y {query_to}.")
+    return logs
+
+
+def _hour_local_santiago(iso_timestamp: str | None) -> int | None:
+    if not iso_timestamp:
+        return None
+    try:
+        from zoneinfo import ZoneInfo
+        dt = datetime.fromisoformat(iso_timestamp.replace("Z", "+00:00"))
+        return dt.astimezone(ZoneInfo("America/Santiago")).hour
+    except (ValueError, TypeError):
+        return None
+
+
+def _enforce_auth0_response(anomaly: dict) -> None:
+    """Cierra el lazo de respuesta: dado un acceso anómalo, actúa sobre el
+    usuario en Auth0 vía Management API.
+
+    - anomaly_score >= BLOCK_THRESHOLD: bloquea la cuenta (`blocked: true`).
+    - anomaly_score >= ANOMALY_THRESHOLD: fuerza re-MFA por `FORCE_MFA_WINDOW_HOURS`
+      horas, seteando `app_metadata.force_mfa_until` (leído por
+      `auth0/post-login-mfa-adaptativo.js` en el próximo login).
+
+    Requiere una Auth0 Application M2M autorizada para la Management API
+    con scopes `read:users update:users`.
+    """
+    import requests
+
+    user_id = anomaly.get("user_id")
+    score = anomaly.get("anomaly_score", 0)
+    if not user_id:
+        print(json.dumps({"service": "guardia-ia", "enforce_error": "missing_user_id", "anomaly": anomaly}))
+        return
+
+    domain = os.environ.get("AUTH0_DOMAIN")
+    client_id = os.environ.get("AUTH0_M2M_CLIENT_ID")
+    client_secret = os.environ.get("AUTH0_M2M_CLIENT_SECRET")
+    if not all([domain, client_id, client_secret]):
+        print("Auth0 Management API no configurado — no se puede cerrar el lazo este ciclo.")
+        return
+
+    try:
+        token_resp = requests.post(
+            f"https://{domain}/oauth/token",
+            json={
+                "grant_type": "client_credentials",
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "audience": f"https://{domain}/api/v2/",
+            },
+            timeout=10,
+        )
+        token_resp.raise_for_status()
+        access_token = token_resp.json()["access_token"]
+
+        patch_body = {}
+        if score >= BLOCK_THRESHOLD:
+            patch_body["blocked"] = True
+            action = "blocked"
+        else:
+            force_until = (datetime.now(timezone.utc) + timedelta(hours=FORCE_MFA_WINDOW_HOURS)).isoformat()
+            patch_body["app_metadata"] = {"force_mfa_until": force_until}
+            action = "force_mfa"
+
+        patch_resp = requests.patch(
+            f"https://{domain}/api/v2/users/{user_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=patch_body,
+            timeout=10,
+        )
+        patch_resp.raise_for_status()
+        print(json.dumps({
+            "service": "guardia-ia", "enforce_action": action,
+            "user_id": user_id, "anomaly_score": score,
+        }))
+    except requests.RequestException as e:
+        print(json.dumps({
+            "service": "guardia-ia", "enforce_error": str(e),
+            "user_id": user_id, "anomaly_score": score,
+        }))
 
 
 @app.local_entrypoint()
