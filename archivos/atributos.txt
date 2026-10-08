@@ -1,0 +1,5 @@
+Atributo			Mercado Tradicional (SaaS Ley 20.393)		Guardia Digital Inteligente
+Naturaleza del Control		Pasivo/Administrativo (Matrices, Políticas).	Activo/Técnico (Bloqueo y re-autenticación).
+Generación de Evidencia		Manual (Humanos suben documentos/logs).		Automatizada (Log Streams Auth0 → Datadog).
+Prevención de Fraude		Depende del canal de denuncias.			Algorítmica (IA detecta viaje imposible/anomalías).
+Adopción Mid-Market		Alta (Bajo costo, fácil de usar).		Alta (Arquitectura Serverless elimina costos de infraestructura IAM enterprise).

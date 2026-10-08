@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLA de Detección y Respuesta — Guardia Digital Inteligente · Wayweb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f0f4f8;
+    color: #1e293b;
+    line-height: 1.65;
+  }
+
+  .topnav {
+    position: sticky; top: 0; z-index: 10;
+    background: #ffffff; border-bottom: 1px solid #e2e8f0;
+  }
+  .topnav-inner {
+    max-width: 900px; margin: 0 auto; padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between; height: 60px;
+  }
+  .topnav-back { font-size: 13px; color: #64748b; text-decoration: none; font-weight: 500; }
+  .topnav-back:hover { color: #4f46e5; }
+
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 32px 60px; }
+
+  .doc-header { padding: 44px 0 28px; border-bottom: 2px solid #e2e8f0; }
+  .doc-kicker { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; color: #4f46e5; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+  .doc-header h1 { font-size: 27px; font-weight: 700; color: #0f172a; letter-spacing: -.3px; margin-bottom: 10px; }
+  .doc-header p.lead { font-size: 15px; color: #475569; max-width: 68ch; }
+  .doc-meta { display: flex; gap: 22px; margin-top: 18px; flex-wrap: wrap; }
+  .doc-meta-item { font-size: 12px; color: #64748b; }
+  .doc-meta-item strong { display: block; color: #0f172a; font-family: 'JetBrains Mono', monospace; font-size: 13px; margin-top: 1px; }
+
+  .sla-hero {
+    display: flex; align-items: center; gap: 24px;
+    background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px;
+    padding: 26px 30px; margin: 32px 0;
+  }
+  .sla-hero-num { font-family: 'JetBrains Mono', monospace; font-size: 46px; font-weight: 700; color: #4338ca; line-height: 1; flex-shrink: 0; }
+  .sla-hero-text h2 { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+  .sla-hero-text p { font-size: 13.5px; color: #475569; margin: 0; }
+
+  section { padding: 34px 0; border-bottom: 1px solid #e2e8f0; }
+  section:last-of-type { border-bottom: none; }
+  section h2 { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
+  section p { font-size: 14.5px; color: #334155; margin-bottom: 12px; max-width: 74ch; }
+  section p:last-child { margin-bottom: 0; }
+  section p strong { color: #0f172a; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    background: #f1f5f9; color: #c026d3; padding: 1px 5px; border-radius: 3px;
+  }
+
+  .timeline { border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; margin: 16px 0; }
+  .tl-row { display: grid; grid-template-columns: 90px 1fr; gap: 16px; padding: 14px 18px; border-bottom: 1px solid #f1f5f9; align-items: baseline; }
+  .tl-row:last-child { border-bottom: none; }
+  .tl-row:nth-child(odd) { background: #fafbfc; }
+  .tl-t { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; color: #4338ca; }
+  .tl-desc { font-size: 13.5px; color: #334155; }
+  .tl-desc strong { color: #0f172a; }
+
+  .callout {
+    display: flex; gap: 12px; padding: 14px 18px;
+    border-radius: 8px; border-left: 3px solid; margin: 16px 0;
+    font-size: 13.5px;
+  }
+  .callout-info    { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+  .callout-warn    { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+  .callout-success { background: #f0fdf4; border-color: #22c55e; color: #166534; }
+  .callout-icon    { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  .evid-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  .evid-table th {
+    background: #f1f5f9; padding: 9px 12px; text-align: left;
+    font-size: 11px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: .4px;
+  }
+  .evid-table td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+  .evid-table tr:last-child td { border-bottom: none; }
+
+  .sign-block { margin-top: 30px; padding-top: 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .sign-col { flex: 1; min-width: 220px; }
+  .sign-line { width: 100%; max-width: 240px; height: 1px; background: #cbd5e1; margin-bottom: 8px; }
+  .sign-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; }
+
+  footer { text-align: center; padding: 30px 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #94a3b8; }
+  footer a { color: #4f46e5; }
+
+  @media (max-width: 640px) {
+    .sla-hero { flex-direction: column; text-align: center; }
+    .doc-meta { flex-direction: column; gap: 10px; }
+    .tl-row { grid-template-columns: 70px 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="topnav-back" href="bitacora.html">← Volver a la bitácora</a>
+    <a class="topnav-back" href="arquitectura.html">Arquitectura técnica →</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="doc-header">
+    <div class="doc-kicker">Política de Respuesta a Incidentes · Anexo Técnico</div>
+    <h1>SLA de Detección y Respuesta a Accesos Anómalos</h1>
+    <p class="lead">
+      Documento de referencia para el Encargado de Prevención de Delitos (EPD), el CISO y auditoría externa.
+      Describe, con evidencia técnica verificable, el compromiso de tiempo máximo entre un acceso anómalo
+      real y la ejecución de una respuesta automática (re-autenticación o bloqueo) por parte de
+      <strong>Guardia Digital Inteligente</strong>.
+    </p>
+    <div class="doc-meta">
+      <div class="doc-meta-item">Versión<strong>1.0</strong></div>
+      <div class="doc-meta-item">Vigente desde<strong>2026-07-26</strong></div>
+      <div class="doc-meta-item">Producto<strong>Guardia Digital Inteligente</strong></div>
+      <div class="doc-meta-item">Emisor<strong>Wayweb SpA</strong></div>
+    </div>
+  </div>
+
+  <div class="sla-hero">
+    <div class="sla-hero-num">≤15<span style="font-size:20px;color:#6366f1;"> min</span></div>
+    <div class="sla-hero-text">
+      <h2>Tiempo máximo garantizado de aislamiento de un acceso comprometido</h2>
+      <p>Desde que el evento de acceso queda registrado en el sistema hasta que la respuesta automática (re-MFA o bloqueo) se ejecuta sobre la cuenta afectada, sin intervención humana.</p>
+    </div>
+  </div>
+
+  <section id="que-es">
+    <h2>1. Qué es este SLA y por qué existe</h2>
+    <p>
+      La <strong>Ley 20.393</strong> exige que una empresa pueda demostrar que ejerció <strong>debida diligencia</strong>
+      en la supervisión de sus sistemas — no basta con tener un control, hay que poder probar que actúa dentro de
+      un plazo razonable ante una señal de riesgo. Este documento formaliza, como compromiso de servicio (SLA),
+      el intervalo que Guardia Digital tarda en aislar un acceso anómalo desde que ocurre.
+    </p>
+    <p>
+      El intervalo no es una estimación de marketing: es la configuración real del job de detección
+      (<code>modal.Period(minutes=15)</code>), verificada en producción el <strong>25 de julio de 2026</strong>
+      con un bloqueo autónomo real, ejecutado sin intervención humana, sobre una cuenta de prueba con acceso
+      genuinamente anómalo.
+    </p>
+  </section>
+
+  <section id="como-funciona">
+    <h2>2. Cómo se compone el intervalo</h2>
+    <p>El ciclo de detección y respuesta tiene dos capas independientes, que operan en paralelo:</p>
+    <div class="timeline">
+      <div class="tl-row">
+        <div class="tl-t">&lt; 1s</div>
+        <div class="tl-desc"><strong>MFA adaptativo (Auth0 Action).</strong> En el momento mismo del login, si hay señales de riesgo evidentes (país fuera de perfil, horario inhabitual, dispositivo nuevo), se exige un segundo factor antes de completar la sesión — sin esperar al ciclo de IA.</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-t">≤ 15 min</div>
+        <div class="tl-desc"><strong>Clasificación por IA (Vertex AI vía Modal).</strong> Cada 15 minutos, un job batch consulta los eventos de acceso pendientes y los evalúa contra el modelo de anomalías (viaje imposible, geolocalización nueva, horario atípico). Es el <em>peor caso</em>: un evento que ocurre justo después de un ciclo debe esperar como máximo al siguiente.</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-t">1–2s</div>
+        <div class="tl-desc"><strong>Ejecución de la respuesta.</strong> Si el <code>anomaly_score</code> supera el umbral, el mismo job llama a la Auth0 Management API para forzar re-autenticación o bloquear la cuenta. Medido en campaña de validación: 0.8–2.1s en caliente, ~11s en frío (primera predicción tras inactividad).</div>
+      </div>
+    </div>
+    <p style="margin-top:14px;">
+      El compromiso de <strong>≤15 minutos</strong> cubre el peor escenario posible del ciclo batch. En la práctica,
+      con actividad regular de login, el intervalo real observado suele ser menor porque el endpoint de IA no
+      llega a quedar inactivo entre ciclos.
+    </p>
+  </section>
+
+  <section id="evidencia">
+    <h2>3. Evidencia técnica que sustenta este SLA</h2>
+    <table class="evid-table">
+      <thead><tr><th>Fuente</th><th>Qué demuestra</th></tr></thead>
+      <tbody>
+        <tr><td><code>ia_models/anomaly_detector.py</code></td><td>Configuración real del intervalo: <code>schedule=modal.Period(minutes=15)</code></td></tr>
+        <tr><td>Campaña de validación (Sesión #6)</td><td>6/6 escenarios correctamente clasificados, incluido caso borde de horario</td></tr>
+        <tr><td>Prueba autónoma real (Sesión #7)</td><td>Bloqueo real ejecutado sin intervención humana, 25-jul-2026, 22:55 UTC, score 1.000</td></tr>
+        <tr><td>Dashboard de compliance (Datadog)</td><td>Trazabilidad operativa continua: ingestión por ciclo, anomalías detectadas, acciones de enforcement</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-success" style="margin-top:16px;">
+      <div class="callout-icon">✅</div>
+      <div>
+        A diferencia de un control administrativo (matriz de riesgo revisada trimestralmente), este SLA es
+        <strong>verificable en cualquier momento</strong>: el propio sistema registra cada ciclo de ejecución y
+        cada decisión tomada, quedando disponible como evidencia operativa continua.
+      </div>
+    </div>
+  </section>
+
+  <section id="valor-legal">
+    <h2>4. Valor como defensa jurídica</h2>
+    <p>
+      Ante un fiscal o un directorio, la pregunta relevante no es solo "¿existe un control?", sino
+      <strong>"¿la empresa actuó con la diligencia esperada dentro de un plazo razonable?"</strong>. Poder
+      documentar —con configuración de sistema verificable, no con una declaración de intenciones— que un
+      acceso comprometido queda aislado en un máximo de 15 minutos, sin depender de que un analista humano
+      esté disponible o atento, es evidencia directa de supervisión activa y razonable del sistema de acceso.
+    </p>
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div>
+        <strong>Alcance de este documento:</strong> este SLA cubre la capa de <em>detección técnica y respuesta
+        automática</em> sobre accesos. No sustituye la certificación formal del Modelo de Prevención de Delitos
+        (MPD) del cliente, ni constituye asesoría legal — se recomienda que el equipo legal o el EPD del cliente
+        incorpore este documento como anexo técnico dentro de su propio MPD.
+      </div>
+    </div>
+  </section>
+
+  <div class="sign-block">
+    <div class="sign-col">
+      <div class="sign-line"></div>
+      <div class="sign-label">Wayweb SpA — Responsable técnico</div>
+    </div>
+    <div class="sign-col" style="text-align:right;">
+      <div class="sign-line" style="margin-left:auto;"></div>
+      <div class="sign-label">Cliente — Aceptación / EPD</div>
+    </div>
+  </div>
+</div>
+
+<footer>Guardia Digital Inteligente · Wayweb SpA · <a href="bitacora.html">← Volver a la bitácora</a> · <a href="arquitectura.html">Arquitectura técnica</a></footer>
+
+</body>
+</html>

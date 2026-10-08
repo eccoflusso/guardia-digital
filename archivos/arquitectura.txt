@@ -1,0 +1,48 @@
+El diseño y la estructura que muestran estas capturas son excepcionales. Estás logrando algo muy difícil en B2B: explicar una arquitectura compleja de manera modular y digerible. El nivel de detalle que incluiste (como mencionar "128 MB, timeout 10s" para Lambda o "Node 20 para minimizar cold-starts") es exactamente el tipo de "cebo técnico" que convence a un Arquitecto TI o a un CISO de que tu equipo sabe lo que hace.
+
+Sin embargo, para alinear esta página con la estrategia legal y comercial que definimos, hay un ajuste crítico en el diagrama y un par de optimizaciones en los textos para blindar tu autoridad sin regalar tu propiedad intelectual.
+
+Aquí tienes la revisión estratégica sección por sección:
+
+1. El Diagrama de Flujo (Sección 02 - image_f54569.png)
+El diagnóstico: El diagrama actual ("Happy path") es limpio, pero le falta la pieza maestra que te separa de la competencia: la bóveda WORM.
+La mejora:
+
+Debes agregar un nodo paralelo que salga de "Lambda" (o de "CloudWatch logs") apuntando hacia un bloque que diga: Amazon S3 (WORM).
+
+Texto de apoyo debajo del nodo: Archivo inmutable (5 años). Evidencia criptográfica para Ley 20.393.
+
+Por qué es vital: Cuando el CISO vea el flujo, entenderá la operatividad (Datadog/Vertex). Pero cuando el auditor o el abogado vea el flujo, su ojo debe ir directamente a ese nodo "S3 WORM". Es la justificación legal de la compra.
+
+2. El Motor de Anomalías (Sección 02 - image_f54297.jpg)
+El diagnóstico: Tienes descripciones muy buenas para el Clasificador y el Job programado.
+Lo que NO debes agregar (Protección de IP):
+
+Mantén la descripción en un nivel funcional ("Evalúa viaje imposible, horario...").
+
+Nunca publiques en esta página cómo ponderas esas variables (ej: "si la IP cambia a más de 500km en menos de 2 horas, el score sube 0.5"). Esa lógica interna es el valor de tu algoritmo y se reserva exclusivamente para la explicación verbal en la demo.
+
+3. Stack Tecnológico (Sección 03 - image_f54297.jpg)
+El diagnóstico: Excelente ejecución. Mostrar que usas Terraform (IaC) es un diferenciador gigante. Le dice al equipo TI del cliente: "Nuestro despliegue es un script limpio y versionado, no un parche manual".
+La optimización sugerida (Copywriting):
+
+En la tarjeta de Datadog, eleva el tono legal.
+
+Actual: "Forwarder oficial vía CloudFormation. Pipelines geo-IP, monitores de latencia..."
+
+Mejorado: "SIEM y Observabilidad. Pipelines de ingesta con retención analítica. Dashboards dedicados para el Encargado de Prevención de Delitos (MPD) y monitoreo de salud del pipeline en tiempo real."
+
+En la tarjeta de Auth0, haz énfasis en la fricción cero.
+
+Sugerencia a añadir: "Intercepción asíncrona sin latencia para el usuario final."
+
+4. Ruta de Despliegue (Sección 04 - image_f54242.png)
+El diagnóstico: La tabla de "De cero a producción" es tu mejor herramienta para derribar la objeción del tiempo de implementación. La nota final sobre documentar cada paso para la Ley 20.393 es un toque maestro.
+La mejora visual:
+
+Asegúrate de que la columna "Tiempo estimado" quede implícita o explícita. Si el proceso completo toma 1 semana o 3 días, ponlo en un texto destacado arriba de la tabla. El TI corporativo está traumado con implementaciones que duran 8 meses; ver un roadmap de 4 pasos claros alivia esa ansiedad.
+
+El balance final
+No estás entregando demasiada información a la competencia. Estás mostrando el "Qué" (los componentes) y el "Por qué" (la justificación legal/técnica), pero te estás guardando el "Cómo exacto" (el código, la configuración del modelo Vertex AI, las políticas IAM de AWS, los prompts).
+
+La competencia puede ver que usas Node 20 en Lambda y Vertex AI, pero orquestar eso con Terraform, Auth0 Actions y S3 WORM sin romper la latencia del login les tomará meses de ensayo y error, nootros ya lo tenemos en TRL5.

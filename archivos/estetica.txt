@@ -1,0 +1,46 @@
+1. La Estética: El toque "Premium Tech"
+Para un producto SaaS B2B de ciberseguridad, el diseño debe transmitir transparencia, velocidad y modernidad.
+
+Transiciones translúcidas: En lugar de mantener las tarjetas con fondos sólidos planos (como se ve en la sección azul oscuro), puedes aplicar un efecto de Glassmorphism (cristal esmerilado líquido).
+
+Implementación: Usando fondos ligeramente translúcidos con un desenfoque (backdrop-blur) sobre el fondo oscuro, las tarjetas parecerán flotar. Si estás maquetando esto con Elementor Pro y algo de CSS personalizado, este efecto es muy ligero en carga y le da inmediatamente a la plataforma un aspecto de gama alta (enterprise), separando la información crítica del fondo sin usar bordes duros.
+
+2. Distribución y Cantidad de Tarjetas por Sección
+El ojo del usuario B2B escanea, no lee. La regla de oro es evitar la fatiga visual.
+
+Sección Hero (Arriba - image_471c9f.jpg):
+
+Cantidad: Mantén 1 sola tarjeta (el simulador de terminal).
+
+Mejora: Haz que el texto dentro de esa terminal tenga una leve animación de escritura (typewriter effect) o que los estados cambien dinámicamente de "Analizando..." a "Bloqueado". Esto captura la atención de la gerencia de inmediato en la demo.
+
+Sección Ley 20.393 (image_471c43.jpg):
+
+Cantidad: Tienes 3 tarjetas apiladas verticalmente.
+
+Mejora: Rompe la verticalidad. Cuando apilas 3 bloques de texto hacia abajo, el cerebro lo percibe como "términos y condiciones" y tiende a saltarlo. Distribúyelas de forma horizontal en 3 columnas, o usa un diseño escalonado (una a la izquierda, la siguiente un poco más a la derecha).
+
+Sección Diferenciadores (image_471c20.jpg):
+
+Cantidad: 3 tarjetas (como lo tienes ahora).
+
+Mejora: El número 3 es perfecto para retención cognitiva. Mantén el layout horizontal.
+
+Sección "En Números" / KPIs (image_4718dd.png):
+
+Cantidad: 4 tarjetas es el estándar ideal para métricas.
+
+Mejora: Asegúrate de que los números destaquen tipográficamente (más grandes y en un peso de fuente mayor) respecto al texto descriptivo.
+
+3. Tarjetas Interactivas "Técnico-Comerciales" (El efecto Flip)
+Dado que en tu demo tendrás público mixto (TI y Gerencia), puedes usar el diseño de las tarjetas a tu favor para hablarles a ambos sin saturar la pantalla.
+
+La Idea: Implementa un efecto Hover (o Flip Box) en las tarjetas de diferenciadores.
+
+Cómo funciona:
+
+Estado normal (Cara A): Muestra el mensaje gerencial. Ejemplo: "Respuesta Autónoma. Sin turnos de guardia".
+
+Estado Hover (Cara B): Al pasar el ratón durante la presentación, la tarjeta revela el dato técnico duro para el Arquitecto/CISO. Ejemplo: "Pipeline serverless: API Gateway → Lambda → Modal (Latencia < 1.5s)".
+
+El impacto: Le demuestras a gerencia el beneficio, y a TI le muestras "el motor" con un simple movimiento del mouse, manteniendo la interfaz limpia.

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arquitectura — Guardia Digital Inteligente · Wayweb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f0f4f8;
+    color: #1e293b;
+    line-height: 1.6;
+  }
+
+  /* ── Top nav ───────────────────────────────────────────────────── */
+  .topnav {
+    position: sticky; top: 0; z-index: 10;
+    background: #ffffff; border-bottom: 1px solid #e2e8f0;
+  }
+  .topnav-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .topnav-back { font-size: 13px; color: #64748b; text-decoration: none; font-weight: 500; }
+  .topnav-back:hover { color: #4f46e5; }
+  .topnav-links { display: flex; gap: 22px; }
+  .topnav-links a {
+    font-size: 13px; font-weight: 600; color: #475569; text-decoration: none;
+    padding: 6px 2px; border-bottom: 2px solid transparent;
+  }
+  .topnav-links a:hover { color: #4f46e5; border-color: #c7d2fe; }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+
+  /* ── Hero ──────────────────────────────────────────────────────── */
+  .hero { padding: 48px 0 36px; border-bottom: 1px solid #e2e8f0; }
+  .hero-eyebrow { font-size: 12px; font-weight: 600; color: #4f46e5; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 10px; }
+  .hero h1 { font-size: 32px; font-weight: 700; color: #0f172a; margin-bottom: 12px; letter-spacing: -.3px; }
+  .hero p { font-size: 15px; color: #475569; max-width: 68ch; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 28px 0; }
+  .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 18px; }
+  .stat-value { font-size: 24px; font-weight: 700; color: #4f46e5; }
+  .stat-label { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ── Layer sections ────────────────────────────────────────────── */
+  .layer { padding: 52px 0; border-bottom: 1px solid #e2e8f0; scroll-margin-top: 72px; }
+  .layer:last-of-type { border-bottom: none; }
+  .layer-kicker { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .layer-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    color: #4f46e5; background: #eef2ff; border: 1px solid #c7d2fe;
+    width: 26px; height: 26px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .layer-kicker span.label { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .6px; }
+  .layer h2 { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+  .layer > p.lead { font-size: 14.5px; color: #64748b; max-width: 72ch; margin-bottom: 26px; }
+
+  /* ── Cards / stack ─────────────────────────────────────────────── */
+  .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px 24px; margin-bottom: 18px; }
+  .card h3 { font-size: 15.5px; font-weight: 600; color: #0f172a; margin-bottom: 14px; }
+
+  .stack-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .stack-item { display: flex; align-items: flex-start; gap: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 13px 16px; }
+  .stack-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .stack-info { min-width: 0; }
+  .stack-name { font-size: 13px; font-weight: 600; color: #1e293b; }
+  .stack-desc { font-size: 12px; color: #64748b; margin-top: 3px; line-height: 1.55; }
+  .stack-example {
+    margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #4338ca; background: #f5f5ff; border: 1px solid #e0e0ff;
+    border-radius: 5px; padding: 6px 9px; line-height: 1.6;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    background: #f1f5f9; color: #c026d3; padding: 1px 5px; border-radius: 3px;
+  }
+
+  /* ── Flow diagram ──────────────────────────────────────────────── */
+  .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 0; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px 24px; }
+  .flow-node { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 14px; font-size: 12.5px; font-weight: 500; color: #334155; text-align: center; min-width: 90px; }
+  .flow-node.primary { background: #eef2ff; border-color: #a5b4fc; color: #3730a3; }
+  .flow-node.success { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
+  .flow-node.danger { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+  .flow-arrow { color: #94a3b8; font-size: 16px; padding: 0 6px; flex-shrink: 0; }
+  .flow-split { display: flex; flex-direction: column; gap: 6px; }
+
+  /* ── Visibility matrix ─────────────────────────────────────────── */
+  .role-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .role-table th {
+    background: #f1f5f9; padding: 10px 12px; text-align: left;
+    font-size: 11px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: .4px;
+  }
+  .role-table td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+  .role-table tr:last-child td { border-bottom: none; }
+  .role-table .yes { color: #059669; font-weight: 700; text-align: center; }
+  .role-table .no  { color: #cbd5e1; text-align: center; }
+  .role-table .auto { color: #4f46e5; font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-align: center; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: .3px; }
+  .badge-indigo { background: #eef2ff; color: #4338ca; }
+  .badge-green  { background: #d1fae5; color: #065f46; }
+  .badge-amber  { background: #fef3c7; color: #92400e; }
+
+  .callout { display: flex; gap: 12px; padding: 12px 16px; border-radius: 8px; border-left: 3px solid; margin-top: 14px; font-size: 13.5px; }
+  .callout-info { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  footer { text-align: center; padding: 30px 0; font-size: 12px; color: #94a3b8; }
+
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .stack-grid { grid-template-columns: 1fr; }
+    .topnav-links { display: none; }
+    .role-table { display: block; overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="topnav-back" href="bitacora.html">← Volver a la bitácora</a>
+    <div class="topnav-links">
+      <a href="#experiencia">1. Experiencia</a>
+      <a href="#logica-ia">2. Lógica e IA</a>
+      <a href="#infraestructura">3. Infraestructura</a>
+      <a href="#onboarding">4. Onboarding</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-eyebrow">Guardia Digital Inteligente · Wayweb SpA</div>
+    <h1>Plataforma y arquitectura</h1>
+    <p>
+      Descubre cómo funciona Guardia Digital desde la experiencia de cada rol dentro de la
+      organización hasta la infraestructura serverless y el motor de IA que detecta y responde
+      a accesos anómalos en tiempo real.
+    </p>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value">5</div><div class="stat-label">Roles con visibilidad distinta</div></div>
+      <div class="stat-card"><div class="stat-value">15 min</div><div class="stat-label">Ciclo de detección IA</div></div>
+      <div class="stat-card"><div class="stat-value">TRL 5</div><div class="stat-label">Validado en producción</div></div>
+      <div class="stat-card"><div class="stat-value">Ley 20.393</div><div class="stat-label">Trazabilidad de auditoría</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       1. EXPERIENCIA (NEGOCIO)
+  ══════════════════════════════════════════════════════ -->
+  <section class="layer" id="experiencia">
+    <div class="layer-kicker"><div class="layer-num">01</div><span class="label">Negocio</span></div>
+    <h2>La experiencia de cada rol</h2>
+    <p class="lead">
+      Un mismo evento de acceso —un login desde Rusia a las 3 a.m.— significa cosas distintas
+      según quién lo mira. El sistema no expone un único panel: cada rol ve la capa de información
+      que necesita para actuar.
+    </p>
+
+    <div class="card">
+      <h3>Matriz de visibilidad por rol</h3>
+      <table class="role-table">
+        <thead>
+          <tr><th>Rol</th><th>Login normal</th><th>MFA forzado</th><th>Anomalía IA</th><th>Bloqueo automático</th><th>Reporte de auditoría</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>🔐 CISO / Seguridad</td>
+            <td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td>
+          </tr>
+          <tr>
+            <td>👔 Gerencia / CEO</td>
+            <td class="no">—</td><td class="no">—</td><td class="auto">RESUMEN</td><td class="auto">RESUMEN</td><td class="yes">✓</td>
+          </tr>
+          <tr>
+            <td>⚖️ Legal / Compliance</td>
+            <td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td>
+          </tr>
+          <tr>
+            <td>🖥️ TI / Soporte</td>
+            <td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td>
+          </tr>
+          <tr>
+            <td>🧑‍💼 Usuario final</td>
+            <td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="auto">NOTIFICADO</td><td class="no">—</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">
+        <div class="callout-icon">ℹ️</div>
+        <div>
+          El usuario final nunca ve el <em>score</em> de anomalía ni la decisión del modelo — solo
+          experimenta el resultado (se le pide MFA otra vez, o su sesión queda bloqueada con instrucciones
+          claras de cómo recuperarla vía el soporte embebido de Intercom).
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Qué decide cada rol con esta información</h3>
+      <div class="stack-grid">
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#eef2ff;">🔐</div>
+          <div class="stack-info">
+            <div class="stack-name">CISO — Postura de riesgo</div>
+            <div class="stack-desc">Ajusta el umbral de anomalía, revisa el dashboard de Datadog y decide si una cuenta bloqueada se reactiva manualmente.</div>
+            <div class="stack-example">Ejemplo real: score 1.00 en login desde Rusia → bloqueo confirmado, sin intervención.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fff7ed;">👔</div>
+          <div class="stack-info">
+            <div class="stack-name">Gerencia — Evidencia de control</div>
+            <div class="stack-desc">No necesita el detalle técnico: necesita poder decir "tenemos un modelo de prevención de delitos que funciona" frente a un directorio o un auditor.</div>
+            <div class="stack-example">Reporte: "6/6 escenarios de validación superados, TRL 5".</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#f0fdf4;">⚖️</div>
+          <div class="stack-info">
+            <div class="stack-name">Legal — Ley 20.393</div>
+            <div class="stack-desc">Usa la trazabilidad (usuario, fecha/hora, geolocalización, resultado) como parte del Modelo de Prevención de Delitos exigido por ley.</div>
+            <div class="stack-example">Cada decisión de acceso queda registrada, no solo declarada.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fef9c3;">🖥️</div>
+          <div class="stack-info">
+            <div class="stack-name">TI — Operación diaria</div>
+            <div class="stack-desc">Monitorea el pipeline (ingestión, errores, salud del job de IA) y resuelve casos de desbloqueo que el bot de soporte no cubre.</div>
+            <div class="stack-example">Dashboard: "Errores del pipeline (24h)", "Logs ingeridos por ciclo".</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       2. LÓGICA E IA
+  ══════════════════════════════════════════════════════ -->
+  <section class="layer" id="logica-ia">
+    <div class="layer-kicker"><div class="layer-num">02</div><span class="label">Lógica e IA</span></div>
+    <h2>El motor de detección de anomalías</h2>
+    <p class="lead">
+      Cada login pasa por dos decisiones automáticas independientes: una en el momento (MFA
+      adaptativo, sub-segundo) y otra en batch cada 15 minutos (clasificación por IA contra un
+      modelo entrenado en Vertex AI).
+    </p>
+
+    <div class="card">
+      <h3>Flujo de identidad y respuesta (happy path)</h3>
+      <div class="flow">
+        <div class="flow-node primary">Auth0<br><small style="color:#94a3b8;">Universal Login + MFA</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node primary">Lambda<br><small>normaliza evento</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-split">
+          <div class="flow-node" style="font-size:11px;">CloudWatch<br><small>logs</small></div>
+          <div class="flow-node success" style="font-size:11px;">Datadog<br><small>SIEM</small></div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node primary">Modal → Vertex AI<br><small>score de anomalía</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node danger">Re-MFA / bloqueo<br><small>Auth0 Mgmt API</small></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Componentes del motor</h3>
+      <div class="stack-grid">
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#eef2ff;">🤖</div>
+          <div class="stack-info">
+            <div class="stack-name">Clasificador de anomalías (Vertex AI)</div>
+            <div class="stack-desc">Modelo custom (scikit-learn en contenedor propio) servido en un endpoint de Vertex AI. Evalúa viaje imposible, horario fuera de turno y país no habitual.</div>
+            <div class="stack-example">Umbral: anomaly_score ≥ 0.8 → evento anómalo.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fef9c3;">⏱️</div>
+          <div class="stack-info">
+            <div class="stack-name">Job programado (Modal)</div>
+            <div class="stack-desc">Batch cada 15 minutos: consulta logs pendientes, llama al endpoint, y si hay anomalía, ejecuta la respuesta sobre Auth0.</div>
+            <div class="stack-example">modal.Period(minutes=15) — balance costo/latencia.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fdf2f8;">🛡️</div>
+          <div class="stack-info">
+            <div class="stack-name">MFA adaptativo (Auth0 Action)</div>
+            <div class="stack-desc">Decisión instantánea en el propio login: fuerza segundo factor si hay señales de riesgo, sin esperar el ciclo de IA.</div>
+            <div class="stack-example">Señales: país ≠ CL, fuera de 07:00–22:00 CLT, dispositivo nuevo.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#f0fdf4;">📡</div>
+          <div class="stack-info">
+            <div class="stack-name">Cierre del lazo de respuesta</div>
+            <div class="stack-desc">Cuando el score supera el umbral, el job llama a la Auth0 Management API para exigir re-autenticación o bloquear la cuenta — sin intervención humana.</div>
+            <div class="stack-example">Verificado en producción: 25-jul-2026, bloqueo autónomo real.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       3. INFRAESTRUCTURA
+  ══════════════════════════════════════════════════════ -->
+  <section class="layer" id="infraestructura">
+    <div class="layer-kicker"><div class="layer-num">03</div><span class="label">Infraestructura</span></div>
+    <h2>Serverless, sin servidores que mantener</h2>
+    <p class="lead">
+      Toda la plataforma corre sobre servicios administrados. No hay un servidor que parchear ni
+      una VM que escalar — el costo y el cómputo siguen el tráfico real.
+    </p>
+
+    <div class="card">
+      <h3>Stack tecnológico</h3>
+      <div class="stack-grid">
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#eef2ff;">🔐</div>
+          <div class="stack-info">
+            <div class="stack-name">Auth0 (Universal Login + Adaptive MFA)</div>
+            <div class="stack-desc">Identidad como servicio. Log Streams hacia API Gateway. Conexiones AD de sucursales y contratistas.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fff7ed;">☁️</div>
+          <div class="stack-info">
+            <div class="stack-name">AWS API Gateway + Lambda (Node 20)</div>
+            <div class="stack-desc">Webhook de ingesta. 128 MB, timeout 10s, sin dependencias externas para minimizar cold-start.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#f0fdf4;">📊</div>
+          <div class="stack-info">
+            <div class="stack-name">Datadog (Forwarder + SIEM)</div>
+            <div class="stack-desc">Forwarder oficial vía CloudFormation. Pipelines geo-IP, monitores de fuerza bruta y dashboard de compliance.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fef9c3;">🧠</div>
+          <div class="stack-info">
+            <div class="stack-name">Modal + Google Vertex AI</div>
+            <div class="stack-desc">Cómputo serverless para Python (Modal) orquestando inferencia contra un endpoint de Vertex AI con escalado a cero.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#f1f5f9;">⚙️</div>
+          <div class="stack-info">
+            <div class="stack-name">Terraform (IaC)</div>
+            <div class="stack-desc">Todo el despliegue AWS versionado como código: IAM, Lambda, API Gateway y el Forwarder de Datadog.</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-icon" style="background:#fdf2f8;">💬</div>
+          <div class="stack-info">
+            <div class="stack-name">Intercom (soporte embebido)</div>
+            <div class="stack-desc">Widget de autoservicio en Universal Login: desbloqueo de cuenta y setup de MFA sin intervención humana.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💰</div>
+      <div>
+        <strong>Escalado a cero real:</strong> el endpoint de Vertex AI corre con <code>min_replica_count=0</code>.
+        Cuando no hay tráfico, no genera costo — a cambio de una latencia de arranque (~11s) en la
+        primera consulta tras estar inactivo.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       4. ONBOARDING
+  ══════════════════════════════════════════════════════ -->
+  <section class="layer" id="onboarding">
+    <div class="layer-kicker"><div class="layer-num">04</div><span class="label">Adopción</span></div>
+    <h2>De cero a producción</h2>
+    <p class="lead">
+      El mismo ciclo que siguió esta validación es el que sigue un cliente nuevo: no hay meses de
+      integración a medida.
+    </p>
+
+    <div class="card">
+      <h3>Ruta de despliegue</h3>
+      <table class="role-table">
+        <thead><tr><th>Paso</th><th>Qué ocurre</th><th>Responsable</th></tr></thead>
+        <tbody>
+          <tr><td>1. Conexión de identidad</td><td>Se conecta el directorio existente (AD, Google Workspace) como conexión de Auth0.</td><td>TI del cliente + Wayweb</td></tr>
+          <tr><td>2. Calibración de riesgo</td><td>Se define el horario habitual, países esperados y umbral de anomalía inicial.</td><td>CISO / Seguridad</td></tr>
+          <tr><td>3. Modo observación</td><td>El sistema clasifica y notifica, pero no bloquea, mientras se valida el modelo con tráfico real.</td><td>Wayweb</td></tr>
+          <tr><td>4. Activación del lazo de respuesta</td><td>Se habilita el bloqueo/re-MFA automático. Desde aquí, el sistema opera sin intervención humana.</td><td>CISO / Seguridad</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">📋</div>
+      <div>
+        Cada paso queda documentado como parte del Modelo de Prevención de Delitos: la fecha de
+        activación del lazo de respuesta es, en sí misma, evidencia de supervisión razonable ante
+        un eventual requerimiento de la <strong>Ley 20.393</strong>.
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>Guardia Digital Inteligente · Wayweb SpA · <a href="bitacora.html" style="color:#4f46e5;">← Volver a la bitácora</a></footer>
+
+</body>
+</html>

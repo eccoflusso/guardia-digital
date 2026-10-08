@@ -1,0 +1,54 @@
+Bienvenido. Le agradezco el tiempo — lo que va a ver a continuación no es una maqueta, es el panel real de Guardia Digital Inteligente, la plataforma de Wayweb que convierte el control de accesos de su empresa en un sistema que se defiende solo.
+
+Está viendo justo la vista de Auditor de Compliance — una de tres perspectivas que este mismo panel puede mostrar según quién lo mire (también existe la del Admin de Seguridad, más operativa, y la del Usuario final, que solo ve su propia actividad). Elegimos partir por acá porque es la que responde la pregunta que más le importa a su gerencia: ¿podemos demostrar, con evidencia real, que tenemos control sobre quién entra a nuestros sistemas?
+
+Recorramos la pantalla de arriba hacia abajo:
+
+El banner verde de arriba no es un texto de marketing — dice que el 25 de julio de este año, un acceso anómalo real fue detectado y bloqueado por el sistema, sin que ningún humano interviniera. Volveremos a ese evento exacto más abajo, con el registro completo.
+
+El banner dorado debajo le explica que, en este modo, solo le mostramos evidencia técnica verificable — nada de material comercial.
+
+Las cuatro tarjetas de glosario (Zero-Trust, TRL 5, Score de Anomalía, Ley 20.393) están ahí porque asumimos que quien lo acompañe a ver esto — un abogado, un director, alguien de finanzas — no necesariamente maneja estos términos, y no queremos que la conversación se detenga por eso.
+
+Las dos tarjetas centrales son el corazón de por qué esto le importa a la empresa, no solo a TI: a la izquierda, el estado operacional real (6 de 6 componentes desplegados, 100% de autonomía en la respuesta); a la derecha, la Ley 20.393 traducida a algo concreto — cuatro exigencias legales, cada una con el control real que ya tenemos operando para cumplirla: bloqueo real, evidencia inalterable por 5 años, respuesta en menos de 15 minutos, y todo etiquetado para que un fiscal lo entienda.
+
+Y abajo, la tabla que probablemente le interesa más: siete escenarios de una campaña de validación real — no simulacros de pizarra, sino intentos de acceso reales contra el sistema, con su score exacto, su resultado, y cuánto tardó en reaccionar. La última fila es la que ya mencioné: un bloqueo automático real, sobre una cuenta real, sin que nadie tuviera que estar mirando una pantalla esa noche.
+
+Perfecto, ahora le muestro las otras dos vistas que este mismo panel puede tomar. La idea es que vea que no es un solo dashboard genérico — cada persona de su organización ve exactamente lo que necesita, ni más ni menos.
+
+Primera captura — "Usuario final"
+
+Esta es la vista de un empleado cualquiera de su empresa, alguien que no tiene por qué entender de scores de anomalía ni de Vertex AI. Fíjese en lo poco que ve: solo su propio historial de acceso — "hoy, normal" y "25-jul-2026, verificación extra pedida". Eso es intencional: el sistema nunca le muestra a un empleado por qué se le pidió una verificación extra (eso sería exponer la lógica de detección a un posible atacante que haya robado esas credenciales). Solo le da una salida clara: "si no fuiste tú, repórtalo, y se revoca la sesión al instante". Es la prueba de que el sistema es Zero-Trust hacia adentro también — ni siquiera el propio usuario ve más de lo que le corresponde.
+
+Segunda captura — "Auditor de Compliance"
+
+Esta es la misma vista que veíamos antes, pero completa, sin recortar. Quiero que note tres cosas concretas:
+
+El banner dorado de "Vista de auditoría" le confirma en todo momento en qué modo está parado — así nadie confunde una vista recortada con que "falta información".
+Las cuatro tarjetas de glosario siguen ahí arriba, porque un auditor externo tampoco tiene por qué saber de memoria qué es Zero-Trust o TRL 5.
+La tabla de abajo es la misma evidencia técnica que le mostré antes — siete escenarios reales, cada uno con su score, su resultado y la latencia real de respuesta. Esto es exactamente lo que un auditor externo, o un fiscal en un escenario de investigación, pediría ver: no una declaración de que "tenemos controles", sino el registro verificable de que esos controles actuaron.
+
+Perfecto. Cambio a la pestaña "Admin de Seguridad" — esta es la vista de quien opera el sistema día a día, no la del auditor ni la del empleado. Aquí es donde vamos a hacer algo distinto a lo que le mostraron cualquiera de sus otros proveedores hasta ahora: en vez de contarle qué hace el sistema, se lo voy a mostrar pasando en vivo, delante suyo.
+
+Voy a leer el guion que aparece en pantalla, y después vamos a apretar un botón real.
+
+El problema. Imagínese a un ejecutivo de su empresa, con acceso a sistemas críticos, un domingo por la noche, fuera de horario laboral. Un atacante compró sus credenciales en la dark web e intenta entrar desde un servidor en Rusia — un país donde esa cuenta nunca ha iniciado sesión.
+
+Lo que pasa hoy, sin Guardia Digital. Un sistema de acceso tradicional ve la contraseña correcta y lo deja entrar. El atacante roba datos o comete un fraude. El lunes, su empresa no solo perdió información — bajo la Ley 20.393 queda expuesta a una investigación, porque no tuvo un control activo capaz de evitar el delito informático.
+
+Lo que hace Guardia Digital. Auth0 valida la contraseña — es correcta. Pero nuestro motor de IA en Vertex AI cruza las variables reales del acceso: país fuera de perfil, horario atípico, geolocalización nunca vista. El score de anomalía se dispara a 1.0, el máximo posible. En menos de 15 minutos, el sistema intercepta la sesión y bloquea la cuenta — sin que ningún analista tuviera que estar mirando una pantalla esa madrugada.
+
+Y ahora viene lo que quiero que vea con sus propios ojos: hay tres botones ahí — "Viaje imposible (Rusia)", "Fuera de turno (3 AM)", "Geo-IP nueva (Nigeria)". Si me da la autorización, voy a apretar uno ahora mismo. Esto no es una animación ni un video pregrabado: va a disparar una llamada real a nuestro modelo de IA, y si el score supera el umbral, va a ejecutar un bloqueo real sobre una cuenta de prueba dedicada — la misma infraestructura que protegería las cuentas de su empresa el día de mañana.
+¿Le parece si probamos "Viaje imposible (Rusia)"?
+
+Ahí está — y esto es exactamente lo que aparecería en su pantalla si hubiera hecho clic usted mismo:
+
+✓ CUENTA BLOQUEADA — score 1.000
+
+Vertex AI clasificó el acceso desde Rusia como anómalo, con el score máximo posible. Auth0 Management API confirmó la acción real sobre la cuenta de prueba — no es una respuesta simulada, la cuenta efectivamente quedó bloqueada en nuestro tenant de Auth0 en este instante.
+
+Además de ese resultado en pantalla, se genera automáticamente una fila nueva en la tabla de evidencia técnica, marcada como "EN VIVO" — para que quede el registro de que esto ocurrió durante esta reunión con usted, con la latencia real medida (unos segundos, no minutos).
+
+Y ahí abajo dice "3 simulaciones restantes en esta ventana" — eso es un límite de seguridad que pusimos nosotros mismos, no una limitación técnica: como el botón queda expuesto públicamente en la demo, acotamos a un máximo de 5 simulaciones cada 24 horas para que el costo de operar esto sea siempre marginal, sin importar quién lo use.
+
+Antes de seguir: como la cuenta de prueba quedó bloqueada de verdad, si quiere repetir el ejercicio con otro escenario (por ejemplo "Fuera de turno" o "Geo-IP nueva"), hay un botón "↺ Reiniciar cuenta de prueba" al lado de los tres — eso desbloquea la cuenta real en segundos, para que pueda encadenar varias pruebas en la misma reunión sin que se acumule un bloqueo sobre otro. ¿Quiere que lo use ahora para seguir probando, o continuamos con el resto del recorrido del panel?

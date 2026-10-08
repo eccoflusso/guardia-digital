@@ -34,6 +34,12 @@ variable "datadog_site" {
   default     = "datadoghq.com"
 }
 
+variable "worm_retention_years" {
+  description = "Años de retención en modo COMPLIANCE (Object Lock) del archivo WORM de logs de acceso. 5 años por defecto, en línea con plazos habituales de prescripción de delitos económicos base de la Ley 20.393; ajustar con el equipo legal del cliente antes de un despliegue real."
+  type        = number
+  default     = 5
+}
+
 locals {
   common_tags = {
     Project     = "guardia-digital-inteligente"

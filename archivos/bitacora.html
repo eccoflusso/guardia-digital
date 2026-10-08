@@ -315,10 +315,10 @@
     <h1>GUARDIA DIGITAL I.</h1>
     <span>Plataforma IAM/IGA · Wayweb</span>
     <div>
-      <span class="status-pill pill-warn"><span class="pill-dot"></span>TRL 3 · Scaffolding</span>
+      <span class="status-pill pill-ok"><span class="pill-dot"></span>TRL 5 · Validado en entorno real</span>
     </div>
     <div>
-      <span class="status-pill pill-info"><span class="pill-dot"></span>En planificación activa</span>
+      <span class="status-pill pill-info"><span class="pill-dot"></span>Capa de demo/venta en curso</span>
     </div>
   </div>
   <nav class="sidebar-nav">
@@ -346,6 +346,7 @@
     <div class="nav-section">
       <div class="nav-label">Seguridad</div>
       <a href="#seguridad"     class="nav-link"><span class="nav-icon">🔒</span>Seguridad y compliance</a>
+      <a href="sla-respuesta.html" class="nav-link"><span class="nav-icon">📜</span>SLA de respuesta (Ley 20.393)</a>
     </div>
   </nav>
 </aside>
@@ -372,8 +373,8 @@
       </div>
       <div style="text-align:right;flex-shrink:0;">
         <div style="font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">última actualización</div>
-        <div style="font-size:15px;font-weight:600;color:#334155;">2026-07-25</div>
-        <div style="font-size:12px;color:#64748b;">Sesión #8</div>
+        <div style="font-size:15px;font-weight:600;color:#334155;">2026-07-28</div>
+        <div style="font-size:12px;color:#64748b;">Sesión #13</div>
       </div>
     </div>
   </div>
@@ -384,85 +385,96 @@
   <section class="page-section" id="overview">
     <div class="section-header">
       <h2>Resumen general</h2>
-      <p>Estado actual del proyecto y métricas clave.</p>
+      <p>Qué es, qué lo diferencia, y estado real verificado — no proyectado.</p>
     </div>
 
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-value">TRL 5</div>
         <div class="stat-label">Nivel de madurez</div>
-        <div class="stat-sub">Campaña de validación formal: 6/6 escenarios OK</div>
+        <div class="stat-sub">Validado en producción — bloqueo autónomo real, no simulado</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">6</div>
-        <div class="stat-label">Componentes modulares</div>
-        <div class="stat-sub">infra · lambdas · auth0 · ia · obs · soporte</div>
+        <div class="stat-value">≤15 min</div>
+        <div class="stat-label">SLA de detección y respuesta</div>
+        <div class="stat-sub">Documentado formalmente, ver sla-respuesta.html</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">5</div>
-        <div class="stat-label">Fases para go-live</div>
-        <div class="stat-sub">Fase 0 completada</div>
+        <div class="stat-value">5 años</div>
+        <div class="stat-label">Retención WORM inmutable</div>
+        <div class="stat-sub">S3 Object Lock (COMPLIANCE), aplicado en AWS real</div>
       </div>
     </div>
 
     <div class="card">
-      <h3>Descripción del sistema</h3>
+      <h3>Qué es Guardia Digital Inteligente</h3>
       <p>
-        <strong>Guardia Digital Inteligente</strong> es una <strong>plataforma SaaS B2B de IAM/IGA</strong>
-        (Gestión de Identidades y Accesos) desarrollada por Wayweb para el <strong>Mid-Market chileno</strong>.
-        Aplica un enfoque <strong>Zero-Trust</strong> con MFA adaptativo, captura y normaliza los eventos
-        de inicio de sesión, y detecta accesos anómalos para forzar re-autenticación o bloqueo.
+        <strong>Guardia Digital Inteligente</strong> es una <strong>plataforma de gestión de identidades
+        Zero-Trust</strong> para el <strong>Mid-Market chileno</strong>, que no solo detecta accesos
+        anómalos: <strong>actúa sola</strong>. Evalúa cada inicio de sesión en tiempo real, exige
+        re-autenticación o bloquea la cuenta automáticamente, y deja evidencia lista para auditoría —
+        sin depender de que un analista humano esté disponible o atento.
       </p>
       <p>
-        La identidad se gestiona en <strong>Auth0</strong> (Universal Login + Adaptive MFA). Los
-        <em>Log Streams</em> de Auth0 se envían vía <strong>API Gateway → AWS Lambda (Node 20)</strong>,
-        que valida, normaliza y emite eventos estructurados a <strong>CloudWatch → Datadog</strong> (SIEM,
-        pipelines y dashboard de compliance). Un job batch en <strong>Modal</strong> (cada 15 min) consulta
-        un endpoint de <strong>Vertex AI</strong> para detectar anomalías de acceso (viaje imposible, fuera
-        de turno, dispositivo nuevo) y cerrar el lazo de respuesta sobre Auth0.
+        La identidad se gestiona en <strong>Auth0</strong> (Universal Login + Adaptive MFA). Los eventos
+        de acceso viajan vía <strong>API Gateway → AWS Lambda</strong> hacia <strong>Datadog</strong>
+        (SIEM y dashboard de compliance) y, en paralelo, hacia un <strong>archivo inmutable en S3 (WORM)</strong>
+        que ningún administrador puede alterar ni borrar durante el período de retención. Un job de
+        <strong>IA (Vertex AI)</strong> clasifica anomalías de acceso cada 15 minutos como máximo y cierra
+        el lazo de respuesta directamente sobre Auth0.
       </p>
       <p>
-        La propuesta de valor se centra en tres ejes para el Mid-Market local: <strong>Zero-Trust</strong>
-        sin la complejidad de un IAM enterprise; <strong>reducción de costo TI</strong> mediante una
-        arquitectura 100% serverless (Lambda + API GW HTTP API + Modal); y <strong>cumplimiento de
-        auditoría</strong> con trazabilidad completa de decisiones de acceso para la <strong>Ley 20.393</strong>.
+        Tres ejes de valor lo diferencian de un IAM enterprise tradicional o de un SaaS de compliance
+        genérico: <strong>control activo, no solo administrativo</strong> (bloquea, no solo alerta);
+        <strong>evidencia generada sola</strong>, con trazabilidad etiquetada según categoría de
+        <em>Control Preventivo MPD</em> y archivada de forma inmutable; y <strong>despliegue en días, no
+        meses</strong>, gracias a una arquitectura 100% serverless.
       </p>
     </div>
 
     <div class="card">
-      <h3>Progreso por área</h3>
-      <div class="progress-row">
-        <div class="progress-label"><span>Fase 0 — Higiene del repo (git · .gitignore · .env.example · package.json)</span><span>100%</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Plan de implementación end-to-end (PLAN_IMPLEMENTACION.md)</span><span>100%</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Boilerplate de los 6 componentes (bootstrap)</span><span>100%</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Fase 1 — Ingreso de identidad (Auth0 + MFA)</span><span>100%</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Fase 2 — Captura y normalización (API Gateway + Lambda)</span><span>100%</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Fase 3 — Observabilidad / SIEM (Datadog)</span><span>90%</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:90%"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Fase 4 — Detección de anomalías (Modal → Vertex AI)</span><span>100%</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill fill-green" style="width:100%"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label"><span>Fase 5 — Endurecimiento y go-live</span><span>5%</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill fill-red" style="width:5%"></div></div>
-      </div>
+      <h3>Los 4 atributos que lo diferencian del mercado</h3>
+      <p>Verificados contra código e infraestructura real — no marketing. Ver <code>archivos/atributos.md</code> para el detalle comparativo contra el mercado tradicional.</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Atributo</th><th>Qué resuelve</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Inmutabilidad de logs (WORM)</strong></td>
+            <td>Evidencia de acceso que ningún administrador puede alterar ni borrar por 5 años — estándar probatorio ante un fiscal o auditor</td>
+            <td><span class="badge badge-green">Activo en producción</span></td>
+          </tr>
+          <tr>
+            <td><strong>Etiquetado legal (Ley 21.595 / MPD)</strong></td>
+            <td>Cada anomalía y cada bloqueo queda categorizado como "Control Preventivo MPD", en el idioma del Encargado de Prevención de Delitos, no solo del CISO</td>
+            <td><span class="badge badge-green">Activo en producción</span></td>
+          </tr>
+          <tr>
+            <td><strong>SLA de detección y respuesta</strong></td>
+            <td>Compromiso formal de ≤15 minutos entre un acceso anómalo real y la respuesta automática, documentado y firmable como anexo del MPD del cliente</td>
+            <td><span class="badge badge-green">Documento publicado</span></td>
+          </tr>
+          <tr>
+            <td><strong>IGA — gobierno de identidad</strong> <span class="badge badge-slate" style="margin-left:4px;">Módulo opcional</span></td>
+            <td>Reporte de quién tiene acceso a qué, y offboarding automatizado al sincronizar con el directorio del cliente (AD, Google Workspace)</td>
+            <td><span class="badge badge-cyan">Disponible como add-on — a medida por cliente</span></td>
+          </tr>
+          <tr>
+            <td><strong>Auth0 Organizations — multi-tenant real</strong> <span class="badge badge-slate" style="margin-left:4px;">Módulo opcional</span></td>
+            <td>Aislamiento completo por sucursal/tenant (perfiles de riesgo, roles y políticas propias por organización) — hoy validado a nivel de cuentas individuales (Sesión #11), no aún como Organizations nativas de Auth0</td>
+            <td><span class="badge badge-cyan">Disponible como add-on — a medida por cliente</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:#64748b;margin-top:10px;margin-bottom:0;">
+        Los módulos de IGA y Auth0 Organizations se dimensionan junto con cada cliente porque dependen de
+        su directorio y su estructura real de sucursales/tenants — igual que los módulos de gobierno de
+        identidad y multi-tenant que ofrecen los grandes IAM enterprise (Okta, SailPoint) como línea de
+        producto separada y cotizada aparte. No es una limitación oculta: son las dos piezas que no pueden
+        construirse en el vacío antes de tener un cliente concreto — se mencionan, y se implementan si el
+        cliente las requiere.
+      </p>
     </div>
 
     <div class="card">
@@ -495,9 +507,11 @@
     <div class="callout callout-info">
       <div class="callout-icon">ℹ️</div>
       <div>
-        <strong>Detección de anomalías cada 15 min:</strong> el job de Modal está programado con
-        <code>modal.Period(minutes=15)</code> — balance costo/latencia. Consulta el endpoint de Vertex AI
-        y marca como anómalo todo evento con <code>anomaly_score ≥ 0.8</code> (viaje imposible / fuera de turno).
+        <strong>Detección de anomalías, SLA ≤15 min:</strong> el job de Modal está programado con
+        <code>modal.Period(minutes=15)</code> — no es solo una decisión técnica, es el compromiso formal de
+        respuesta documentado en <a href="sla-respuesta.html" style="color:#1e40af;font-weight:600;">sla-respuesta.html</a>.
+        Consulta el endpoint de Vertex AI y marca como anómalo todo evento con
+        <code>anomaly_score ≥ 0.8</code> (viaje imposible / fuera de turno).
       </div>
     </div>
 
@@ -526,7 +540,7 @@
   <section class="page-section" id="arquitectura">
     <div class="section-header">
       <h2>Arquitectura técnica</h2>
-      <p>Stack, flujo de datos y decisiones de diseño.</p>
+      <p>Stack, flujo de datos y decisiones de diseño. Versión ampliada (4 capas: negocio, lógica/IA, infraestructura, onboarding) en <a href="arquitectura.html" style="color:#4f46e5;">arquitectura.html</a>.</p>
     </div>
 
     <div class="card">
@@ -550,8 +564,9 @@
       <p style="font-size:12.5px;color:#64748b;margin-top:16px;">
         Auth0 emite los <strong>Log Streams</strong> → la Lambda valida el <code>Bearer</code> secret,
         normaliza el evento y lo emite como JSON a CloudWatch → Datadog. El job de Modal consulta Vertex AI
-        y, ante un <code>anomaly_score ≥ 0.8</code>, debe cerrar el lazo sobre Auth0. <strong>Hoy ese lazo de
-        respuesta aún no está cerrado</strong> (ver Pendientes / deuda técnica).
+        y, ante un <code>anomaly_score ≥ 0.8</code>, cierra el lazo sobre Auth0 (re-MFA o bloqueo).
+        <strong>Verificado en producción el 25-jul-2026</strong>: bloqueo autónomo real, sin intervención
+        humana (ver Sesión #7 y Sesión #9).
       </p>
     </div>
 
@@ -780,6 +795,554 @@
     </div>
 
     <div class="timeline">
+
+      <!-- ── ENTRADA #14 ─────────────────────────────────────────── -->
+      <article class="entry" id="sesion-14">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-08-06</span>
+          <span class="badge badge-indigo">Sesión #14</span>
+          <span class="badge badge-emerald">SEO reforzado + PageSpeed 100/100/100/100 confirmado (Móvil y Ordenador)</span>
+        </div>
+
+        <div class="entry-title">Refuerzo de posicionamiento "en Chile" en la landing pública, y verificación completa de PageSpeed Insights tras el cambio</div>
+        <div class="entry-summary">
+          Como parte de una pasada de coherencia de SEO aplicada a todas las landings públicas del círculo de
+          productos Wayweb (mismo criterio ya aplicado a WD-SHIELD, LS-SHIELD y RESILIENCE-IA en esa misma
+          ronda), se reforzó el <code>&lt;title&gt;</code> y las meta descriptions
+          (<code>description</code>, <code>og:title</code>, <code>og:description</code>) de
+          <code>ley-20393.wayweb.cl/index.html</code> agregando "en Chile" — de "Guardia Digital: IAM que
+          Bloquea Accesos y Genera Evidencia Ley 20.393" a "... Ley 20.393 en Chile" — para reforzar el
+          posicionamiento ante búsquedas tipo "ley 20393 chile" / "prevención de delitos chile".
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block full">
+            <h4>Deploy — CloudPanel, no AWS (a diferencia de RESILIENCE-IA)</h4>
+            <p>
+              Landing estática servida vía CloudPanel (SSH usuario <code>mfadmin3</code>, IP
+              <code>34.193.108.197</code>, path <code>/home/mfadmin3/htdocs/ley-20393.wayweb.cl/</code>).
+              Backup del <code>index.html</code> anterior antes de sobrescribir, subida vía <code>scp</code>,
+              verificado en vivo con curl.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Resultado — PageSpeed Insights 100/100/100/100, ambas vistas</h4>
+            <p>
+              Corrida el mismo día (20:57): <strong>100 en Rendimiento, Accesibilidad, Prácticas
+              recomendadas y SEO — tanto en Móvil como en Ordenador</strong>, sin ningún hallazgo. El sitio ya
+              tenía además <code>schema.org SoftwareApplication</code> desde antes (mejor SEO técnico de base
+              que otras landings del círculo) — el refuerzo de título/description no introdujo ninguna
+              regresión.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Search Console</h4>
+            <p>
+              Propiedad <code>ley-20393.wayweb.cl</code> ya verificada de sesiones previas. Confirmado "La
+              URL está en Google" e indexación re-solicitada tras el cambio de contenido (título/description).
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos afectados · Sesión #14</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>index.html</code> (servidor, <code>ley-20393.wayweb.cl</code>)</td><td><span class="change-modified">MODIFICADO</span></td><td>Título y meta description (+ og:title/og:description) reforzados con "en Chile". Backup creado antes de sobrescribir.</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Esta entrada, header actualizado a Sesión #14</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #14 ─────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #13 ─────────────────────────────────────────── -->
+      <article class="entry" id="sesion-13">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-28</span>
+          <span class="badge badge-indigo">Sesión #13</span>
+          <span class="badge badge-emerald">_emitir_evento_noc() implementada — conexión al NOC Hub lista, sin activar</span>
+        </div>
+
+        <div class="entry-title">Guardia Digital ya emite el evento que el Cognitive NOC Hub espera — falta el endpoint real del otro lado</div>
+        <div class="entry-summary">
+          Siguiendo el contrato de evento diseñado ayer (<code>noc-esval/CONTRATO_EVENTO.md</code>, fuera de
+          este proyecto), se implementó <code>_emitir_evento_noc()</code> en
+          <code>anomaly_detector.py</code>: construye el JSON del contrato (sitio, tipo_evento, severidad,
+          dispositivo, origen_ot, mensaje, timestamp, producto_origen, metadata) y lo publica vía HTTP POST,
+          con el mismo criterio defensivo que ya usa <code>_ship_to_datadog()</code> — un fallo de esta
+          integración nunca debe tumbar el ciclo real de detección/enforcement sobre Auth0. Se llama justo
+          después de <code>_enforce_auth0_response()</code>, tanto en el ciclo programado real como en el
+          endpoint de demo. <strong>No se desplegó a Modal ni se activó</strong>: el NOC Hub todavía no
+          expone un endpoint HTTP real que reciba estos eventos (su Lambda se invoca hoy vía IoT
+          Core/OpenSearch Alerting, no vía POST directo) — el código queda listo y es un no-op seguro
+          mientras <code>NOC_HUB_API_ENDPOINT</code> no esté configurado.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>Resolución del campo "sitio" sin dato explícito</h4>
+            <p>
+              El ciclo real programado (logs de Datadog) no trae un campo <code>sucursal</code> — solo el
+              endpoint de demo (<code>simulate_attack</code>) lo recibe en el payload. Se resolvió con
+              <code>_resolver_sitio(user_id)</code>: invierte <code>DEMO_USERS_BY_SUCURSAL</code> (ya existente
+              desde la Sesión #11) para traducir cualquier <code>user_id</code> real de Auth0 a su nombre de
+              sucursal, sin necesitar un campo nuevo en el log de origen.
+            </p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Fidelidad al contrato — sin anomalía, sin evento</h4>
+            <p>
+              Si <code>anomaly_score</code> no alcanza <code>ANOMALY_THRESHOLD</code>, la función retorna sin
+              emitir nada — no tiene sentido correlacionar en el NOC Hub un evento que ni Guardia Digital
+              consideró anómalo. La severidad se deriva del mismo umbral que ya decide bloqueo vs. re-MFA
+              (<code>BLOCK_THRESHOLD</code> → <code>critical</code>, <code>ANOMALY_THRESHOLD</code> →
+              <code>high</code>), sin introducir una escala de riesgo paralela.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Por qué no se activó todavía</h4>
+            <p>
+              Agregar <code>modal.Secret.from_name("noc-hub-integration")</code> al decorador de
+              <code>detect_anomalies</code> habría sido el paso natural para que las variables de entorno
+              existan en el contenedor — pero Modal exige que un secret referenciado ya exista antes del
+              deploy, y ese secret no se ha creado. Crear un secret vacío solo para "activar" una integración
+              sin endpoint real del otro lado no aporta nada y agrega superficie a mantener sin beneficio —
+              se decidió dejar el código escrito y listo, sin tocar el decorador ni Modal, hasta que el NOC Hub
+              tenga una ruta HTTP real (o se decida cambiar el mecanismo de entrega a SNS/SQS).
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos afectados · Sesión #13</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>ia_models/anomaly_detector.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td><code>_emitir_evento_noc()</code> y <code>_resolver_sitio()</code> nuevas; llamada agregada justo después de <code>_enforce_auth0_response()</code>. No desplegado a Modal.</td></tr>
+                <tr><td><code>noc-esval/CONTRATO_EVENTO.md</code> (repo <code>proyectos-wayweb</code>, fuera de este proyecto)</td><td><span class="change-modified">MODIFICADO</span></td><td>Estado actualizado: implementado en Guardia Digital, sin activar — pendiente el endpoint real del NOC Hub.</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Esta entrada, header actualizado a Sesión #13</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #13 ─────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #12 ─────────────────────────────────────────── -->
+      <article class="entry" id="sesion-12">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-27</span>
+          <span class="badge badge-indigo">Sesión #12</span>
+          <span class="badge badge-amber">NOTA PENDIENTE — cerrar círculo de ciberseguridad (5 piezas)</span>
+        </div>
+
+        <div class="entry-title">SEO/GEO real (Search Console verificado), reordenamiento de landing según guion de venta, integración de Guardia Digital al catálogo padre wayweb.cl, y el hallazgo del día: el círculo de seguridad/cumplimiento de Wayweb tiene 5 piezas, no 4 — y hoy operan en paralelo, no conectadas entre sí</div>
+        <div class="entry-summary">
+          Sesión de cierre de flancos abiertos: se aplicó la reestructuración de
+          <code>index.html</code> siguiendo la lógica de embudo de <code>landing.txt</code>
+          (Problema → Solución → Prueba → Costo), se retiraron enlaces de nav redundantes, se
+          unificó el mensaje pre-cargado de los botones de WhatsApp, y — lo más importante para
+          SEO — se verificó por primera vez el dominio real en Google Search Console (sitemap
+          procesado, home indexada, <code>BreadcrumbList</code> validado como rich result). Se
+          construyó además un <code>login.html</code> nuevo (vitrina de compatibilidad de
+          identidad — Microsoft Entra ID / Google Workspace / Auth0 / SAML — con acceso real
+          protegido por hash SHA-256 + bloqueo tras 3 intentos) delante del selector
+          multi-sucursal. Al integrar Guardia Digital como tarjeta 3 del catálogo de
+          <code>wayweb.cl/productos-ia/</code> (el sitio WordPress "padre" de todo el
+          portafolio), surgió la pregunta que abre el verdadero pendiente de esta sesión: ¿qué
+          más falta para cerrar el círculo completo de seguridad/cumplimiento del portafolio?
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block full">
+            <h4>⚠️ NOTA PENDIENTE — Cerrar el círculo de ciberseguridad y cumplimiento (5 piezas)</h4>
+            <p style="font-size:13px;color:#475569;">
+              Revisando el catálogo completo de Wayweb (<code>wayweb.cl/productos-ia/</code>), se
+              identificó que 4 productos ya cubren, en teoría, el ciclo completo de un programa de
+              seguridad/cumplimiento maduro — pero hoy <strong>operan en paralelo, sin cruzar
+              caminos entre sí</strong>: ningún producto le pasa datos ni eventos a otro.
+            </p>
+            <table class="files-table">
+              <thead><tr><th>Etapa</th><th>Producto</th><th>Pregunta que responde</th><th>Estado real verificado</th></tr></thead>
+              <tbody>
+                <tr><td>1. Exposición</td><td><code>SCAN-SIGHT I.A.</code></td><td>¿Qué tengo expuesto hacia afuera? (EASM)</td><td>Operativo, con embudo comercial activo (Informe Simple $35.000)</td></tr>
+                <tr><td>2. Acceso</td><td><code>GUARDIA DIGITAL I.A.</code></td><td>¿Quién entra y qué hace? (IAM Zero-Trust)</td><td><strong>100% real</strong>, bloqueo autónomo verificado en producción — este mismo proyecto</td></tr>
+                <tr><td>3. Dato</td><td><code>DATA-SHIELD I.A.</code></td><td>¿Qué datos personales toco y estoy en regla? (Ley 21.719)</td><td>Demo frontend completa y desplegada en <code>esval.wayweb.cl</code> (dashboard real, score de cumplimiento, RAT/DPIA) — pero las integraciones cloud (Vertex AI, Cloud DLP, Macie, Cognito, CloudTrail) son <strong>mocks declarados en su propio README</strong>, no conectadas todavía. Existe además un backend paralelo (<code>arcsop-core</code>) con piezas reales (Postgres, inmutabilidad a nivel de BD, encadenamiento de hashes verificado) sin conectar a este frontend</td></tr>
+                <tr><td>4. Respuesta</td><td><code>RESILIENCE I.A.</code></td><td>Si algo falla igual, ¿mi equipo sabe reaccionar? (tabletop exercises)</td><td>Build Next.js <strong>real y completo</strong> (login, dashboard, facilitador, ejercicios por centro — Aysén, Reloncaví) ya exportado, pero <strong>no publicado</strong>: <code>ventisqueros.wayweb.cl</code> sigue mostrando una landing de propuesta comercial simple que lo tapa</td></tr>
+                <tr><td>5. Correlación (candidata nueva)</td><td><code>Cognitive NOC Hub</code></td><td>Cuando varias piezas disparan alertas a la vez, ¿quién decide qué es causa raíz y qué es daño colateral?</td><td>Proyecto real (<code>noc-esval</code>): Terraform + Lambda <code>lambda_ai_triage.py</code> que agrupa alertas, las triagea con Gemini Pro 1.5, crea ticket y notifica por SNS — pero hecho a medida para Esval/Aguas del Valle (contexto OT/SCADA, IPs de cliente como placeholders), no genérico todavía</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:#64748b;margin-top:10px;">
+              Diagnóstico honesto: <strong>2 de 5 piezas sólidas</strong> (SCAN-SIGHT, GUARDIA
+              DIGITAL), <strong>3 de 5 a medio camino</strong> (DATA-SHIELD con integraciones
+              mock, RESILIENCE sin publicar, NOC Hub sin generalizar). El Cognitive NOC Hub no es
+              una redundancia — es la pieza que técnicamente resuelve el problema de que las otras
+              4 no se hablan entre sí (su función <code>_agrupar_alertas()</code> ya normaliza
+              campos genéricos de fuente/severidad/dispositivo, el mismo patrón que necesitarían
+              los otros 4 productos para alimentar un correlacionador común). Documentado en
+              detalle, con plan de generalización de 3 pasos, en
+              <code>Estrategia_Ventas_Wayweb.md</code> (secciones 7 y 8, repo <code>ia-agents</code>
+              — fuera de este proyecto). <strong>Nada de esto se ha construido ni publicado</strong>
+              — es una nota de arquitectura para retomar, no una decisión de producto tomada.
+            </p>
+          </div>
+
+          <div class="entry-block">
+            <h4>SEO/GEO real: Search Console verificado</h4>
+            <p style="font-size:13px;color:#475569;">
+              Se creó <code>sitemap.xml</code>/<code>robots.txt</code>, se amplió el JSON-LD
+              (<code>Organization</code> + <code>ItemList</code> de la tabla comparativa) y se
+              creó <code>llms.txt</code>. La propiedad <code>wayweb.cl</code> existente en Search
+              Console resultó ser tipo "Prefijo de URL" (no "Dominio"), por lo que no cubría el
+              subdominio — se verificó <code>ley-20393.wayweb.cl</code> como propiedad nueva vía
+              archivo HTML, se envió el sitemap y se confirmó indexación real de la home
+              (<code>BreadcrumbList</code> validado como 1 elemento válido para rich results).
+            </p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Reestructuración de index.html según guion de venta</h4>
+            <p style="font-size:13px;color:#475569;">
+              Siguiendo <code>landing.txt</code>: orden final Hero → Ley 20.393 (dolor) → Pilares
+              (antídoto) → Diferenciadores (prueba, con "Días, no meses" reemplazado por "Cero
+              infraestructura que mantener" para no repetir el argumento de velocidad) →
+              Comparativa (cierre racional de costo) → CTA. Franja de Ley 20.393 con fondo
+              full-bleed distinto para separación visual. Se retiraron los enlaces de nav
+              "Producto"/"Ley 20.393"/"Comparativa" (redundantes con el scroll natural de la
+              página) y se unificó el mensaje pre-cargado de los 4 botones de WhatsApp.
+            </p>
+          </div>
+
+          <div class="entry-block">
+            <h4>login.html — vitrina de compatibilidad + acceso real protegido</h4>
+            <p style="font-size:13px;color:#475569;">
+              Página nueva antes del selector multi-sucursal: 4 botones decorativos e inertes
+              (Microsoft Entra ID, Google Workspace, Auth0/usuario-clave, SAML corporativo) que
+              comunican compatibilidad sin ser funcionales, y un formulario de acceso real
+              separado que valida <code>usuario:clave</code> contra un hash SHA-256 (la clave
+              nunca quedó en texto plano en la conversación — el usuario la generó localmente vía
+              PowerShell y solo compartió el hash resultante) con bloqueo persistente en
+              <code>localStorage</code> tras 3 intentos fallidos, sin mensajes de error que den
+              pistas.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Integración al catálogo padre wayweb.cl (WordPress)</h4>
+            <p style="font-size:13px;color:#475569;">
+              Guardia Digital se agregó como tarjeta 3 de 8 en <code>wayweb.cl/productos-ia/</code>
+              y en la home (<code>wayweb-home.html</code>) — ambos archivos viven como
+              <code>mu-plugins/*.html</code> servidos directo por WordPress, no como contenido de
+              post/Elementor (se descartó esa hipótesis tras revisar <code>_elementor_data</code>
+              del post ID 18412, que resultó ser una sección narrativa distinta de la grid real).
+              Se corrigió además que la copia local del repo <code>ia-agents</code> estaba
+              desactualizada frente al servidor (le faltaba el menú hamburguesa móvil) — se
+              resincronizó antes de editar, para no pisar trabajo posterior. Orden final acordado:
+              SCAN-SIGHT, RESILIENCE, <strong>GUARDIA DIGITAL</strong>, DATA-SHIELD, GESGOB,
+              AVATAR, ECCOFLUSSO, A1CLIC.CL — los 8 nombres en mayúsculas por pedido explícito del
+              usuario. Backups con sufijo de fecha antes de cada subida, siguiendo la convención ya
+              existente en el servidor.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos afectados · Sesión #12</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>index.html</code>, <code>sitemap.xml</code>, <code>robots.txt</code>, <code>llms.txt</code> (ley-20393.wayweb.cl)</td><td><span class="change-modified">MODIFICADO/NUEVO</span></td><td>Reestructuración de secciones, SEO/GEO, indexación real en Search Console</td></tr>
+                <tr><td><code>login.html</code> (ley-20393.wayweb.cl)</td><td><span class="change-modified">NUEVO</span></td><td>Vitrina de proveedores de identidad + acceso real con hash SHA-256 y bloqueo tras 3 intentos</td></tr>
+                <tr><td><code>selector.html</code> (ley-20393.wayweb.cl)</td><td><span class="change-modified">MODIFICADO</span></td><td>Link "Volver al inicio" agregado</td></tr>
+                <tr><td><code>wp-content/mu-plugins/productos.html</code>, <code>wayweb-home.html</code> (wayweb.cl)</td><td><span class="change-modified">MODIFICADO</span></td><td>Tarjeta Guardia Digital agregada (posición 3/8), reordenamiento y nombres en mayúsculas, enlaces de nav corregidos a <code>/productos-ia/</code></td></tr>
+                <tr><td><code>Estrategia_Ventas_Wayweb.md</code> (repo <code>ia-agents</code>, fuera de este proyecto)</td><td><span class="change-modified">MODIFICADO</span></td><td>Secciones 7 (bundle "Seguridad y Cumplimiento 360°") y 8 (Cognitive NOC Hub como correlacionador candidato)</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Esta entrada, header actualizado a Sesión #12</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #12 ─────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #11 ─────────────────────────────────────────── -->
+      <article class="entry" id="sesion-11">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-26</span>
+          <span class="badge badge-indigo">Sesión #11</span>
+          <span class="badge badge-emerald">Demo interactiva real: simulación de ataque, reset, roles, tema, y aislamiento multi-sucursal verificado</span>
+        </div>
+
+        <div class="entry-title">De páginas estáticas a un demo que ejecuta el sistema real — con una prueba de aislamiento entre sucursales verificada contra Auth0</div>
+        <div class="entry-summary">
+          El usuario marcó un punto de inflexión: "las páginas estáticas deben llevar al demo final,
+          pero sin generar costos altos". Se construyó un endpoint HTTP nuevo en Modal
+          (<code>simulate_attack</code>) que dispara el motor real bajo demanda — Vertex AI real,
+          enforcement real sobre Auth0 — en vez de esperar el ciclo de 15 min o generar el evento
+          manualmente por SSH. Se agregó un endpoint simétrico (<code>reset_demo_account</code>) para
+          no depender de SSH entre demos. Sobre esa base se construyó, en una cuenta regresiva de 4
+          puntos pedida por el usuario, el resto de la interactividad real: tabla de evidencia
+          acumulativa con latencia medida en el navegador, toggle de tema claro/oscuro, y un toggle de
+          3 roles (Admin/Usuario/Auditor) que cambia la vista en vivo sin recargar. Cerró con una
+          demostración real de aislamiento multi-sucursal, verificada contra la API de Auth0, no solo
+          contra la respuesta del endpoint.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>Endpoint simulate_attack / reset_demo_account (Modal)</h4>
+            <p style="font-size:13px;color:#475569;">
+              Nuevos endpoints HTTP (<code>@modal.fastapi_endpoint</code>) sobre la misma app de Modal
+              ya desplegada — sin <code>schedule</code>, cero costo mientras nadie hace clic. Rate-limit
+              real con contador persistente (<code>modal.Dict</code>): 5 simulaciones y 10 reinicios por
+              ventana de 24h, para acotar el peor caso si el secreto embebido en el HTML público es
+              descubierto. <strong>Bug real encontrado y corregido</strong>: el código original reportaba
+              "bloqueado" solo por el score, sin verificar si el PATCH a Auth0 tuvo éxito —
+              <code>_enforce_auth0_response()</code> ahora retorna <code>{success, action, error}</code>
+              y el endpoint usa ese resultado real, no una suposición.
+            </p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Verificación de costo real con soporte de GCP</h4>
+            <p style="font-size:13px;color:#475569;">
+              El usuario preguntó si los créditos de GCP ("Trial credit for GenAI App Builder",
+              "Marketing - AI Agents Challenge") cubrían las llamadas a Vertex AI Online Prediction.
+              Confirmado por soporte de GCP: <strong>no las cubren</strong> — esos créditos están
+              restringidos a Vertex AI Search/Conversation (RAG), un producto distinto. Confirmado con
+              <code>gcloud ai endpoints describe</code> que el endpoint sigue en
+              <code>min_replica_count=0</code> (escala a cero). Costo real aceptado como marginal:
+              centavos de dólar por clic, acotado por el rate-limit ya construido.
+            </p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Tabla de evidencia acumulativa + tema + roles</h4>
+            <p style="font-size:13px;color:#475569;">
+              Cada simulación agrega una fila nueva a la tabla de evidencia (no reemplaza la anterior),
+              marcada "EN VIVO", con la latencia medida realmente en el navegador
+              (<code>performance.now()</code>), no un número inventado. Toggle de tema claro/oscuro con
+              paleta propia (no un invertido genérico), persistida en <code>localStorage</code>. Toggle
+              de 3 roles (Admin de Seguridad / Usuario final / Auditor de Compliance) que cambia la
+              vista en vivo — el rol Auditor es nuevo: ve evidencia técnica y compliance, pero no el
+              guion de venta ni los botones de simulación.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Prueba real de aislamiento multi-sucursal</h4>
+            <p style="font-size:13px;color:#475569;">
+              El usuario preguntó explícitamente: si varias sucursales reciben ataques en paralelo,
+              ¿las respuestas/bloqueos se cruzan entre ellas? Diagnóstico honesto: con una sola cuenta
+              de prueba (<code>DEMO_USER_ID</code>), la respuesta era "no hay nada que demostrar, porque
+              no hay aislamiento real todavía". El usuario pidió construirlo. Se amplió el scope de la
+              Application M2M de Auth0 (agregado <code>create:users</code> junto a los ya existentes
+              <code>read:users</code>/<code>update:users</code>, vía la consola de Auth0, guiado paso a
+              paso) y se crearon <strong>2 cuentas Auth0 reales nuevas</strong>: Valparaíso
+              (<code>auth0|6a66818a8f2f8a096272ebe1</code>) y Contratistas remotos
+              (<code>auth0|6a66819637ffd32c55db0b19</code>), sumadas a la Casa Matriz ya existente. El
+              endpoint ahora recibe <code>sucursal</code> y opera sobre el <code>user_id</code> exacto
+              de esa sucursal (<code>DEMO_USERS_BY_SUCURSAL</code>).
+            </p>
+            <p style="font-size:12px;color:#64748b;">
+              <strong>Prueba ejecutada y verificada contra la API real de Auth0</strong> (no solo la
+              respuesta del endpoint): se disparó un ataque real contra Valparaíso
+              (<code>viaje_imposible</code>, score 1.0) y se confirmó el estado de las 3 cuentas antes y
+              después. Resultado: Valparaíso quedó <code>blocked: true</code>; Casa Matriz y
+              Contratistas permanecieron <code>blocked: false</code>/<code>null</code>, sin cambios. El
+              primer intento falló por timeout de Modal (cold-start de Vertex AI más largo de lo
+              normal) — reintentado con éxito. <code>demo.html</code> ganó un selector de sucursal junto
+              a los botones de ataque para que el presentador elija el objetivo en vivo. Aclaración
+              honesta registrada: esto es aislamiento real a nivel de cuentas de usuario individuales,
+              no todavía aislamiento por Auth0 Organizations/tenant completo (perfiles de riesgo o
+              roles distintos por sucursal) — eso sigue siendo trabajo de diseño mayor, del mismo
+              calibre que el punto pendiente de IGA.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos creados / modificados</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>ia_models/anomaly_detector.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Endpoints <code>simulate_attack</code> y <code>reset_demo_account</code> (con rate-limit y verificación real de éxito), <code>DEMO_USERS_BY_SUCURSAL</code> para aislamiento multi-cuenta</td></tr>
+                <tr><td>Auth0 tenant (consola)</td><td><span class="change-modified">MODIFICADO</span></td><td>Scope <code>create:users</code> agregado a la M2M; 2 usuarios de prueba reales creados (Valparaíso, Contratistas)</td></tr>
+                <tr><td><code>demo.html</code> (Artifact, fuera del repo)</td><td><span class="change-modified">MODIFICADO</span></td><td>Guion de demo de 4 actos, botones de simulación/reset reales, tabla de evidencia acumulativa, toggle de tema, toggle de 3 roles, selector de sucursal — todo conectado al backend real</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Esta entrada, header actualizado a Sesión #11</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #11 ─────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #10 ─────────────────────────────────────────── -->
+      <article class="entry" id="sesion-10">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-26</span>
+          <span class="badge badge-indigo">Sesión #10</span>
+          <span class="badge badge-emerald">Auditoría de atributos diferenciadores + WORM aplicado en AWS + etiquetado MPD + SLA formal</span>
+        </div>
+
+        <div class="entry-title">De 4 atributos legales exigidos (archivos/atributos.md) a un veredicto honesto, y cierre real de 3 de 4</div>
+        <div class="entry-summary">
+          Se auditó el proyecto contra 4 requisitos de <code>archivos/atributos.md</code> pensados para
+          diferenciar Guardia Digital de un SaaS de compliance tradicional: (1) inmutabilidad de logs (WORM),
+          (2) mapeo a Ley 21.595 / etiquetado "Control Preventivo MPD", (3) IGA con offboarding automatizado,
+          (4) SLA de detección/respuesta documentado. Veredicto verificado contra código real (no contra
+          marketing): 3 de 4 <strong>no estaban implementados</strong>. Se decidió no tocar
+          <code>archivos/costos.html</code> hasta que la implementación avance de verdad (evitar vender algo
+          que no existe). En el transcurso de la sesión se cerraron los puntos 1, 2 y 4 —el 1 primero como
+          Terraform sin aplicar, y luego <strong>aplicado de verdad en la cuenta AWS real</strong> tras
+          confirmar con el usuario que el costo de retención no depende de los años configurados (es por
+          volumen de datos, centavos/mes), sino que estaba usando este proyecto como prueba real antes de
+          una campaña de captación de clientes.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>Punto 1 — WORM (Terraform, aplicado en AWS real)</h4>
+            <p style="font-size:13px;color:#475569;">
+              Nuevo <code>infra/worm_archive.tf</code>: bucket S3 con <code>object_lock_enabled = true</code> y
+              retención en modo <strong>COMPLIANCE</strong> (5 años) — ni el root de la cuenta AWS puede
+              borrar/modificar un objeto antes del plazo. CloudWatch Logs no puede escribir a S3 directo, así
+              que se agregó un Kinesis Data Firehose intermedio (sin Lambda propia que mantener) como segunda
+              ruta en paralelo a la que ya va a Datadog, sin tocarla.
+            </p>
+            <p style="font-size:12px;color:#64748b;">
+              Validado con <code>terraform validate</code> (OK) y <code>terraform plan -target=...</code>
+              acotado solo a los recursos nuevos (aislado con <code>-target</code> porque el plan sin acotar
+              arrastraba un <em>replace</em> del subscription filter de Datadog por drift preexistente no
+              relacionado — API key desincronizada en el stack de CloudFormation del Forwarder, ajeno a este
+              cambio). <strong>Aplicado en dos pasos</strong>: el primer <code>apply</code> creó 8/11 recursos
+              y falló en el Firehose (<code>InvalidArgumentException: error_output_prefix</code> requerido
+              cuando el <code>prefix</code> usa expresiones de timestamp dinámicas); corregido y reaplicado sin
+              tocar los 8 ya creados. <strong>Verificado contra la API real de AWS</strong> (no solo el state
+              de Terraform): <code>aws s3api get-object-lock-configuration</code> confirma
+              <code>ObjectLockEnabled: Enabled</code>, modo <code>COMPLIANCE</code>, 5 años; los dos
+              subscription filters (Datadog + WORM) corren en paralelo sobre el mismo log group.
+            </p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Punto 4 — SLA de respuesta (documento formal)</h4>
+            <p style="font-size:13px;color:#475569;">
+              Nuevo <code>archivos/sla-respuesta.html</code>: declara formalmente el intervalo de
+              <code>modal.Period(minutes=15)</code> como SLA de detección y respuesta ante Ley 20.393 — antes
+              solo existía como comentario de código ("balance costo/latencia"), nunca como compromiso de
+              servicio verificable para un EPD o auditor. Incluye el desglose de las 3 capas de tiempo
+              (MFA instantáneo, ciclo batch ≤15 min, ejecución 1–2s), la evidencia real que lo sustenta
+              (Sesión #6 campaña de validación, Sesión #7 bloqueo autónomo real) y un bloque de firma para
+              incorporarlo al MPD del cliente.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos creados / modificados</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>infra/worm_archive.tf</code></td><td><span class="change-created">CREADO</span></td><td>Bucket S3 Object Lock (COMPLIANCE) + Firehose + IAM roles — archivo inmutable de logs de acceso, en paralelo al pipeline de Datadog existente</td></tr>
+                <tr><td><code>infra/variables.tf</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Nueva variable <code>worm_retention_years</code> (default 5)</td></tr>
+                <tr><td><code>infra/outputs.tf</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Nuevos outputs <code>worm_archive_bucket</code>, <code>worm_retention_years</code></td></tr>
+                <tr><td><code>archivos/sla-respuesta.html</code></td><td><span class="change-created">CREADO</span></td><td>Documento formal de SLA de detección/respuesta (15 min), con evidencia técnica y bloque de firma para el MPD del cliente</td></tr>
+                <tr><td><code>ia_models/anomaly_detector.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td><code>_ship_to_datadog()</code> etiqueta cada evento relevante con <code>mpd_control_category</code> y <code>legal_basis</code> (Ley 20.393 + Ley 21.595) según su <code>event_type</code></td></tr>
+                <tr><td><code>monitoring/build_dashboard.py</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Nuevo widget "Eventos por Control Preventivo MPD" en el grupo de Auditoría — <strong>aplicado en producción</strong> (mismo dashboard <code>bu4-tb7-8tt</code>, sin duplicar)</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Tabla de estado real de los 4 atributos diferenciadores, fila de retención de logs actualizada, link a <code>sla-respuesta.html</code>, esta entrada, header a Sesión #10</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:#64748b;margin-top:8px;">
+              <strong>Punto 2 (etiquetado legal) implementado esta misma sesión</strong>, tras confirmar que
+              no toca infraestructura ni genera costo. El widget quedará vacío hasta el próximo ciclo real
+              del job de Modal (los eventos con <code>mpd_control_category</code> recién empiezan a generarse
+              desde este cambio). Pendiente explícito, no atacado (decisión del usuario: "modificaremos
+              costos.html según el avance"): <strong>punto 3</strong> (IGA/offboarding) — el más caro, requiere
+              integración real con el directorio de un cliente, no se puede construir en el vacío.
+            </p>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #10 ─────────────────────────────────────── -->
+
+      <!-- ── ENTRADA #9 ──────────────────────────────────────────── -->
+      <article class="entry" id="sesion-9">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-07-25</span>
+          <span class="badge badge-indigo">Sesión #9</span>
+          <span class="badge badge-cyan">Landing comercial + página de arquitectura técnica</span>
+        </div>
+
+        <div class="entry-title">Capa de presentación: landing de demo, dashboard mixto y arquitectura estilo portafolio Wayweb</div>
+        <div class="entry-summary">
+          Con el sistema ya validado en TRL 5 (Sesión #7) y el dashboard operacional listo (Sesión #8),
+          esta sesión se enfocó en la capa de presentación para demos y ventas: una landing comercial
+          (estilo <code>resilienceai.wayweb.cl</code>), un dashboard mixto técnico/comercial (estilo
+          <code>esval.wayweb.cl</code> / DataShield AI), y una página de arquitectura de 4 capas (estilo
+          <code>ventisqueros.wayweb.cl/archivos/arquitectura.html</code>). Todo construido como Claude
+          Artifacts + un archivo nuevo en el repo, pendientes de publicar en un subdominio propio vía
+          CloudPanel.
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block">
+            <h4>Landing comercial (Artifact)</h4>
+            <p style="font-size:13px;color:#475569;">
+              Hero con el diferenciador real (bloqueo autónomo del 25-jul-2026), sección de Ley 20.393
+              en lenguaje llano (con fuentes citadas), y una tabla comparativa contra Okta/Entra ID/SailPoint
+              con precios de mercado reales (jul-2026). Corregido tras feedback: sin mencionar otros
+              productos Wayweb (SCAN-SIGHT), sin datos de costo interno de Wayweb, paleta ajustada
+              (azul-marino suavizado + acento dorado, tipografía sans en vez de serif tipo Times).
+            </p>
+          </div>
+
+          <div class="entry-block">
+            <h4>Dashboard mixto (Artifact, ya existente)</h4>
+            <p style="font-size:13px;color:#475569;">
+              Corregido en línea con la landing: se removió la misma mención cruzada a SCAN-SIGHT y se
+              reemplazó por un diferenciador propio ("responde sola, sin turnos de guardia").
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos creados / modificados</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>archivos/arquitectura.html</code></td><td><span class="change-created">CREADO</span></td><td>Página standalone de arquitectura en 4 capas (negocio/experiencia, lógica-IA, infraestructura, onboarding), con matriz de visibilidad por rol y stack real con ejemplos concretos</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Corregida frase desactualizada en <code>#arquitectura</code> ("lazo aún no cerrado" → verificado en producción); agregado link a <code>arquitectura.html</code>; agregada esta entrada</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:12px;color:#64748b;margin-top:8px;">
+              Landing y dashboard mixto viven fuera del repo como Claude Artifacts (no versionados en
+              git). Pendiente para la próxima sesión: crear subdominio propio (ej. <code>guardia.wayweb.cl</code>)
+              y publicar los tres —landing, dashboard, arquitectura— como sitio estático real en CloudPanel,
+              ajustando ahí el SEO (canonical, JSON-LD) que hoy apunta a un dominio placeholder.
+            </p>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #9 ──────────────────────────────────────── -->
 
       <!-- ── ENTRADA #8 ──────────────────────────────────────────── -->
       <article class="entry" id="sesion-8">
@@ -1602,10 +2165,58 @@
           <tr><td>Validación de webhook</td><td>Hoy Bearer estático; objetivo: firma HMAC + rotación de secret</td><td><span class="badge badge-amber">A endurecer</span></td></tr>
           <tr><td>Least-privilege IAM</td><td>Rol de ejecución de Lambda acotado; auditar permisos antes de prod</td><td><span class="badge badge-amber">Pendiente</span></td></tr>
           <tr><td>Trazabilidad de decisiones</td><td>Cada decisión MFA queda en <code>app_metadata</code> + logs → Datadog</td><td><span class="badge badge-green">Diseñado</span></td></tr>
-          <tr><td>Retención de logs</td><td>TTL y retención definidos para evidencia de auditoría</td><td><span class="badge badge-amber">Pendiente</span></td></tr>
+          <tr><td>Retención de logs (WORM)</td><td>S3 Object Lock modo COMPLIANCE, 5 años — inmutable ni para el root de la cuenta</td><td><span class="badge badge-green">Terraform listo (Sesión #10)</span></td></tr>
           <tr><td>Residencia de datos (Chile)</td><td>Evaluar región sa-east-1 y marco legal de datos personales</td><td><span class="badge badge-amber">Pendiente</span></td></tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="card">
+      <h3>Atributos diferenciadores vs. mercado tradicional (ver <code>archivos/atributos.md</code>)</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>#</th><th>Atributo</th><th>Estado real</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Inmutabilidad de logs (estándar probatorio, WORM)</td>
+            <td><span class="badge badge-green">Aplicado en AWS real (Sesión #10)</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Mapeo a Ley 21.595 / etiquetado "Control Preventivo MPD"</td>
+            <td><span class="badge badge-green">Implementado y aplicado en producción (Sesión #10)</span></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>IGA — reporte de accesos + offboarding automatizado</td>
+            <td><span class="badge badge-cyan">Módulo opcional — no construido, se dimensiona por cliente</span></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>SLA de detección y respuesta (15 min) documentado formalmente</td>
+            <td><span class="badge badge-green">Documento publicado (Sesión #10)</span></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Auth0 Organizations — aislamiento multi-tenant nativo por sucursal/cliente</td>
+            <td><span class="badge badge-cyan">Módulo opcional — no construido, se dimensiona por cliente</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:#64748b;margin-top:10px;margin-bottom:0;">
+        Ver <a href="sla-respuesta.html" style="color:#4f46e5;">sla-respuesta.html</a> para el documento formal
+        del punto 4. El punto 1 (<code>infra/worm_archive.tf</code>) fue <strong>aplicado en la cuenta real de
+        AWS</strong> (11/11 recursos, sin tocar el pipeline existente hacia Datadog) y verificado directamente
+        contra la API de AWS, no solo contra el state de Terraform: el bucket
+        <code>guardia-digital-worm-archive-staging</code> confirma <code>ObjectLockEnabled: Enabled</code>,
+        modo <code>COMPLIANCE</code>, 5 años. Los dos filtros de suscripción (Datadog + Firehose/WORM) corren
+        en paralelo sobre el mismo log group de producción. Bug real encontrado y corregido en el proceso:
+        el primer <code>apply</code> falló en el Firehose por falta de <code>error_output_prefix</code> cuando
+        el <code>prefix</code> usa expresiones dinámicas de timestamp — corregido y reaplicado sin reintentar
+        los 8 recursos ya creados.
+      </p>
     </div>
 
     <div class="callout callout-info">

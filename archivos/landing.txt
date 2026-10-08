@@ -1,0 +1,44 @@
+Actualmente, el flujo de tu landing page compite consigo mismo. Tienes los diferenciadores técnicos mezclados con la educación legal y luego rematas con la competencia.
+
+Para que la página actúe como un embudo de ventas implacable, debemos reordenar las piezas siguiendo la lógica psicológica del comprador corporativo: Problema → Solución → Prueba → Justificación de Costo.
+
+Aquí tienes la reestructuración exacta bloque por bloque:
+
+1. El Hook (Mantener arriba)
+Lo que va: La sección Hero (image_f6273c.jpg) con el título "Detenga el acceso indebido...", el simulador de terminal y los KPIs rápidos (TRL 5, 100%, Ley 20.393).
+Por qué funciona: Es tu tarjeta de presentación. Establece de inmediato que esto es tecnología activa, no un gestor documental. El simulador de la derecha captura el ojo técnico al instante.
+
+2. El Dolor (Subir la urgencia legal)
+Lo que va: La sección "¿Qué es la Ley 20.393 y por qué le importa a su gerencia?" con sus 3 tarjetas (image_f626fd.jpg - parte inferior).
+Por qué funciona aquí: Antes de venderles tus características (WORM, SLA), el gerente necesita sentir el riesgo. Al poner el problema legal justo debajo del Hero, justificas por qué deben seguir leyendo.
+
+Recomendación de diseño: Usa un color de fondo ligeramente distinto (un azul un tono más claro o más oscuro) para esta franja horizontal, creando una separación visual clara.
+
+3. El Antídoto (Tus 4 Pilares)
+Lo que va: La sección "Por qué las gerencias de TI y Cumplimiento lo integran" (Las 4 tarjetas: Traducción, Respaldo WORM, SLA, Despliegue - image_f626fd.jpg parte superior).
+Por qué funciona aquí: Ahora que tocaste el "dolor" de la Ley 20.393, presentas tu "medicina". Aquí es donde brillan los diferenciadores que estructuramos. Le estás diciendo al cliente: "No te preocupes por el problema de arriba, lo resolvemos así".
+
+4. La Prueba Ácida (Consolidar y limpiar)
+Lo que va: La sección "Lo que ningún otro IAM del mercado chileno puede decir" (image_f623d5.jpg - parte inferior).
+Atención a la redundancia: En las imágenes, tienes el argumento de la velocidad repetido. En la sección de los 4 pilares dice "Despliegue en días", y en esta sección de 3 tarjetas dice "Días, no meses".
+
+Solución: Elimina la tarjeta "Días, no meses" de esta sección inferior. Reemplázala con una tarjeta sobre la "Evidencia Lista para Auditoría" o aprovecha para destacar la arquitectura 100% Serverless (Zero Infraestructura) para no desperdiciar espacio visual valioso.
+
+Mantén las tarjetas de "No es una demo" y "Responde sola". Con el efecto Glassmorphism y el hover que revela el dato técnico, esta sección matará cualquier objeción del equipo TI.
+
+5. El Cierre Racional (La Tabla Comparativa)
+Lo que va: La sección "Cómo se compara con el resto del mercado" (La tabla de Okta, Entra ID, SailPoint vs Guardia Digital - image_f623d5.jpg parte superior).
+Por qué funciona al final: El Gerente General o el de Finanzas ya entendió el valor técnico y legal. Ahora necesita justificar el presupuesto. Ver que la alternativa Enterprise cuesta hasta USD 17 por usuario o toma 12 meses de implementación, frente a tus precios cerrados en CLP y validación en días, hace que el clic en el botón de "Ver demo" sea la única decisión lógica.
+
+Resumen del nuevo flujo visual:
+¿Qué hacemos? (Hero + Terminal)
+
+¿Por qué te urge? (Ley 20.393 + Responsabilidad Penal)
+
+¿Cómo te protegemos? (WORM, SLA, Traducción Legal)
+
+¿Por qué somos mejores? (Autonomía total, no mockups)
+
+¿Cuánto te ahorras? (Tabla comparativa IAM Enterprise vs Mid-Market)
+
+Al hacer este simple cambio de orden, transformas la página de un folleto informativo a un caso de negocio estructurado.

@@ -196,15 +196,18 @@ dashboard = {
             log_stream("Errores recientes (detalle)", f"service:{IA_SVC} @event_type:error",
                        ["timestamp", "@error", "@detail"]),
         ]),
-        group("5. Auditoría y compliance (Ley 20.393)", [
+        group("5. Auditoría y compliance (Ley 20.393 / Ley 21.595)", [
             note(
                 "**Trazabilidad de auditoría** — cada decisión de acceso (login, MFA, "
                 "bloqueo) queda registrada con usuario, fecha/hora, geolocalización y "
                 "resultado. Retención actual: según plan de Datadog contratado por la "
                 "organización (confirmar período exacto con el account manager antes "
-                "de certificar ante un auditor externo).",
+                "de certificar ante un auditor externo). Archivo inmutable (WORM, S3 "
+                "Object Lock) disponible en `infra/worm_archive.tf`.",
                 background_color="yellow",
             ),
+            toplist("Eventos por Control Preventivo MPD", f"service:{IA_SVC} @mpd_control_category:*",
+                    "@mpd_control_category"),
             log_stream("Trazabilidad de accesos (auditoría)", f"service:{LOGIN_SVC} @type:(s OR f OR fp OR limit_mu)",
                        ["timestamp", "@user_id", "@type", "@geo.country_code", "@connection", "@tenant"]),
         ]),

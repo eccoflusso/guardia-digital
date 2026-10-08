@@ -43,7 +43,7 @@
                 "live_span": "1d"
               }
             },
-            "id": 1134786666489711
+            "id": 4725103071242831
           },
           {
             "definition": {
@@ -74,7 +74,7 @@
                 "live_span": "1d"
               }
             },
-            "id": 8290958767370723
+            "id": 8471522476690736
           },
           {
             "definition": {
@@ -105,7 +105,7 @@
                 "live_span": "1d"
               }
             },
-            "id": 851906646833657
+            "id": 1143116188892736
           },
           {
             "definition": {
@@ -136,7 +136,7 @@
                 "live_span": "1d"
               }
             },
-            "id": 609104951463163
+            "id": 6244589901159379
           },
           {
             "definition": {
@@ -177,11 +177,11 @@
                 }
               ]
             },
-            "id": 5200783868848646
+            "id": 242236242719928
           }
         ]
       },
-      "id": 3068887832942932
+      "id": 8058843621163790
     },
     {
       "definition": {
@@ -226,7 +226,7 @@
                 "focus": "WORLD"
               }
             },
-            "id": 4221287288326724
+            "id": 3691696229771554
           },
           {
             "definition": {
@@ -267,11 +267,11 @@
                 }
               ]
             },
-            "id": 6752310438133473
+            "id": 3848099067982
           }
         ]
       },
-      "id": 1328784635411365
+      "id": 7725731112184848
     },
     {
       "definition": {
@@ -305,7 +305,7 @@
                 }
               ]
             },
-            "id": 1750445857665392
+            "id": 2024232318810683
           },
           {
             "definition": {
@@ -348,7 +348,7 @@
                 }
               ]
             },
-            "id": 7324942339930822
+            "id": 3553096606979304
           },
           {
             "definition": {
@@ -390,11 +390,11 @@
                 }
               ]
             },
-            "id": 7872983686205508
+            "id": 1781684193853686
           }
         ]
       },
-      "id": 2547478564793243
+      "id": 4488639189638939
     },
     {
       "definition": {
@@ -428,7 +428,7 @@
                 }
               ]
             },
-            "id": 7411270138153705
+            "id": 2062490212434827
           },
           {
             "definition": {
@@ -459,7 +459,7 @@
                 "live_span": "1d"
               }
             },
-            "id": 6246270137317124
+            "id": 2878751483947111
           },
           {
             "definition": {
@@ -500,7 +500,7 @@
                 }
               ]
             },
-            "id": 616534505715475
+            "id": 7158712495677777
           },
           {
             "definition": {
@@ -534,26 +534,67 @@
                 }
               ]
             },
-            "id": 8579460671807094
+            "id": 5607704348142614
           }
         ]
       },
-      "id": 8586016398085091
+      "id": 4429642896669523
     },
     {
       "definition": {
-        "title": "5. Auditoría y compliance (Ley 20.393)",
+        "title": "5. Auditoría y compliance (Ley 20.393 / Ley 21.595)",
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
             "definition": {
               "type": "note",
-              "content": "**Trazabilidad de auditoría** — cada decisión de acceso (login, MFA, bloqueo) queda registrada con usuario, fecha/hora, geolocalización y resultado. Retención actual: según plan de Datadog contratado por la organización (confirmar período exacto con el account manager antes de certificar ante un auditor externo).",
+              "content": "**Trazabilidad de auditoría** — cada decisión de acceso (login, MFA, bloqueo) queda registrada con usuario, fecha/hora, geolocalización y resultado. Retención actual: según plan de Datadog contratado por la organización (confirmar período exacto con el account manager antes de certificar ante un auditor externo). Archivo inmutable (WORM, S3 Object Lock) disponible en `infra/worm_archive.tf`.",
               "background_color": "yellow",
               "font_size": "14"
             },
-            "id": 428374808429068
+            "id": 2301268361243558
+          },
+          {
+            "definition": {
+              "title": "Eventos por Control Preventivo MPD",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "q1",
+                      "search": {
+                        "query": "service:guardia-ia-pipeline @mpd_control_category:*"
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@mpd_control_category",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "q1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "id": 363748159263394
           },
           {
             "definition": {
@@ -599,11 +640,11 @@
                 }
               ]
             },
-            "id": 2473583318208879
+            "id": 1910395850231553
           }
         ]
       },
-      "id": 1141613856647764
+      "id": 5744884157695415
     },
     {
       "definition": {
@@ -650,7 +691,7 @@
                 }
               ]
             },
-            "id": 5775725505936944
+            "id": 4396576880555843
           },
           {
             "definition": {
@@ -691,15 +732,15 @@
                 }
               ]
             },
-            "id": 8927501821931699
+            "id": 2047496237264410
           }
         ]
       },
-      "id": 6204457795996725
+      "id": 2442395780530547
     }
   ],
   "notify_list": null,
   "created_at": "2026-07-25T23:14:10.981391+00:00",
-  "modified_at": "2026-07-25T23:27:01.892386+00:00",
+  "modified_at": "2026-07-26T16:54:41.156865+00:00",
   "restricted_roles": []
 }

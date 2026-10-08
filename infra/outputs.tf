@@ -12,3 +12,13 @@ output "lambda_log_group" {
   description = "Log group de CloudWatch a suscribir en el Datadog Forwarder."
   value       = aws_cloudwatch_log_group.auth0_webhook.name
 }
+
+output "worm_archive_bucket" {
+  description = "Bucket S3 con Object Lock (modo COMPLIANCE) donde se archivan, de forma inmutable, todos los eventos de acceso — evidencia probatoria para Ley 20.393."
+  value       = aws_s3_bucket.worm_archive.bucket
+}
+
+output "worm_retention_years" {
+  description = "Años configurados de retención inmutable del archivo WORM."
+  value       = var.worm_retention_years
+}
