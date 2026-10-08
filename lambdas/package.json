@@ -1,15 +1,19 @@
 {
   "name": "guardia-auth0-webhook",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Receptor de Log Streams de Auth0 vía API Gateway (runtime nativo, sin deps externas)",
-  "main": "handler.js",
+  "description": "Receptor de Log Streams de Auth0 — Cloud Run (lógica en handler.js sin deps externas, server.js agrega Express solo para el wrapper HTTP)",
+  "main": "server.js",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
+    "start": "node server.js",
     "test": "node --test",
-    "lint": "node --check handler.js"
+    "lint": "node --check handler.js && node --check server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
   },
   "license": "UNLICENSED"
 }

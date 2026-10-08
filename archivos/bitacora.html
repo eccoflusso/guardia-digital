@@ -362,7 +362,7 @@
       <div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
           <span class="badge badge-indigo">Wayweb · SaaS IAM/IGA</span>
-          <span class="badge badge-slate">AWS · Auth0 · Node · Vertex AI</span>
+          <span class="badge badge-slate">GCP · Auth0 · Node · Vertex AI</span>
           <span class="badge badge-green">TRL 5 · lazo validado en entorno real</span>
         </div>
         <h2 style="font-size:28px;margin-bottom:4px;">Guardia Digital Inteligente</h2>
@@ -373,8 +373,8 @@
       </div>
       <div style="text-align:right;flex-shrink:0;">
         <div style="font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">última actualización</div>
-        <div style="font-size:15px;font-weight:600;color:#334155;">2026-07-28</div>
-        <div style="font-size:12px;color:#64748b;">Sesión #13</div>
+        <div style="font-size:15px;font-weight:600;color:#334155;">2026-10-08</div>
+        <div style="font-size:12px;color:#64748b;">Sesión #15</div>
       </div>
     </div>
   </div>
@@ -402,7 +402,7 @@
       <div class="stat-card">
         <div class="stat-value">5 años</div>
         <div class="stat-label">Retención WORM inmutable</div>
-        <div class="stat-sub">S3 Object Lock (COMPLIANCE), aplicado en AWS real</div>
+        <div class="stat-sub">Cloud Storage Bucket Lock (GCP), retention policy activa — lock permanente pendiente hasta el primer piloto real</div>
       </div>
     </div>
 
@@ -795,6 +795,125 @@
     </div>
 
     <div class="timeline">
+
+      <!-- ── ENTRADA #14 ─────────────────────────────────────────── -->
+      <article class="entry" id="sesion-15">
+
+        <div class="entry-meta">
+          <span class="entry-date">2026-10-08</span>
+          <span class="badge badge-indigo">Sesión #15</span>
+          <span class="badge badge-emerald">Migración AWS → GCP del backend (webhook + WORM + SIEM)</span>
+        </div>
+
+        <div class="entry-title">Backend migrado de AWS (sa-east-1) a GCP (ley-20393, southamerica-east1) — AWS bloqueado de por vida para cualquier proyecto nuevo</div>
+        <div class="entry-summary">
+          Decisión transversal a todos los proyectos Wayweb/EccoFlusso: la cuenta AWS queda bloqueada de
+          forma permanente, sin intentar recuperar acceso para nada nuevo. Se migró completo el pipeline de
+          ingesta de webhooks de Auth0 (receptor + archivo WORM inmutable + ruta a Datadog) del diseño AWS
+          original (Lambda + API Gateway + S3 Object Lock + Kinesis Firehose + CloudFormation Datadog
+          Forwarder) a GCP, bajo un proyecto nuevo y dedicado (<code>ley-20393</code>, cuenta
+          <code>waywebspa@gmail.com</code> — mismo criterio de nombres que <code>ley-21719</code>/WD-SHIELD).
+          El repo se respaldó primero a <code>github.com/eccoflusso/guardia-digital</code> (no tenía remote;
+          ~2 semanas de trabajo de las Sesiones #10–#14 quedaron consolidadas en un commit antes de tocar
+          nada de infraestructura).
+        </div>
+
+        <div class="entry-grid">
+
+          <div class="entry-block full">
+            <h4>Mapeo de infraestructura AWS → GCP</h4>
+            <table class="files-table">
+              <thead><tr><th>Pieza AWS (antes)</th><th>Equivalente GCP (ahora)</th></tr></thead>
+              <tbody>
+                <tr><td>Lambda + API Gateway HTTP API</td><td><strong>Cloud Run</strong> — mismo <code>handler.js</code>, envuelto con un servidor Express mínimo (<code>server.js</code>) para exponer HTTP directo, sin pieza de gateway separada</td></tr>
+                <tr><td>CloudWatch Logs</td><td><strong>Cloud Logging</strong> — automático, sin recurso explícito</td></tr>
+                <tr><td>S3 bucket + Object Lock modo COMPLIANCE</td><td><strong>Cloud Storage con retention policy</strong> — el <em>lock</em> permanente (equivalente exacto a COMPLIANCE) queda como paso manual explícito, deliberadamente no automatizado, a ejecutar antes del primer piloto real</td></tr>
+                <tr><td>Kinesis Firehose (CloudWatch → S3)</td><td><strong>Cloud Logging Sink</strong> directo a GCS — GCP no necesita una pieza intermedia tipo Firehose</td></tr>
+                <tr><td>Datadog Forwarder (stack CloudFormation)</td><td><strong>Cloud Function Gen2 propia</strong> (Pub/Sub trigger) — el mecanismo "oficial" de Datadog para GCP exige un job de Dataflow corriendo permanentemente (VPC + Cloud NAT, costo fijo), injustificado sin clientes activos; se optó por una función liviana que escala a cero</td></tr>
+                <tr><td>Backend remoto Terraform (S3 + DynamoDB)</td><td><strong>Backend GCS</strong> — el locking de estado es nativo de Terraform ≥1.5, sin tabla de lock aparte</td></tr>
+                <tr><td>Región <code>sa-east-1</code> (São Paulo)</td><td><code>southamerica-east1</code> (São Paulo, GCP) — misma residencia de datos LATAM</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Bug real encontrado y corregido: Eventarc sin permiso de invocar la función</h4>
+            <p>
+              Tras el primer <code>apply</code>, el pipeline hacia Datadog no entregaba ningún evento pese a
+              que el sink publicaba correctamente en Pub/Sub (confirmado con un pull manual de debug). La
+              causa: Eventarc había creado la suscripción push usando el <strong>Service Account por defecto
+              de Compute Engine</strong> en vez del Service Account dedicado del forwarder — y la política IAM
+              del servicio Cloud Run subyacente a la Cloud Function estaba <strong>vacía</strong>, sin ningún
+              <code>roles/run.invoker</code> otorgado. Cloud Run devolvía 403/401 silenciosamente en bucle de
+              reintentos ("The IAM principal lacks run.routes.invoke permission"), sin que apareciera como un
+              error visible en los logs de la propia función. Corregido agregando
+              <code>service_account_email</code> explícito al <code>event_trigger</code> y un
+              <code>google_cloud_run_v2_service_iam_member</code> dedicado — verificado con logs reales
+              (status 204, sin reintentos) tras el fix.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Verificación end-to-end con eventos de prueba reales</h4>
+            <p>
+              Se generaron 6 eventos de prueba directos contra el webhook en producción (no solo despliegue
+              "exitoso" sin probar): confirmado <code>200 {"received":1,"processed":1}</code> en cada uno,
+              el evento visible en Cloud Logging como <code>jsonPayload</code> con el <code>auth0_log_id</code>
+              correcto, y — tras el fix de Eventarc — la Cloud Function del forwarder ejecutando con status
+              204 (sin excepción) contra la API HTTP de Datadog. La escritura al bucket WORM queda en
+              observación: GCS Sinks reparten logs en lotes con una ventana de hasta 1 hora en el primer
+              batch (comportamiento documentado de Google, no error) — no se dio por cerrado sin confirmar el
+              primer objeto real.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Reconfiguración de Auth0</h4>
+            <p>
+              Log Stream (Custom Webhook) actualizado en el dashboard de Auth0 (<code>guardia-digital.us.auth0.com</code>)
+              con la nueva URL de Cloud Run, reutilizando el mismo <code>AUTH0_WEBHOOK_SECRET</code> ya
+              configurado — sin necesidad de reconfigurar el header de autorización ni perder continuidad del
+              stream.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Decisión de alcance: pendiente el bloqueo permanente del WORM</h4>
+            <p>
+              El bucket GCS ya tiene la <em>retention policy</em> de 5 años activa (protege contra borrado
+              accidental en el uso diario), pero el <strong>lock permanente</strong> (equivalente exacto a
+              Object Lock modo COMPLIANCE — ni un Owner del proyecto podría borrar antes del plazo) se dejó
+              deliberadamente sin ejecutar: es una acción irreversible, y este despliegue sigue en fase de
+              desarrollo/demo, sin un piloto real recibiendo datos todavía. Queda documentado como pendiente
+              explícito a ejecutar justo antes del primer cliente real —
+              <code>gcloud storage buckets update gs://guardia-digital-worm-archive-staging --lock-retention-period</code>.
+            </p>
+          </div>
+
+          <div class="entry-block full">
+            <h4>Archivos afectados · Sesión #15</h4>
+            <table class="files-table">
+              <thead><tr><th>Archivo</th><th>Tipo</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td><code>lambdas/handler.js</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Extraída <code>processWebhook(authHeader, rawBody)</code> como función pura reutilizable; <code>exports.handler</code> intacto (los 11 tests existentes pasan sin tocarlos)</td></tr>
+                <tr><td><code>lambdas/server.js</code></td><td><span class="change-created">CREADO</span></td><td>Wrapper Express mínimo — entrypoint HTTP para Cloud Run</td></tr>
+                <tr><td><code>lambdas/Dockerfile</code></td><td><span class="change-created">CREADO</span></td><td>node:20-alpine, mismo patrón liviano que <code>ia_models/serving/Dockerfile</code></td></tr>
+                <tr><td><code>lambdas/package.json</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Agrega <code>express</code>, script <code>start</code></td></tr>
+                <tr><td><code>infra/main.tf</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Provider AWS → google, Cloud Run reemplaza Lambda+API Gateway, backend GCS</td></tr>
+                <tr><td><code>infra/worm_archive.tf</code></td><td><span class="change-modified">MODIFICADO</span></td><td>S3 Object Lock → GCS retention policy + Cloud Logging Sink directo</td></tr>
+                <tr><td><code>infra/datadog_forwarder.tf</code></td><td><span class="change-modified">MODIFICADO</span></td><td>CloudFormation Forwarder → Pub/Sub + Cloud Function Gen2 propia, con fix de IAM del trigger</td></tr>
+                <tr><td><code>infra/datadog_forwarder_src/</code></td><td><span class="change-created">CREADO</span></td><td>Código de la Cloud Function (reenvía logs a la API HTTP de Datadog)</td></tr>
+                <tr><td><code>infra/variables.tf</code></td><td><span class="change-modified">MODIFICADO</span></td><td><code>aws_region</code> → <code>gcp_project</code>/<code>gcp_region</code></td></tr>
+                <tr><td><code>infra/outputs.tf</code></td><td><span class="change-modified">MODIFICADO</span></td><td><code>webhook_url</code> ahora es la URL de Cloud Run</td></tr>
+                <tr><td><code>infra/backend.example.hcl</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Backend S3+DynamoDB → GCS</td></tr>
+                <tr><td><code>archivos/bitacora.html</code></td><td><span class="change-modified">MODIFICADO</span></td><td>Esta entrada, header actualizado a Sesión #15</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </article>
+      <!-- ── FIN ENTRADA #15 ─────────────────────────────────────── -->
 
       <!-- ── ENTRADA #14 ─────────────────────────────────────────── -->
       <article class="entry" id="sesion-14">

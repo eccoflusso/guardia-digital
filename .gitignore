@@ -28,6 +28,7 @@ crash.log
 override.tf
 override.tf.json
 handler.zip
+infra/*.zip
 
 # --- Python (ia_models) ---
 __pycache__/

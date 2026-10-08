@@ -33,16 +33,18 @@ function parseLogBody(rawBody) {
   return lines.map((line) => JSON.parse(line)); // deja que un JSON inválido siga lanzando
 }
 
-exports.handler = async (event) => {
+// Lógica pura del webhook, independiente del runtime que la invoque (Lambda,
+// Cloud Run vía server.js, o los tests). Recibe el header crudo y el body
+// crudo, devuelve {statusCode, body} igual que un handler HTTP clásico.
+async function processWebhook(authHeader, rawBody) {
   // 1. Validar autenticidad del webhook (header compartido configurado en Auth0)
-  const token = event.headers?.['authorization'] || '';
-  if (!isValidToken(token, process.env.AUTH0_WEBHOOK_SECRET)) {
+  if (!isValidToken(authHeader || '', process.env.AUTH0_WEBHOOK_SECRET)) {
     return { statusCode: 401, body: JSON.stringify({ error: 'unauthorized' }) };
   }
 
   let logs;
   try {
-    logs = parseLogBody(event.body);
+    logs = parseLogBody(rawBody);
   } catch {
     return { statusCode: 400, body: JSON.stringify({ error: 'invalid_json' }) };
   }
@@ -72,11 +74,17 @@ exports.handler = async (event) => {
       };
     });
 
-  // 3. Emitir a stdout en JSON -> CloudWatch Logs -> Datadog Forwarder (SIEM)
+  // 3. Emitir a stdout en JSON -> CloudWatch/Cloud Logging -> Datadog Forwarder (SIEM)
   for (const evt of processed) {
     console.log(JSON.stringify({ source: 'auth0', service: 'guardia-iam', ...evt }));
   }
 
   // TODO: encolar en SQS/Kinesis para el batch de /ia_models si el volumen crece
   return { statusCode: 200, body: JSON.stringify({ received: logs.length, processed: processed.length }) };
-};
+}
+
+// Entrypoint Lambda (formato API Gateway v2 payload) — se mantiene por
+// compatibilidad con handler.test.js, que invoca directamente con ese shape.
+exports.handler = async (event) => processWebhook(event.headers?.['authorization'], event.body);
+
+exports.processWebhook = processWebhook;

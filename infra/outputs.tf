@@ -1,24 +1,24 @@
 output "webhook_url" {
   description = "URL a configurar en el Log Stream (HTTP) de Auth0."
-  value       = "${aws_apigatewayv2_api.main.api_endpoint}/webhooks/auth0"
+  value       = "${google_cloud_run_v2_service.auth0_webhook.uri}/webhooks/auth0"
 }
 
-output "lambda_function_name" {
-  description = "Nombre de la función Lambda del receptor de webhooks."
-  value       = aws_lambda_function.auth0_webhook.function_name
-}
-
-output "lambda_log_group" {
-  description = "Log group de CloudWatch a suscribir en el Datadog Forwarder."
-  value       = aws_cloudwatch_log_group.auth0_webhook.name
+output "webhook_service_name" {
+  description = "Nombre del servicio Cloud Run del receptor de webhooks."
+  value       = google_cloud_run_v2_service.auth0_webhook.name
 }
 
 output "worm_archive_bucket" {
-  description = "Bucket S3 con Object Lock (modo COMPLIANCE) donde se archivan, de forma inmutable, todos los eventos de acceso — evidencia probatoria para Ley 20.393."
-  value       = aws_s3_bucket.worm_archive.bucket
+  description = "Bucket GCS con retención bloqueada (Bucket Lock) donde se archivan, de forma inmutable, todos los eventos de acceso — evidencia probatoria para Ley 20.393."
+  value       = google_storage_bucket.worm_archive.name
 }
 
 output "worm_retention_years" {
   description = "Años configurados de retención inmutable del archivo WORM."
   value       = var.worm_retention_years
+}
+
+output "datadog_forwarder_function" {
+  description = "Nombre de la Cloud Function que reenvía logs a Datadog."
+  value       = google_cloudfunctions2_function.datadog_forwarder.name
 }
