@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GUARDIA DIGITAL I.A. — Control Preventivo Ley 20.393</title>
+    <meta
+      name="description"
+      content="IAM Zero-Trust que bloquea accesos indebidos de forma 100% autónoma y genera evidencia inmutable para el Modelo de Prevención de Delitos — Ley 20.393, por WAYWEB SPA."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://ley-20393.wayweb.cl/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_CL" />
+    <meta property="og:url" content="https://ley-20393.wayweb.cl/" />
+    <meta property="og:site_name" content="GUARDIA DIGITAL I.A." />
+    <meta property="og:title" content="GUARDIA DIGITAL I.A. — Control Preventivo Ley 20.393" />
+    <meta
+      property="og:description"
+      content="IAM Zero-Trust que bloquea accesos indebidos de forma 100% autónoma y genera evidencia inmutable para el Modelo de Prevención de Delitos — Ley 20.393."
+    />
+
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/outfit/v15/QGYvz_MVcBeNP4NJtEtq.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxTOlOV.woff2" />
+    <style>
+      @font-face {
+        font-family: 'Outfit';
+        font-style: normal;
+        font-weight: 500 800;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/outfit/v15/QGYvz_MVcBeNP4NJtEtq.woff2) format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: 'JetBrains Mono';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxTOlOV.woff2) format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+    </style>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "GUARDIA DIGITAL I.A.",
+        "applicationCategory": "SecurityApplication",
+        "operatingSystem": "Web",
+        "description": "IAM Zero-Trust que evalúa cada inicio de sesión en tiempo real, bloquea accesos anómalos de forma autónoma y archiva evidencia inmutable como Control Preventivo del Modelo de Prevención de Delitos exigido por la Ley 20.393.",
+        "url": "https://ley-20393.wayweb.cl",
+        "provider": { "@type": "Organization", "name": "WAYWEB SPA", "url": "https://wayweb.cl" }
+      }
+    </script>
+
+    <style>
+      :root {
+        --navy-900: #182238;
+        --navy-800: #1f2c46;
+        --navy-700: #253552;
+        --navy-600: #37486b;
+        --gold-500: #e0a83c;
+        --gold-400: #e0aa5c;
+        --gold-100: #e6d5a8;
+        --paper: #eef1f7;
+        --line: #dde3ee;
+        --ink-900: #182238;
+        --ink-500: #7e8cab;
+        --ink-300: #adbad4;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; background: var(--navy-900); }
+      body {
+        font-family: "Outfit", system-ui, sans-serif;
+        background: var(--navy-900);
+        color: var(--ink-300);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+      .mono { font-family: "JetBrains Mono", monospace; }
+      a { color: inherit; }
+      img { max-width: 100%; display: block; }
+
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+      /* ── Header ── */
+      header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(24, 34, 56, 0.85);
+        backdrop-filter: blur(8px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 0;
+      }
+      .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #fff; font-size: 1.05rem; text-decoration: none; }
+      .brand-mark {
+        width: 34px; height: 34px; border-radius: 9px;
+        background: var(--gold-500);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--navy-900); font-weight: 800; font-size: 0.78rem; flex-shrink: 0;
+      }
+      .nav-links { display: flex; align-items: center; gap: 28px; }
+      .nav-links a { font-size: 0.9rem; color: var(--ink-300); text-decoration: none; font-weight: 500; }
+      .nav-links a:hover { color: #fff; }
+      .nav-links a.btn-primary, .nav-links a.btn-primary:hover { color: var(--navy-900); }
+      .btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 10px 20px; border-radius: 10px;
+        font-weight: 600; font-size: 0.9rem; text-decoration: none;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .btn-primary { background: var(--gold-500); color: var(--navy-900); box-shadow: 0 6px 16px -6px rgba(224, 168, 60, 0.5); }
+      .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 22px -8px rgba(224, 168, 60, 0.6); }
+
+      /* ── Hero ── */
+      .hero {
+        padding: 76px 0 60px;
+        color: #fff;
+      }
+      .hero-grid {
+        display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center;
+      }
+      .eyebrow {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+        color: var(--gold-400); background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 100px;
+        padding: 6px 14px; margin-bottom: 22px;
+      }
+      .eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: #3fbe85; }
+      .differentiator {
+        font-size: 1.14rem; font-weight: 600; color: #fff;
+        max-width: 52ch; line-height: 1.5; margin-bottom: 22px;
+      }
+      .differentiator em { font-style: normal; color: var(--gold-400); }
+      h1 {
+        font-family: "Segoe UI", ui-sans-serif, -apple-system, system-ui, sans-serif;
+        font-size: clamp(1.6rem, 2.8vw, 2.1rem);
+        font-weight: 600; letter-spacing: -0.01em;
+        color: var(--ink-300); line-height: 1.35;
+        margin-bottom: 22px;
+      }
+      .lede { font-size: 1.02rem; color: var(--ink-300); max-width: 56ch; margin-bottom: 34px; }
+      .hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 44px; }
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.06); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+      .btn-secondary:hover { border-color: var(--gold-500); }
+      .trust-row { display: flex; flex-wrap: wrap; gap: 10px; }
+      .trust-chip {
+        font-size: 0.74rem; font-family: "JetBrains Mono", monospace;
+        color: var(--ink-300); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px; padding: 5px 10px;
+      }
+
+      /* ── Live mockup ── */
+      .mockup {
+        background: rgba(13, 20, 35, 0.6); border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.5);
+      }
+      .mockup-bar {
+        display: flex; align-items: center; gap: 8px;
+        padding: 12px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+      .mockup-title {
+        margin-left: 8px; font-size: 0.68rem; font-family: "JetBrains Mono", monospace;
+        color: var(--ink-300); letter-spacing: 0.08em; display: flex; align-items: center; gap: 6px;
+      }
+      .mockup-pulse { width: 6px; height: 6px; border-radius: 50%; background: #3fbe85; animation: pulse 1.6s ease-in-out infinite; }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+      .mockup-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+      .mockup-card {
+        background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px; padding: 12px;
+      }
+      .mockup-card.alert { border-color: rgba(224, 168, 60, 0.3); }
+      .mockup-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+      .mockup-badge {
+        font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em;
+        padding: 2px 8px; border-radius: 4px;
+        background: rgba(224, 168, 60, 0.15); border: 1px solid rgba(224, 168, 60, 0.3); color: var(--gold-400);
+      }
+      .mockup-time { font-size: 0.68rem; color: var(--ink-300); font-family: "JetBrains Mono", monospace; }
+      .mockup-finding { font-size: 0.86rem; color: #fff; font-weight: 600; min-height: 1.4em; }
+      .mockup-caret {
+        display: inline-block; width: 6px; height: 14px; background: var(--gold-500);
+        margin-left: 2px; vertical-align: middle; animation: pulse 0.9s step-end infinite;
+      }
+      .mockup-sub { font-size: 0.75rem; color: var(--ink-300); margin-top: 3px; }
+      .mockup-label { font-size: 0.62rem; color: var(--ink-300); font-family: "JetBrains Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+      .mockup-conf { font-size: 0.68rem; font-family: "JetBrains Mono", monospace; color: #3fbe85; }
+      .mockup-progress {
+        display: flex; align-items: center; justify-content: space-between; margin-top: 4px;
+      }
+      .mockup-progress .value { font-size: 1.15rem; font-weight: 700; color: #fff; }
+      .mockup-ring { position: relative; width: 38px; height: 38px; flex-shrink: 0; }
+      .mockup-ring-fill { width: 38px; height: 38px; border-radius: 50%; transition: background 0.6s ease; }
+      .mockup-ring-hole { position: absolute; inset: 3px; background: #131c30; border-radius: 50%; }
+      .mockup-foot { text-align: center; font-size: 0.68rem; color: var(--ink-300); font-family: "JetBrains Mono", monospace; padding: 10px 0; }
+
+      /* ── Modules ── */
+      section { padding: 64px 0; }
+      .section-head { max-width: 56ch; margin-bottom: 42px; }
+      .section-head p.eyebrow-plain {
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em;
+        text-transform: uppercase; color: var(--gold-500); margin-bottom: 10px;
+      }
+      h2 { font-family: "Segoe UI", ui-sans-serif, -apple-system, system-ui, sans-serif; font-size: clamp(1.5rem, 2.6vw, 1.9rem); font-weight: 600; color: #fff; margin-bottom: 10px; letter-spacing: -0.01em; }
+      .section-desc { color: var(--ink-300); font-size: 0.98rem; }
+
+      .modules { background: var(--navy-800); border-top: 1px solid rgba(255, 255, 255, 0.08); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+      .module-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+      .module-card {
+        border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 26px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .module-icon {
+        width: 40px; height: 40px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; margin-bottom: 16px;
+      }
+      .module-tier {
+        display: inline-block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em;
+        text-transform: uppercase; color: var(--ink-300);
+        background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 100px; padding: 3px 10px; margin-bottom: 10px;
+      }
+      .module-card h3 { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+      .module-card p { font-size: 0.9rem; color: var(--ink-300); }
+
+      /* ── Comparativa (el diferenciador vs. IAM tradicional) ── */
+      .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      .compare-col {
+        border-radius: 16px; padding: 26px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .compare-col.no { background: rgba(255, 255, 255, 0.02); }
+      .compare-col.yes { background: rgba(224, 168, 60, 0.06); border-color: rgba(224, 168, 60, 0.3); }
+      .compare-col h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; }
+      .compare-col.no h3 { color: var(--ink-300); }
+      .compare-col.yes h3 { color: var(--gold-400); }
+      .compare-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+      .compare-list li { font-size: 0.9rem; color: var(--ink-300); display: flex; gap: 10px; align-items: flex-start; }
+      .compare-list .ic { flex-shrink: 0; margin-top: 1px; }
+      .compare-col.no .ic { color: #ff9d9d; }
+      .compare-col.yes .ic { color: #5ed6a3; }
+
+      /* ── Flow ── */
+      .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+      .flow-step { position: relative; }
+      .flow-num {
+        width: 32px; height: 32px; border-radius: 9px;
+        background: var(--gold-500); color: var(--navy-900);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.85rem; margin-bottom: 14px;
+      }
+      .flow-step h3 { font-size: 0.98rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+      .flow-step p { font-size: 0.86rem; color: var(--ink-300); }
+
+      /* ── CTA ── */
+      .cta {
+        background: linear-gradient(135deg, var(--navy-800), var(--navy-600));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px; padding: 56px 40px; text-align: center; color: #fff;
+      }
+      .cta h2 { color: #fff; }
+      .cta p { color: var(--ink-300); max-width: 46ch; margin: 0 auto 28px; }
+      .cta .btn-primary { background: var(--gold-500); color: var(--navy-900); box-shadow: none; }
+      .cta .btn-primary:hover { background: var(--gold-400); }
+
+      footer { border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 32px 0; background: var(--navy-900); }
+      .foot-row {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+        gap: 12px; font-size: 0.82rem; color: var(--ink-500);
+      }
+      .foot-row a { text-decoration: none; }
+      .foot-row a:hover { color: var(--gold-400); }
+
+      @media (max-width: 900px) {
+        .hero-grid { grid-template-columns: 1fr; }
+        .compare { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 760px) {
+        .module-grid { grid-template-columns: 1fr; }
+        .flow { grid-template-columns: repeat(2, 1fr); }
+        .nav-links a:not(.btn) { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap nav">
+        <a href="/" class="brand">
+          <span class="brand-mark">GD</span>
+          GUARDIA DIGITAL I.A.
+        </a>
+        <nav class="nav-links">
+          <a href="https://wayweb.cl">← Volver a Wayweb</a>
+          <a href="#modulos">Módulos</a>
+          <a href="#comparativa">Por qué no un IAM tradicional</a>
+          <a href="#flujo">Cómo funciona</a>
+          <a href="#planes">Planes</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div>
+            <span class="eyebrow"><span class="eyebrow-dot"></span>Control Preventivo · Ley N.º 20.393 de Responsabilidad Penal de las Personas Jurídicas</span>
+            <p class="differentiator">
+              No es un IAM que solo alerta. Es el <em>control que actúa solo</em> — bloquea el acceso
+              indebido en el momento, y deja la evidencia lista para el Modelo de Prevención de Delitos.
+            </p>
+            <h1>Bloqueo autónomo de accesos anómalos, con evidencia que un fiscal o auditor acepta</h1>
+            <p class="lede">
+              GUARDIA DIGITAL I.A. evalúa cada inicio de sesión en tiempo real, exige re-autenticación o
+              bloquea la cuenta automáticamente — sin depender de que un analista humano esté disponible —
+              y archiva cada evento de forma inmutable, etiquetado como Control Preventivo MPD.
+            </p>
+            <div class="hero-ctas">
+              <a href="https://wa.me/56961530165?text=Hola%2C%20quiero%20solicitar%20una%20prueba%20de%20GUARDIA%20DIGITAL%20I.A." class="btn btn-primary" target="_blank" rel="noopener">Solicitar prueba →</a>
+              <a href="#comparativa" class="btn btn-secondary">Ver el diferenciador</a>
+            </div>
+            <div class="trust-row">
+              <span class="trust-chip">Ley N.º 20.393</span>
+              <span class="trust-chip">Modelo de Prevención de Delitos</span>
+              <span class="trust-chip">Evidencia WORM 5 años</span>
+              <span class="trust-chip">SLA ≤15 min</span>
+            </div>
+          </div>
+
+          <div class="mockup">
+            <div class="mockup-bar">
+              <span class="mockup-dot" style="background:#ff6b6b99;"></span>
+              <span class="mockup-dot" style="background:#e0a83c99;"></span>
+              <span class="mockup-dot" style="background:#3fbe8599;"></span>
+              <span class="mockup-title"><span class="mockup-pulse"></span>GUARDIA DIGITAL I.A. · EN VIVO</span>
+            </div>
+            <div class="mockup-body">
+              <div class="mockup-card alert">
+                <div class="mockup-row">
+                  <span class="mockup-badge" id="mk-badge">ACCESO ANÓMALO DETECTADO</span>
+                  <span class="mockup-time" id="mk-time">hace 0s</span>
+                </div>
+                <p class="mockup-finding" id="mk-finding"></p>
+                <p class="mockup-sub" id="mk-source"></p>
+              </div>
+              <div class="mockup-card">
+                <p class="mockup-label" id="mk-actionlabel">Acción registrada</p>
+                <div class="mockup-row" style="margin-top:6px;">
+                  <span style="font-size:0.85rem; color:#fff;" id="mk-action"></span>
+                  <span class="mockup-conf" id="mk-conf"></span>
+                </div>
+                <p class="mockup-sub" style="font-family:'JetBrains Mono',monospace; font-size:0.68rem;" id="mk-hash"></p>
+              </div>
+              <div class="mockup-card mockup-progress">
+                <div>
+                  <p class="mockup-label">Score de riesgo</p>
+                  <p class="value" id="mk-score">—</p>
+                </div>
+                <div class="mockup-ring">
+                  <div class="mockup-ring-fill" id="mk-ring"></div>
+                  <div class="mockup-ring-hole"></div>
+                </div>
+              </div>
+            </div>
+            <p class="mockup-foot">Simulación del motor en tiempo real</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="modules" id="modulos">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow-plain">Módulos</p>
+            <h2>Los 4 atributos que lo diferencian del mercado</h2>
+            <p class="section-desc">
+              Verificados contra código e infraestructura real en producción — no marketing.
+            </p>
+          </div>
+          <div class="module-grid">
+            <div class="module-card">
+              <div class="module-icon" style="background: var(--gold-100); color: var(--gold-500);">🔒</div>
+              <span class="module-tier">Activo en producción</span>
+              <h3>Inmutabilidad de logs (WORM)</h3>
+              <p>
+                Evidencia de acceso que ningún administrador puede alterar ni borrar por 5 años —
+                estándar probatorio ante un fiscal o auditor.
+              </p>
+            </div>
+            <div class="module-card">
+              <div class="module-icon" style="background: rgba(255,255,255,0.08); color: var(--ink-300);">📋</div>
+              <span class="module-tier">Activo en producción</span>
+              <h3>Etiquetado legal (Ley 20.393 / MPD)</h3>
+              <p>
+                Cada anomalía y cada bloqueo queda categorizado como "Control Preventivo MPD", en el
+                idioma del Encargado de Prevención de Delitos — no solo del CISO.
+              </p>
+            </div>
+            <div class="module-card">
+              <div class="module-icon" style="background: var(--gold-100); color: var(--gold-500);">⏱️</div>
+              <span class="module-tier">Documento publicado</span>
+              <h3>SLA de detección y respuesta</h3>
+              <p>
+                Compromiso formal de ≤15 minutos entre un acceso anómalo real y la respuesta automática,
+                documentado y firmable como anexo del MPD del cliente.
+              </p>
+            </div>
+            <div class="module-card">
+              <div class="module-icon" style="background: rgba(255,255,255,0.08); color: var(--ink-300);">👥</div>
+              <span class="module-tier">Add-on — a medida por cliente</span>
+              <h3>IGA — gobierno de identidad</h3>
+              <p>
+                Reporte de quién tiene acceso a qué, y offboarding automatizado al sincronizar con el
+                directorio del cliente (AD, Google Workspace).
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="motor">
+        <div class="wrap hero-grid">
+          <div>
+            <p class="eyebrow-plain">Cómo actúa el motor</p>
+            <h2>De la identidad al bloqueo, sin intervención humana</h2>
+            <p class="section-desc" style="margin-bottom: 28px;">
+              La identidad se gestiona en Auth0 (Universal Login + Adaptive MFA). Los eventos de acceso
+              viajan hacia Datadog (SIEM y dashboard de compliance) y, en paralelo, hacia un archivo
+              inmutable que ningún administrador puede alterar durante el período de retención. Un job de
+              IA clasifica anomalías de acceso cada 15 minutos como máximo y cierra el lazo de respuesta
+              directamente sobre Auth0.
+            </p>
+            <div class="flow" style="grid-template-columns: repeat(2, 1fr); gap: 20px;">
+              <div class="flow-step">
+                <div class="flow-num">1</div>
+                <h3>Evaluación en tiempo real</h3>
+                <p>Cada inicio de sesión se evalúa contra señales de riesgo: país, horario, dispositivo, IP nueva.</p>
+              </div>
+              <div class="flow-step">
+                <div class="flow-num">2</div>
+                <h3>Clasificación por IA</h3>
+                <p>Un modelo entrenado asigna un score de riesgo a cada evento, en ciclos de hasta 15 minutos.</p>
+              </div>
+              <div class="flow-step">
+                <div class="flow-num">3</div>
+                <h3>Respuesta autónoma</h3>
+                <p>Si el score supera el umbral, el sistema fuerza re-autenticación o bloquea la cuenta — solo.</p>
+              </div>
+              <div class="flow-step">
+                <div class="flow-num">4</div>
+                <h3>Evidencia inmutable</h3>
+                <p>Cada evento queda archivado como Control Preventivo MPD, sin posibilidad de alteración.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mockup">
+            <div class="mockup-bar">
+              <span class="mockup-dot" style="background:#ff6b6b99;"></span>
+              <span class="mockup-dot" style="background:#e0a83c99;"></span>
+              <span class="mockup-dot" style="background:#3fbe8599;"></span>
+              <span class="mockup-title"><span class="mockup-pulse"></span>GUARDIA DIGITAL · ARCHIVO WORM</span>
+            </div>
+            <div class="mockup-body">
+              <div class="mockup-card alert">
+                <div class="mockup-row">
+                  <span class="mockup-badge" id="bc-badge">EVENTO ARCHIVADO</span>
+                  <span class="mockup-time" id="bc-time">hace 0s</span>
+                </div>
+                <p class="mockup-finding" id="bc-finding"></p>
+                <p class="mockup-sub" id="bc-source"></p>
+              </div>
+              <div class="mockup-card">
+                <p class="mockup-label" id="bc-actionlabel">Acción registrada</p>
+                <div class="mockup-row" style="margin-top:6px;">
+                  <span style="font-size:0.85rem; color:#fff;" id="bc-action"></span>
+                  <span class="mockup-conf" id="bc-conf"></span>
+                </div>
+                <p class="mockup-sub" style="font-family:'JetBrains Mono',monospace; font-size:0.68rem;" id="bc-hash"></p>
+              </div>
+              <div class="mockup-card mockup-progress">
+                <div>
+                  <p class="mockup-label">Retención WORM</p>
+                  <p class="value" id="bc-score">—</p>
+                </div>
+                <div class="mockup-ring">
+                  <div class="mockup-ring-fill" id="bc-ring"></div>
+                  <div class="mockup-ring-hole"></div>
+                </div>
+              </div>
+            </div>
+            <p class="mockup-foot">Simulación del archivo inmutable</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="planes" style="background: var(--navy-800); border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow-plain">Planes</p>
+            <h2>Empiece con el control activo, crezca a gobierno de identidad</h2>
+            <p class="section-desc">Un mismo producto, dos niveles según la complejidad de su organización.</p>
+          </div>
+          <div class="module-grid">
+            <div class="module-card">
+              <span class="module-tier">Nivel 1</span>
+              <h3>Control activo</h3>
+              <p style="margin-bottom: 16px;">
+                Bloqueo autónomo de accesos anómalos, archivo WORM de 5 años y etiquetado como Control
+                Preventivo MPD. Arquitectura serverless, desplegable en días.
+              </p>
+              <div class="trust-row">
+                <span class="trust-chip">Bloqueo autónomo</span>
+                <span class="trust-chip">Evidencia WORM</span>
+              </div>
+            </div>
+            <div class="module-card" style="border-color: rgba(224, 168, 60, 0.35); background: rgba(224, 168, 60, 0.05);">
+              <span class="module-tier" style="color: var(--gold-400);">Nivel 2 — a medida</span>
+              <h3>IGA + multi-tenant</h3>
+              <p style="margin-bottom: 16px;">
+                Todo lo del Nivel 1, más gobierno de identidad (IGA) con offboarding automatizado y
+                aislamiento por sucursal/tenant, dimensionado junto con el directorio real del cliente.
+              </p>
+              <div class="trust-row">
+                <span class="trust-chip">IGA</span>
+                <span class="trust-chip">Multi-tenant</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="comparativa">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow-plain">El diferenciador real</p>
+            <h2>¿Por qué no un IAM enterprise tradicional?</h2>
+            <p class="section-desc">Un IAM tradicional alerta y espera a un analista. GUARDIA DIGITAL actúa sola y deja evidencia lista para el MPD.</p>
+          </div>
+          <div class="compare">
+            <div class="compare-col no">
+              <h3>IAM enterprise tradicional (Okta, SailPoint)</h3>
+              <ul class="compare-list">
+                <li><span class="ic">✕</span>Detecta y alerta — la decisión de bloquear queda en manos de un analista disponible.</li>
+                <li><span class="ic">✕</span>Los logs de acceso son editables por un administrador con permisos suficientes.</li>
+                <li><span class="ic">✕</span>No habla el idioma del Encargado de Prevención de Delitos, solo el del CISO.</li>
+                <li><span class="ic">✕</span>Implementación de meses, pensada para TI enterprise con equipo dedicado.</li>
+              </ul>
+            </div>
+            <div class="compare-col yes">
+              <h3>GUARDIA DIGITAL I.A.</h3>
+              <ul class="compare-list">
+                <li><span class="ic">✓</span>Evalúa, decide y bloquea solo — sin depender de que alguien esté mirando la alerta.</li>
+                <li><span class="ic">✓</span>Archivo WORM: ningún administrador puede alterar ni borrar la evidencia por 5 años.</li>
+                <li><span class="ic">✓</span>Cada evento queda etiquetado como Control Preventivo MPD, listo para el Encargado de Prevención.</li>
+                <li><span class="ic">✓</span>Arquitectura 100% serverless — desplegable en días, no meses.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="flujo" style="background: var(--navy-800); border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="eyebrow-plain">Cómo funciona</p>
+            <h2>Del acceso al Modelo de Prevención de Delitos</h2>
+          </div>
+          <div class="flow">
+            <div class="flow-step">
+              <div class="flow-num">1</div>
+              <h3>Conecte su identidad</h3>
+              <p>Universal Login + Adaptive MFA sobre su directorio existente, sin migración compleja.</p>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num">2</div>
+              <h3>El motor evalúa</h3>
+              <p>Cada inicio de sesión se clasifica por riesgo en tiempo real, ciclos de hasta 15 minutos.</p>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num">3</div>
+              <h3>Bloqueo autónomo</h3>
+              <p>Ante un acceso anómalo real, el sistema actúa solo — re-autenticación o bloqueo.</p>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num">4</div>
+              <h3>Evidencia para el MPD</h3>
+              <p>Cada evento queda archivado de forma inmutable, listo como anexo del Modelo de Prevención.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <div class="cta">
+            <h2>¿Listo para un control de accesos que actúa solo?</h2>
+            <p>Conozca cómo GUARDIA DIGITAL I.A. refuerza el Modelo de Prevención de Delitos de su organización ante la Ley 20.393.</p>
+            <a href="https://wa.me/56961530165?text=Hola%2C%20quiero%20saber%20m%C3%A1s%20sobre%20GUARDIA%20DIGITAL%20I.A." class="btn btn-primary" target="_blank" rel="noopener">Hablar con nosotros →</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap foot-row">
+        <span>© <span id="year"></span> WAYWEB SPA · GUARDIA DIGITAL I.A.</span>
+        <a href="https://wayweb.cl">wayweb.cl</a>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      const MOCK_EVENTS = [
+        {
+          finding: "Inicio de sesión desde IP no reconocida fuera de horario laboral",
+          source: "Usuario: finanzas.rsantos · Conexión: AD Casa Matriz",
+          action: "MFA adaptativo forzado — re-autenticación exigida",
+          confidence: 93,
+          hash: "checksum sha256: 5a1c9f2e…b73d",
+          score: 82,
+        },
+        {
+          finding: "Múltiples intentos fallidos seguidos de acceso exitoso",
+          source: "Usuario: admin.contratista · Conexión: AD Contratistas",
+          action: "Cuenta bloqueada de forma autónoma, evento escalado",
+          confidence: 97,
+          hash: "checksum sha256: 8e4d2b71…f19a",
+          score: 91,
+        },
+        {
+          finding: "Dispositivo nuevo detectado en cuenta con privilegios elevados",
+          source: "Usuario: ti.soporte · Conexión: AD Casa Matriz",
+          action: "Verificación adicional solicitada, acceso en espera",
+          confidence: 88,
+          hash: "checksum sha256: 2f68ac0d…e35b",
+          score: 76,
+        },
+      ];
+
+      let mkStep = 0;
+      let mkSeconds = 0;
+
+      function typeText(el, text, speed = 24) {
+        el.textContent = "";
+        let i = 0;
+        const caret = document.createElement("span");
+        caret.className = "mockup-caret";
+        const id = setInterval(() => {
+          i++;
+          el.textContent = text.slice(0, i);
+          if (i >= text.length) {
+            clearInterval(id);
+          } else {
+            el.appendChild(caret);
+          }
+        }, speed);
+      }
+
+      function renderMockEvent() {
+        const e = MOCK_EVENTS[mkStep];
+        mkSeconds = 0;
+        typeText(document.getElementById("mk-finding"), e.finding);
+        document.getElementById("mk-source").textContent = e.source;
+        document.getElementById("mk-action").textContent = e.action;
+        document.getElementById("mk-conf").textContent = "conf. " + e.confidence + "%";
+        document.getElementById("mk-hash").textContent = e.hash;
+        document.getElementById("mk-score").textContent = e.score + "%";
+        document.getElementById("mk-ring").style.background =
+          "conic-gradient(#e0a83c " + e.score + "%, rgba(255,255,255,0.1) 0)";
+      }
+
+      renderMockEvent();
+      setInterval(() => {
+        mkStep = (mkStep + 1) % MOCK_EVENTS.length;
+        renderMockEvent();
+      }, 6000);
+      setInterval(() => {
+        mkSeconds++;
+        document.getElementById("mk-time").textContent = "hace " + mkSeconds + "s";
+      }, 1000);
+
+      const BC_MOCK_EVENTS = [
+        {
+          finding: "Evento de login exitoso archivado en WORM",
+          source: "Usuario: operaciones.lvera · Score de riesgo: bajo",
+          action: "Escrito en archivo inmutable, retención 5 años",
+          confidence: 99,
+          hash: "checksum sha256: 3c7a9d1e…04f2",
+          score: 100,
+        },
+        {
+          finding: "Solicitud de auditoría de accesos — Encargado de Prevención",
+          source: "Modelo de Prevención de Delitos · Revisión trimestral",
+          action: "Export generado desde el archivo WORM, trazabilidad completa",
+          confidence: 100,
+          hash: "checksum sha256: 91bd6a4c…7e18",
+          score: 100,
+        },
+        {
+          finding: "Bloqueo autónomo registrado como Control Preventivo MPD",
+          source: "Usuario: admin.contratista · Evento 2026-07-25",
+          action: "Evidencia firmada, lista como anexo del MPD",
+          confidence: 100,
+          hash: "checksum sha256: 6f2e8b39…c5a1",
+          score: 100,
+        },
+      ];
+
+      let bcStep = 0;
+      let bcSeconds = 0;
+
+      function bcTypeText(el, text, speed = 24) {
+        el.textContent = "";
+        let i = 0;
+        const caret = document.createElement("span");
+        caret.className = "mockup-caret";
+        const id = setInterval(() => {
+          i++;
+          el.textContent = text.slice(0, i);
+          if (i >= text.length) {
+            clearInterval(id);
+          } else {
+            el.appendChild(caret);
+          }
+        }, speed);
+      }
+
+      function renderBcEvent() {
+        const e = BC_MOCK_EVENTS[bcStep];
+        bcSeconds = 0;
+        bcTypeText(document.getElementById("bc-finding"), e.finding);
+        document.getElementById("bc-source").textContent = e.source;
+        document.getElementById("bc-action").textContent = e.action;
+        document.getElementById("bc-conf").textContent = "conf. " + e.confidence + "%";
+        document.getElementById("bc-hash").textContent = e.hash;
+        document.getElementById("bc-score").textContent = e.score + "%";
+        document.getElementById("bc-ring").style.background =
+          "conic-gradient(#e0a83c " + e.score + "%, rgba(255,255,255,0.1) 0)";
+      }
+
+      renderBcEvent();
+      setInterval(() => {
+        bcStep = (bcStep + 1) % BC_MOCK_EVENTS.length;
+        renderBcEvent();
+      }, 6000);
+      setInterval(() => {
+        bcSeconds++;
+        document.getElementById("bc-time").textContent = "hace " + bcSeconds + "s";
+      }, 1000);
+    </script>
+  </body>
+</html>
